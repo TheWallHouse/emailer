@@ -1,4 +1,5 @@
 import { MailIcon, ServerIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { ProviderIcon } from "@/components/providers/provider-icon"
@@ -29,12 +30,13 @@ const SUPPORTED_BRANDS: ProviderBrandId[] = [
 ]
 
 export function WelcomePanel({ onAddAccount }: { onAddAccount: () => void }) {
+  const { t } = useTranslation()
   return (
     <EmptyState
       testId="welcome-panel"
       icon={MailIcon}
-      title="Welcome to Emailer"
-      hint="A local-first mail client: your messages stay on this machine and keep working offline. Connect an account to start syncing."
+      title={t("threadList.welcome.title")}
+      hint={t("threadList.welcome.hint")}
       actions={
         <>
           <Button onClick={onAddAccount}>
@@ -43,11 +45,11 @@ export function WelcomePanel({ onAddAccount }: { onAddAccount: () => void }) {
               className="size-4"
               data-icon="inline-start"
             />
-            Add Gmail
+            {t("threadList.welcome.addGmail")}
           </Button>
           <Button variant="outline" onClick={onAddAccount}>
             <ServerIcon data-icon="inline-start" />
-            Add IMAP/SMTP
+            {t("threadList.welcome.addImap")}
           </Button>
         </>
       }

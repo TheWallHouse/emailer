@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { KeyRound, Loader2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -31,6 +32,7 @@ import {
   setPgpEnabledPreference,
 } from "@/services/settings/preferences"
 import { useActiveAccount } from "@/stores/account-store"
+import { i18next } from "@/i18n"
 
 /**
  * Settings "Encryption" section (task 18.7, mail-security "PGP key
@@ -92,7 +94,7 @@ function formatFingerprint(id: string): string {
 }
 
 function formatCreatedDate(unixSeconds: number): string {
-  return new Date(unixSeconds * 1000).toLocaleDateString()
+  return new Date(unixSeconds * 1000).toLocaleDateString(i18next.language)
 }
 
 /** Clipboard write with an execCommand fallback (the Tauri webview
@@ -138,6 +140,7 @@ function PrivateKeyRow({
   onSetDefault: (summary: PrivateKeySummary) => void
   onDelete: (summary: PrivateKeySummary) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       data-testid="pgp-private-key-row"
@@ -151,37 +154,47 @@ function PrivateKeyRow({
           className="truncate text-xs text-muted-foreground"
           title={summary.id}
         >
-          {formatFingerprint(summary.id)} · created{" "}
-          {formatCreatedDate(summary.createdAt)}
+          {t("settingsAdvanced.pgp.row.created", {
+            fingerprint: formatFingerprint(summary.id),
+            date: formatCreatedDate(summary.createdAt),
+          })}
         </p>
       </div>
       {summary.isDefault ? (
-        <Badge aria-label="Default signing key">Default</Badge>
+        <Badge aria-label={t("settingsAdvanced.pgp.row.defaultSigningKey")}>
+          {t("settingsAdvanced.pgp.row.default")}
+        </Badge>
       ) : (
         <Button
           variant="ghost"
           size="sm"
-          aria-label={`Make ${summary.email} the default key`}
+          aria-label={t("settingsAdvanced.pgp.row.makeDefault", {
+            email: summary.email,
+          })}
           onClick={() => onSetDefault(summary)}
         >
-          Set Default
+          {t("settingsAdvanced.pgp.row.setDefault")}
         </Button>
       )}
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Copy the public key for ${summary.email}`}
+        aria-label={t("settingsAdvanced.pgp.row.copyPublicKeyFor", {
+          email: summary.email,
+        })}
         onClick={() => onCopy(summary)}
       >
-        Copy Public Key
+        {t("settingsAdvanced.pgp.row.copyPublicKey")}
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Delete the key for ${summary.email}`}
+        aria-label={t("settingsAdvanced.pgp.row.deleteKeyFor", {
+          email: summary.email,
+        })}
         onClick={() => onDelete(summary)}
       >
-        Delete
+        {t("settingsAdvanced.pgp.row.delete")}
       </Button>
     </div>
   )
@@ -196,6 +209,7 @@ function PublicKeyRow({
   onCopy: (summary: PublicKeySummary) => void
   onDelete: (summary: PublicKeySummary) => void
 }) {
+  const { t } = useTranslation()
   const email = summary.email ?? summary.id
   return (
     <div
@@ -208,28 +222,32 @@ function PublicKeyRow({
           className="truncate text-xs text-muted-foreground"
           title={summary.id}
         >
-          {formatFingerprint(summary.id)} · created{" "}
-          {formatCreatedDate(summary.createdAt)}
+          {t("settingsAdvanced.pgp.row.created", {
+            fingerprint: formatFingerprint(summary.id),
+            date: formatCreatedDate(summary.createdAt),
+          })}
         </p>
       </div>
       <Badge variant="outline" className="font-normal">
-        {summary.source === "imported" ? "Imported" : "From your key"}
+        {summary.source === "imported"
+          ? t("settingsAdvanced.pgp.row.imported")
+          : t("settingsAdvanced.pgp.row.fromYourKey")}
       </Badge>
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Copy the public key for ${email}`}
+        aria-label={t("settingsAdvanced.pgp.row.copyPublicKeyFor", { email })}
         onClick={() => onCopy(summary)}
       >
-        Copy
+        {t("settingsAdvanced.pgp.row.copy")}
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Delete the public key for ${email}`}
+        aria-label={t("settingsAdvanced.pgp.row.deletePublicKeyFor", { email })}
         onClick={() => onDelete(summary)}
       >
-        Delete
+        {t("settingsAdvanced.pgp.row.delete")}
       </Button>
     </div>
   )
@@ -252,6 +270,7 @@ function GenerateKeyDialog({
   onOpenChange: (open: boolean) => void
   onGenerated: () => Promise<void>
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState(defaultName)
   const [email, setEmail] = useState(defaultEmail)
   const [passphrase, setPassphrase] = useState("")
@@ -296,7 +315,9 @@ function GenerateKeyDialog({
         armor: armor ?? "",
       })
     } catch (error) {
-      setErrorMessage(toErrorMessage(error, "Could not generate the key pair."))
+      setErrorMessage(
+        toErrorMessage(error, t("settingsAdvanced.pgp.generate.failed"))
+      )
       setSaving(false)
     }
   }
@@ -305,9 +326,9 @@ function GenerateKeyDialog({
     if (!generated) return
     const copied = await copyText(generated.armor)
     if (copied) {
-      toast.success("Public key copied to the clipboard")
+      toast.success(t("settingsAdvanced.pgp.generate.copied"))
     } else {
-      toast.error("Could not access the clipboard.")
+      toast.error(t("settingsAdvanced.pgp.generate.clipboardFailed"))
     }
   }
 
@@ -318,10 +339,14 @@ function GenerateKeyDialog({
         { filename: `0x${generated.id.slice(-8)}.asc` },
         new TextEncoder().encode(generated.armor)
       )
-      if (target) toast.success(`Public key saved to ${target}`)
+      if (target) {
+        toast.success(
+          t("settingsAdvanced.pgp.generate.savedTo", { path: target })
+        )
+      }
     } catch (error) {
       console.warn("[settings] failed to export the public key", error)
-      toast.error("Could not export the public key.")
+      toast.error(t("settingsAdvanced.pgp.generate.exportFailed"))
     }
   }
 
@@ -333,32 +358,31 @@ function GenerateKeyDialog({
       <Dialog open onOpenChange={onOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save your public key</DialogTitle>
+            <DialogTitle>
+              {t("settingsAdvanced.pgp.generate.saveTitle")}
+            </DialogTitle>
             <DialogDescription>
-              The key pair for {generated.email} was generated. Share the public
-              key with your correspondents so they can encrypt to you and verify
-              your signatures.
+              {t("settingsAdvanced.pgp.generate.saveDescription", {
+                email: generated.email,
+              })}
             </DialogDescription>
           </DialogHeader>
           <Textarea
             readOnly
             value={generated.armor}
-            aria-label="Public key"
+            aria-label={t("settingsAdvanced.pgp.generate.publicKey")}
             className="h-40 font-mono text-xs"
           />
           <p className="flex items-start gap-2 rounded-md bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
             <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
-            The private key cannot be recovered without its passphrase — if you
-            lose it, the key and every message encrypted to it become
-            unreadable. There is no server-side backup; keep a copy of this key
-            pair somewhere safe before continuing.
+            {t("settingsAdvanced.pgp.generate.recoveryWarning")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => void handleCopy()}>
-              Copy Public Key
+              {t("settingsAdvanced.pgp.generate.copyPublicKey")}
             </Button>
             <Button variant="outline" onClick={() => void handleExport()}>
-              Export key file
+              {t("settingsAdvanced.pgp.generate.exportKeyFile")}
             </Button>
             <Button
               onClick={() => {
@@ -366,7 +390,7 @@ function GenerateKeyDialog({
                 onOpenChange(false)
               }}
             >
-              Done
+              {t("settingsAdvanced.pgp.generate.done")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -378,10 +402,9 @@ function GenerateKeyDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Generate Key Pair</DialogTitle>
+          <DialogTitle>{t("settingsAdvanced.pgp.generate.title")}</DialogTitle>
           <DialogDescription>
-            Creates an OpenPGP key pair for this account, protected by the
-            passphrase and stored encrypted on this machine.
+            {t("settingsAdvanced.pgp.generate.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -392,27 +415,33 @@ function GenerateKeyDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="pgp-generate-name">Name</Label>
+            <Label htmlFor="pgp-generate-name">
+              {t("settingsAdvanced.pgp.generate.name")}
+            </Label>
             <Input
               id="pgp-generate-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Ada Lovelace"
+              placeholder={t("settingsAdvanced.pgp.generate.namePlaceholder")}
               autoFocus
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="pgp-generate-email">Email</Label>
+            <Label htmlFor="pgp-generate-email">
+              {t("settingsAdvanced.pgp.generate.email")}
+            </Label>
             <Input
               id="pgp-generate-email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="e.g. ada@example.com"
+              placeholder={t("settingsAdvanced.pgp.generate.emailPlaceholder")}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="pgp-generate-passphrase">Passphrase</Label>
+            <Label htmlFor="pgp-generate-passphrase">
+              {t("settingsAdvanced.pgp.generate.passphrase")}
+            </Label>
             <Input
               id="pgp-generate-passphrase"
               type="password"
@@ -421,12 +450,13 @@ function GenerateKeyDialog({
               autoComplete="new-password"
             />
             <p className="text-xs text-muted-foreground">
-              Required. Without it the private key cannot be used or recovered —
-              there is no way to reset it.
+              {t("settingsAdvanced.pgp.generate.passphraseHint")}
             </p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="pgp-generate-confirm">Confirm passphrase</Label>
+            <Label htmlFor="pgp-generate-confirm">
+              {t("settingsAdvanced.pgp.generate.confirmPassphrase")}
+            </Label>
             <Input
               id="pgp-generate-confirm"
               type="password"
@@ -437,7 +467,7 @@ function GenerateKeyDialog({
             />
             {mismatch && (
               <p role="alert" className="text-xs text-destructive">
-                The passphrases do not match.
+                {t("settingsAdvanced.pgp.generate.mismatch")}
               </p>
             )}
           </div>
@@ -453,13 +483,13 @@ function GenerateKeyDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settingsAdvanced.pgp.generate.cancel")}
             </Button>
             <Button type="submit" disabled={!canGenerate}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              Generate
+              {t("settingsAdvanced.pgp.generate.submit")}
             </Button>
           </DialogFooter>
         </form>
@@ -481,6 +511,7 @@ function ImportKeyDialog({
   onOpenChange: (open: boolean) => void
   onImported: () => Promise<void>
 }) {
+  const { t } = useTranslation()
   const [kind, setKind] = useState<"public" | "private">("public")
   const [armor, setArmor] = useState("")
   const [passphrase, setPassphrase] = useState("")
@@ -506,13 +537,15 @@ function ImportKeyDialog({
       }
       toast.success(
         kind === "public"
-          ? "Public key imported"
-          : "Private key imported and protected with your passphrase"
+          ? t("settingsAdvanced.pgp.import.importedPublic")
+          : t("settingsAdvanced.pgp.import.importedPrivate")
       )
       await onImported()
       onOpenChange(false)
     } catch (error) {
-      setErrorMessage(toErrorMessage(error, "Could not import the key."))
+      setErrorMessage(
+        toErrorMessage(error, t("settingsAdvanced.pgp.import.failed"))
+      )
       setSaving(false)
     }
   }
@@ -523,7 +556,7 @@ function ImportKeyDialog({
       setArmor(await file.text())
       setErrorMessage(null)
     } catch {
-      setErrorMessage("Could not read the selected file.")
+      setErrorMessage(t("settingsAdvanced.pgp.import.readFileFailed"))
     }
   }
 
@@ -531,11 +564,9 @@ function ImportKeyDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import Key</DialogTitle>
+          <DialogTitle>{t("settingsAdvanced.pgp.import.title")}</DialogTitle>
           <DialogDescription>
-            Paste an armored OpenPGP key or load it from a file. A private key
-            is re-protected with the passphrase you give here — it must be the
-            key's existing passphrase when the key already has one.
+            {t("settingsAdvanced.pgp.import.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -546,25 +577,36 @@ function ImportKeyDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="pgp-import-kind">Key type</Label>
+            <Label htmlFor="pgp-import-kind">
+              {t("settingsAdvanced.pgp.import.keyType")}
+            </Label>
             <Select
               value={kind}
               onValueChange={(value) =>
                 setKind(String(value) === "private" ? "private" : "public")
               }
-              items={{ public: "Public key", private: "Private key" }}
+              items={{
+                public: t("settingsAdvanced.pgp.import.publicKey"),
+                private: t("settingsAdvanced.pgp.import.privateKey"),
+              }}
             >
               <SelectTrigger id="pgp-import-kind">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="public">Public key</SelectItem>
-                <SelectItem value="private">Private key</SelectItem>
+                <SelectItem value="public">
+                  {t("settingsAdvanced.pgp.import.publicKey")}
+                </SelectItem>
+                <SelectItem value="private">
+                  {t("settingsAdvanced.pgp.import.privateKey")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="pgp-import-armor">Armored key</Label>
+            <Label htmlFor="pgp-import-armor">
+              {t("settingsAdvanced.pgp.import.armoredKey")}
+            </Label>
             <Textarea
               id="pgp-import-armor"
               value={armor}
@@ -575,13 +617,15 @@ function ImportKeyDialog({
             <Input
               type="file"
               accept=".asc,.txt,application/pgp-keys,text/plain"
-              aria-label="Load armored key from a file"
+              aria-label={t("settingsAdvanced.pgp.import.loadFromFile")}
               onChange={(event) => void handleLoadFile(event.target.files?.[0])}
             />
           </div>
           {kind === "private" && (
             <div className="grid gap-2">
-              <Label htmlFor="pgp-import-passphrase">Passphrase</Label>
+              <Label htmlFor="pgp-import-passphrase">
+                {t("settingsAdvanced.pgp.import.passphrase")}
+              </Label>
               <Input
                 id="pgp-import-passphrase"
                 type="password"
@@ -590,8 +634,7 @@ function ImportKeyDialog({
                 autoComplete="new-password"
               />
               <p className="text-xs text-muted-foreground">
-                Validated against the key before anything is stored — keys are
-                never saved without a passphrase you have proven.
+                {t("settingsAdvanced.pgp.import.passphraseHint")}
               </p>
             </div>
           )}
@@ -607,13 +650,13 @@ function ImportKeyDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settingsAdvanced.pgp.import.cancel")}
             </Button>
             <Button type="submit" disabled={!canImport}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              Import
+              {t("settingsAdvanced.pgp.import.submit")}
             </Button>
           </DialogFooter>
         </form>
@@ -641,6 +684,7 @@ function DeleteKeyDialog({
   onOpenChange: (open: boolean) => void
   onDeleted: () => Promise<void>
 }) {
+  const { t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const isPrivate = target.kind === "private"
@@ -662,13 +706,15 @@ function DeleteKeyDialog({
       }
       toast.success(
         isPrivate
-          ? `Deleted the key for ${label}`
-          : `Deleted the public key for ${label}`
+          ? t("settingsAdvanced.pgp.delete.deletedPrivate", { label })
+          : t("settingsAdvanced.pgp.delete.deletedPublic", { label })
       )
       await onDeleted()
       onOpenChange(false)
     } catch (error) {
-      setErrorMessage(toErrorMessage(error, "Could not delete the key."))
+      setErrorMessage(
+        toErrorMessage(error, t("settingsAdvanced.pgp.delete.failed"))
+      )
     } finally {
       setDeleting(false)
     }
@@ -679,12 +725,14 @@ function DeleteKeyDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isPrivate ? "Delete private key" : "Delete public key"}
+            {isPrivate
+              ? t("settingsAdvanced.pgp.delete.titlePrivate")
+              : t("settingsAdvanced.pgp.delete.titlePublic")}
           </DialogTitle>
           <DialogDescription>
             {isPrivate
-              ? `Delete the private key for ${label}? Messages encrypted to it can no longer be decrypted and it can no longer sign mail. This cannot be undone.`
-              : `Delete the public key for ${label}? You will no longer be able to encrypt mail to ${label} with this key. This cannot be undone.`}
+              ? t("settingsAdvanced.pgp.delete.descriptionPrivate", { label })
+              : t("settingsAdvanced.pgp.delete.descriptionPublic", { label })}
           </DialogDescription>
         </DialogHeader>
         {errorMessage && (
@@ -698,7 +746,7 @@ function DeleteKeyDialog({
             onClick={() => onOpenChange(false)}
             disabled={deleting}
           >
-            Cancel
+            {t("settingsAdvanced.pgp.delete.cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -710,7 +758,7 @@ function DeleteKeyDialog({
             {deleting && (
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
             )}
-            Delete key
+            {t("settingsAdvanced.pgp.delete.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -731,6 +779,7 @@ function KeyManager({
   defaultName: string
   defaultEmail: string
 }) {
+  const { t } = useTranslation()
   // Null until the first (lazy) load resolves — the "chunk fetching" state.
   const [privateKeys, setPrivateKeys] = useState<PrivateKeySummary[] | null>(
     null
@@ -780,20 +829,24 @@ function KeyManager({
         summary.id
       )
       if (!armor) {
-        toast.error("The public key material is missing.")
+        toast.error(t("settingsAdvanced.pgp.manager.materialMissing"))
         return
       }
       const copied = await copyText(armor)
       if (copied) {
         toast.success(
-          `Public key for ${summary.email ?? "this key"} copied to the clipboard`
+          summary.email === undefined
+            ? t("settingsAdvanced.pgp.manager.copiedForThisKey")
+            : t("settingsAdvanced.pgp.manager.copiedFor", {
+                email: summary.email,
+              })
         )
       } else {
-        toast.error("Could not access the clipboard.")
+        toast.error(t("settingsAdvanced.pgp.manager.clipboardFailed"))
       }
     } catch (error) {
       console.warn("[settings] failed to copy the public key", error)
-      toast.error("Could not copy the public key.")
+      toast.error(t("settingsAdvanced.pgp.manager.copyFailed"))
     }
   }
 
@@ -804,7 +857,7 @@ function KeyManager({
       reload()
     } catch (error) {
       console.warn("[settings] failed to set the default key", error)
-      toast.error("Could not set the default key.")
+      toast.error(t("settingsAdvanced.pgp.manager.setDefaultFailed"))
     }
   }
 
@@ -812,8 +865,7 @@ function KeyManager({
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm text-muted-foreground">
-          Keys sign and decrypt this account's mail. They never leave this
-          machine; share only the public key.
+          {t("settingsAdvanced.pgp.manager.description")}
         </p>
         <div className="flex shrink-0 gap-2">
           <Button
@@ -822,7 +874,7 @@ function KeyManager({
             disabled={privateKeys === null}
             onClick={() => setImportOpen(true)}
           >
-            Import Key
+            {t("settingsAdvanced.pgp.manager.import")}
           </Button>
           <Button
             size="sm"
@@ -830,7 +882,7 @@ function KeyManager({
             onClick={() => setGenerateOpen(true)}
           >
             <KeyRound />
-            Generate Key Pair
+            {t("settingsAdvanced.pgp.manager.generate")}
           </Button>
         </div>
       </div>
@@ -840,16 +892,17 @@ function KeyManager({
           role="status"
         >
           <Loader2 className="size-3.5 animate-spin" aria-hidden />
-          Loading encryption keys…
+          {t("settingsAdvanced.pgp.manager.loading")}
         </p>
       ) : (
         <>
           <div>
-            <h3 className="text-sm font-medium text-foreground">Your keys</h3>
+            <h3 className="text-sm font-medium text-foreground">
+              {t("settingsAdvanced.pgp.manager.yourKeys")}
+            </h3>
             {privateKeys.length === 0 ? (
               <p className="py-2 text-sm text-muted-foreground">
-                No keys yet. Generate a key pair to start signing and
-                encrypting, or import an existing private key.
+                {t("settingsAdvanced.pgp.manager.noKeys")}
               </p>
             ) : (
               <div className="divide-y divide-border">
@@ -873,12 +926,11 @@ function KeyManager({
           </div>
           <div>
             <h3 className="text-sm font-medium text-foreground">
-              Correspondents' public keys
+              {t("settingsAdvanced.pgp.manager.publicKeys")}
             </h3>
             {publicKeys === null ? null : publicKeys.length === 0 ? (
               <p className="py-2 text-sm text-muted-foreground">
-                No public keys imported yet. Import a correspondent's public key
-                to encrypt mail to them.
+                {t("settingsAdvanced.pgp.manager.noPublicKeys")}
               </p>
             ) : (
               <div className="divide-y divide-border">
@@ -901,8 +953,7 @@ function KeyManager({
       )}
       <Separator />
       <p className="text-xs text-muted-foreground">
-        Signing and encrypting are chosen per message in the composer; the
-        recipient lookup uses the public keys listed here.
+        {t("settingsAdvanced.pgp.manager.footer")}
       </p>
       {/* Remounted on every open so the forms always start fresh. */}
       {generateOpen && (
@@ -943,6 +994,7 @@ function KeyManager({
 // ---------------------------------------------------------------------------
 
 export function PgpSection() {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   /** The account the opt-in flag was last read/written for — scoping the
    * boolean to its account means an account switch renders the (correct)
@@ -993,27 +1045,31 @@ export function PgpSection() {
   }
 
   return (
-    <section aria-label="Encryption" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsAdvanced.pgp.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Encryption</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settingsAdvanced.pgp.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          OpenPGP signing and encryption. Keys are generated and stored on this
-          machine only.
+          {t("settingsAdvanced.pgp.description")}
         </p>
       </div>
       {!account ? (
         <p className="text-sm text-muted-foreground">
-          Add an account to manage its encryption keys.
+          {t("settingsAdvanced.pgp.noAccount")}
         </p>
       ) : (
         <>
           <div className="flex items-center justify-between gap-6 py-1">
             <div className="grid gap-0.5">
-              <Label htmlFor="pgp-enabled">Enable OpenPGP</Label>
+              <Label htmlFor="pgp-enabled">
+                {t("settingsAdvanced.pgp.enable")}
+              </Label>
               <p className="text-xs text-muted-foreground">
-                Per account: {account.email}. Turning it on reveals the key
-                tools below; signing and encrypting stay per-message choices in
-                the composer.
+                {t("settingsAdvanced.pgp.enableHint", { email: account.email })}
               </p>
             </div>
             <Switch

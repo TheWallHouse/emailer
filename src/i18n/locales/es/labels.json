@@ -1,0 +1,40 @@
+{
+  "rowMenu": {
+    "options": "Opciones de {{name}}",
+    "rename": "Cambiar nombre…",
+    "changeColor": "Cambiar color…",
+    "delete": "Eliminar…"
+  },
+  "colorPicker": {
+    "label": "Color de la etiqueta",
+    "default": "Predeterminado",
+    "color": "Color {{number}}"
+  },
+  "dialog": {
+    "titles": {
+      "create": "Nueva etiqueta",
+      "rename": "Cambiar nombre de la etiqueta",
+      "color": "Cambiar color"
+    },
+    "saveFailed": "No se ha podido guardar la etiqueta.",
+    "createDescription": "Las etiquetas se anidan con \"/\" en el nombre: elige una etiqueta superior o escribe tú la ruta completa.",
+    "renameDescription": "Al cambiar el nombre de <name>{{name}}</name>, la etiqueta se actualiza en local y en el servidor.",
+    "colorDescription": "Elige un color para <name>{{name}}</name>. El color se guarda en local; los colores del servidor se importan de Gmail si existen.",
+    "name": "Nombre",
+    "fullName": "Nombre completo: <name>{{name}}</name>",
+    "parent": "Etiqueta superior",
+    "noParent": "Ninguna",
+    "color": "Color",
+    "cancel": "Cancelar",
+    "create": "Crear etiqueta",
+    "save": "Guardar"
+  },
+  "deleteDialog": {
+    "title": "Eliminar etiqueta",
+    "deleteFailed": "No se ha podido eliminar la etiqueta.",
+    "description": "¿Eliminar <name>{{name}}</name>? La etiqueta se quita de todas las conversaciones locales y la eliminación queda pendiente de enviarse al servidor. Los mensajes se conservan.",
+    "descriptionFolder": "¿Eliminar <name>{{name}}</name>? La etiqueta se quita de todas las conversaciones locales y la eliminación queda pendiente de enviarse al servidor. Los mensajes se conservan, salvo que el servidor elimine el contenido de la carpeta.",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar etiqueta"
+  }
+}

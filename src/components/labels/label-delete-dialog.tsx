@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -33,6 +34,7 @@ export function LabelDeleteDialog({
   account: { id: string; type: AccountType } | null
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -54,7 +56,9 @@ export function LabelDeleteDialog({
       onOpenChange(false)
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Could not delete the label."
+        error instanceof Error
+          ? error.message
+          : t("labels.deleteDialog.deleteFailed")
       )
     } finally {
       setDeleting(false)
@@ -71,15 +75,17 @@ export function LabelDeleteDialog({
       {label && (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete label</DialogTitle>
+            <DialogTitle>{t("labels.deleteDialog.title")}</DialogTitle>
             <DialogDescription>
-              Delete <span className="font-medium">{label.name}</span>? The
-              label is removed from every local thread and the deletion is
-              queued for the server. The messages themselves are kept
-              {label.imap_folder_name
-                ? " unless the server deletes the folder's contents"
-                : ""}
-              .
+              <Trans
+                i18nKey={
+                  label.imap_folder_name
+                    ? "labels.deleteDialog.descriptionFolder"
+                    : "labels.deleteDialog.description"
+                }
+                values={{ name: label.name }}
+                components={{ name: <span className="font-medium" /> }}
+              />
             </DialogDescription>
           </DialogHeader>
           {errorMessage && (
@@ -93,7 +99,7 @@ export function LabelDeleteDialog({
               onClick={() => onOpenChange(false)}
               disabled={deleting}
             >
-              Cancel
+              {t("labels.deleteDialog.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -105,7 +111,7 @@ export function LabelDeleteDialog({
               {deleting && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              Delete label
+              {t("labels.deleteDialog.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

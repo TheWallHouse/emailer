@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { Loader2, WandSparkles } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { i18next } from "@/i18n"
 import { getExecutor } from "@/services/db/executor"
 import {
   buildWritingStyleProfile,
@@ -90,28 +92,28 @@ type Flow = {
 function buildFailureCopy(reason: StyleProfileBuildFailure): string {
   switch (reason) {
     case "not-configured":
-      return "AI assistance is not configured."
+      return i18next.t("reader.smartReply.errors.notConfigured")
     case "no-sent-mail":
-      return "No recent sent messages were found to analyze."
+      return i18next.t("reader.smartReply.errors.noSentMail")
     case "parse":
-      return "The writing style could not be read from the model's reply. Try again."
+      return i18next.t("reader.smartReply.errors.parse")
     case "provider":
-      return "The provider request failed."
+      return i18next.t("reader.smartReply.errors.provider")
   }
 }
 
 function generateFailureCopy(reason: SmartReplyFailureReason): string {
   switch (reason) {
     case "not-configured":
-      return "AI assistance is not configured."
+      return i18next.t("reader.smartReply.errors.notConfigured")
     case "surface-disabled":
-      return "Smart replies are turned off in Settings."
+      return i18next.t("reader.smartReply.errors.surfaceDisabled")
     case "no-profile":
-      return "No writing-style profile was found — build one first."
+      return i18next.t("reader.smartReply.errors.noProfile")
     case "no-thread":
-      return "This conversation could not be loaded."
+      return i18next.t("reader.smartReply.errors.noThread")
     case "provider":
-      return "The provider request failed."
+      return i18next.t("reader.smartReply.errors.provider")
   }
 }
 
@@ -145,6 +147,7 @@ export function SmartReplyDialog({
   onOpenChange,
 }: SmartReplyDialogProps) {
   /** The whole flow in one object, so an open-reset is a single setState. */
+  const { t } = useTranslation()
   const [flow, setFlow] = useState<Flow>(() => ({ stage: "checking" }))
   const resetFlow = () => setFlow({ stage: "checking" })
 
@@ -186,9 +189,9 @@ export function SmartReplyDialog({
           if (result.ok) {
             setFlow({
               stage: "ready",
-              builtInfo: `Profile built from ${result.sampleSize} sent message${
-                result.sampleSize === 1 ? "" : "s"
-              }.`,
+              builtInfo: i18next.t("reader.smartReply.builtInfo", {
+                count: result.sampleSize,
+              }),
             })
           } else {
             setFlow({
@@ -205,14 +208,14 @@ export function SmartReplyDialog({
           setFlow({
             stage: "error",
             errorStep: "build",
-            errorMessage: "Building the writing-style profile failed.",
+            errorMessage: i18next.t("reader.smartReply.errors.buildFailed"),
           })
         })
     } catch {
       setFlow({
         stage: "error",
         errorStep: "build",
-        errorMessage: "Building the writing-style profile failed.",
+        errorMessage: i18next.t("reader.smartReply.errors.buildFailed"),
       })
     }
   }, [accountId])
@@ -254,14 +257,16 @@ export function SmartReplyDialog({
             setFlow({
               stage: "error",
               errorStep: "generate",
-              errorMessage: "Drafting the suggestion failed.",
+              errorMessage: i18next.t(
+                "reader.smartReply.errors.generateFailed"
+              ),
             })
           })
       } catch {
         setFlow({
           stage: "error",
           errorStep: "generate",
-          errorMessage: "Drafting the suggestion failed.",
+          errorMessage: i18next.t("reader.smartReply.errors.generateFailed"),
         })
       }
     },
@@ -295,11 +300,10 @@ export function SmartReplyDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <WandSparkles className="size-4" aria-hidden />
-            Smart reply
+            {t("reader.smartReply.title")}
           </DialogTitle>
           <DialogDescription>
-            A draft suggestion in your writing style, for you to edit. Nothing
-            is sent automatically.
+            {t("reader.smartReply.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -309,35 +313,32 @@ export function SmartReplyDialog({
             className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground"
           >
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Checking your writing-style profile…
+            {t("reader.smartReply.checking")}
           </div>
         )}
 
         {stage === "consent" && (
-          <div data-testid="smart-reply-consent" className="flex flex-col gap-3">
+          <div
+            data-testid="smart-reply-consent"
+            className="flex flex-col gap-3"
+          >
             <p className="text-sm text-muted-foreground">
-              Emailer analyzes your recent sent messages to learn your writing
-              style, so suggestions sound like you. The analysis runs against
-              the active AI provider and the profile stays on this machine.
+              {t("reader.smartReply.consent")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Nothing is sent automatically — suggestions are always drafts
-              for you to review and edit.
+              {t("reader.smartReply.consentNote")}
             </p>
             <DialogFooter>
               <Button
                 variant="ghost"
                 onClick={() => onOpenChange(false)}
-                aria-label="Close smart replies"
+                aria-label={t("reader.smartReply.closeLabel")}
               >
-                Cancel
+                {t("reader.smartReply.cancel")}
               </Button>
-              <Button
-                data-testid="smart-reply-build"
-                onClick={runBuild}
-              >
+              <Button data-testid="smart-reply-build" onClick={runBuild}>
                 <WandSparkles aria-hidden />
-                Analyze sent mail
+                {t("reader.smartReply.analyze")}
               </Button>
             </DialogFooter>
           </div>
@@ -349,7 +350,7 @@ export function SmartReplyDialog({
             className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground"
           >
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Analyzing your recent sent messages…
+            {t("reader.smartReply.analyzing")}
           </div>
         )}
 
@@ -369,16 +370,16 @@ export function SmartReplyDialog({
                 <Button
                   variant="ghost"
                   onClick={() => onOpenChange(false)}
-                  aria-label="Close smart replies"
+                  aria-label={t("reader.smartReply.closeLabel")}
                 >
-                  Cancel
+                  {t("reader.smartReply.cancel")}
                 </Button>
                 <Button
                   data-testid="smart-reply-generate"
                   onClick={() => runGenerate(false)}
                 >
                   <WandSparkles aria-hidden />
-                  Generate suggestion
+                  {t("reader.smartReply.generate")}
                 </Button>
               </DialogFooter>
             ) : (
@@ -387,7 +388,7 @@ export function SmartReplyDialog({
                 className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground"
               >
                 <Loader2 className="size-4 animate-spin" aria-hidden />
-                Drafting a suggestion in your style…
+                {t("reader.smartReply.generating")}
               </div>
             )}
           </div>
@@ -401,32 +402,31 @@ export function SmartReplyDialog({
             >
               <p
                 data-testid="smart-reply-text"
-                className="whitespace-pre-wrap text-sm text-foreground"
+                className="text-sm whitespace-pre-wrap text-foreground"
               >
                 {flow.reply}
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
-              AI-generated — inserting opens the composer with this draft for
-              you to edit before sending.
+              {t("reader.smartReply.previewNote")}
             </p>
             <DialogFooter>
               <Button
                 variant="ghost"
                 onClick={() => onOpenChange(false)}
-                aria-label="Dismiss smart reply"
+                aria-label={t("reader.smartReply.dismissLabel")}
               >
-                Dismiss
+                {t("reader.smartReply.dismiss")}
               </Button>
               <Button
                 variant="outline"
                 data-testid="smart-reply-regenerate"
                 onClick={() => runGenerate(true)}
               >
-                Regenerate
+                {t("reader.smartReply.regenerate")}
               </Button>
               <Button data-testid="smart-reply-use" onClick={useReply}>
-                Use reply
+                {t("reader.smartReply.use")}
               </Button>
             </DialogFooter>
           </div>
@@ -443,16 +443,13 @@ export function SmartReplyDialog({
               size="sm"
               data-testid="smart-reply-retry"
               onClick={
-                flow.errorStep === "build"
-                  ? runBuild
-                  : () => runGenerate(false)
+                flow.errorStep === "build" ? runBuild : () => runGenerate(false)
               }
             >
-              Retry
+              {t("reader.smartReply.retry")}
             </Button>
           </div>
         )}
-
       </DialogContent>
     </Dialog>
   )

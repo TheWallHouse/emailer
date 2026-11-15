@@ -1,5 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -58,6 +59,7 @@ function formatBytes(bytes: number): string {
 }
 
 export function SemanticSearchSection() {
+  const { t } = useTranslation()
   const [enabled, setEnabled] = useState<boolean | null>(null) // null = loading
   const [modelPresent, setModelPresent] = useState<boolean | null>(null)
   // The loaded spill count, keyed by the account it was loaded FOR (the
@@ -123,7 +125,10 @@ export function SemanticSearchSection() {
           activeAccountId
         )
         if (!cancelled) {
-          setSpillFor({ accountId: activeAccountId, spilled: status?.spilled ?? 0 })
+          setSpillFor({
+            accountId: activeAccountId,
+            spilled: status?.spilled ?? 0,
+          })
         }
       } catch {
         if (!cancelled) setSpillFor({ accountId: activeAccountId, spilled: 0 })
@@ -192,17 +197,17 @@ export function SemanticSearchSection() {
     <div
       data-testid="semantic-search-section"
       className="flex flex-col gap-2"
-      aria-label="Semantic search"
+      aria-label={t("settingsAdvanced.semanticSearch.title")}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <Label htmlFor="semantic-search-enabled">Semantic search</Label>
+          <Label htmlFor="semantic-search-enabled">
+            {t("settingsAdvanced.semanticSearch.title")}
+          </Label>
           <p className="text-xs text-muted-foreground">
-            Let the assistant also find threads by MEANING, not just exact
-            words. Runs entirely on this machine: a{" "}
-            {formatBytes(BGE_TOTAL_BYTES)} language model is downloaded
-            once from Hugging Face and your mail is never sent anywhere by
-            it.
+            {t("settingsAdvanced.semanticSearch.description", {
+              size: formatBytes(BGE_TOTAL_BYTES),
+            })}
           </p>
         </div>
         <Switch
@@ -218,7 +223,7 @@ export function SemanticSearchSection() {
       {loading ? (
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="size-3 animate-spin" aria-hidden />
-          Loading…
+          {t("settingsAdvanced.semanticSearch.loading")}
         </p>
       ) : enabled ? (
         <>
@@ -227,7 +232,9 @@ export function SemanticSearchSection() {
               data-testid="semantic-model-ready"
               className="text-xs text-muted-foreground"
             >
-              Model downloaded ({formatBytes(BGE_TOTAL_BYTES)}).
+              {t("settingsAdvanced.semanticSearch.modelReady", {
+                size: formatBytes(BGE_TOTAL_BYTES),
+              })}
             </p>
           ) : downloading ? (
             <div className="flex flex-col gap-1">
@@ -236,11 +243,20 @@ export function SemanticSearchSection() {
                 role="status"
                 className="text-xs text-muted-foreground"
               >
-                Downloading model… {formatBytes(download.received)}
-                {download.total !== null
-                  ? ` of ${formatBytes(download.total)}`
-                  : ""}
-                {downloadPercent !== null ? ` (${downloadPercent}%)` : ""}
+                {download.total === null
+                  ? t("settingsAdvanced.semanticSearch.downloading", {
+                      received: formatBytes(download.received),
+                    })
+                  : downloadPercent === null
+                    ? t("settingsAdvanced.semanticSearch.downloadingOf", {
+                        received: formatBytes(download.received),
+                        total: formatBytes(download.total),
+                      })
+                    : t("settingsAdvanced.semanticSearch.downloadingPercent", {
+                        received: formatBytes(download.received),
+                        total: formatBytes(download.total),
+                        percent: downloadPercent,
+                      })}
               </p>
               {downloadPercent !== null && (
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -259,7 +275,7 @@ export function SemanticSearchSection() {
                     void cancelBgeModelDownload()
                   }}
                 >
-                  Cancel download
+                  {t("settingsAdvanced.semanticSearch.cancelDownload")}
                 </Button>
               </div>
             </div>
@@ -271,14 +287,16 @@ export function SemanticSearchSection() {
                   role="alert"
                   className="text-xs text-destructive"
                 >
-                  The model download failed ({download.error ?? "unknown"}).
-                  You can retry.
+                  {t("settingsAdvanced.semanticSearch.downloadFailed", {
+                    error:
+                      download.error ??
+                      t("settingsAdvanced.semanticSearch.unknownError"),
+                  })}
                 </p>
               )}
               {download.state === "cancelled" && (
                 <p className="text-xs text-muted-foreground">
-                  Download cancelled — semantic search stays off until the
-                  model is downloaded.
+                  {t("settingsAdvanced.semanticSearch.downloadCancelled")}
                 </p>
               )}
               <div>
@@ -294,7 +312,9 @@ export function SemanticSearchSection() {
                   {starting ? (
                     <Loader2 className="animate-spin" aria-hidden />
                   ) : null}
-                  Download model ({formatBytes(BGE_TOTAL_BYTES)})
+                  {t("settingsAdvanced.semanticSearch.download", {
+                    size: formatBytes(BGE_TOTAL_BYTES),
+                  })}
                 </Button>
               </div>
             </div>
@@ -306,11 +326,21 @@ export function SemanticSearchSection() {
             className="text-xs text-muted-foreground"
           >
             {progress.running
-              ? `Indexing your mail… ${progress.indexed} of ${progress.total} threads`
+              ? t("settingsAdvanced.semanticSearch.indexing", {
+                  indexed: progress.indexed,
+                  count: progress.total,
+                })
               : progress.total > 0
-                ? `Indexed ${progress.indexed} of ${progress.total} threads` +
-                  (progress.done ? " (up to date)" : "")
-                : "No mail indexed yet."}
+                ? progress.done
+                  ? t("settingsAdvanced.semanticSearch.indexedUpToDate", {
+                      indexed: progress.indexed,
+                      count: progress.total,
+                    })
+                  : t("settingsAdvanced.semanticSearch.indexed", {
+                      indexed: progress.indexed,
+                      count: progress.total,
+                    })
+                : t("settingsAdvanced.semanticSearch.noneIndexed")}
           </p>
 
           {spilled !== null && spilled > 0 && (
@@ -318,9 +348,10 @@ export function SemanticSearchSection() {
               data-testid="semantic-index-spill"
               className="text-xs text-amber-600 dark:text-amber-400"
             >
-              This mailbox holds more than the in-memory limit — the{" "}
-              {spilled.toLocaleString()} oldest threads are not part of
-              semantic results.
+              {t("settingsAdvanced.semanticSearch.spill", {
+                count: spilled,
+                formatted: spilled.toLocaleString(),
+              })}
             </p>
           )}
         </>

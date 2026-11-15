@@ -1,4 +1,5 @@
 import { WifiOffIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { useOnlineStore } from "@/stores/online-store"
 
@@ -10,6 +11,7 @@ import { useOnlineStore } from "@/stores/online-store"
  * shell keeps in sync with initOnlineTracking (services/online).
  */
 export function OfflineBanner() {
+  const { t } = useTranslation()
   const online = useOnlineStore((state) => state.online)
   if (online) return null
   return (
@@ -19,7 +21,7 @@ export function OfflineBanner() {
       className="fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-2 border-b bg-muted/95 px-4 py-1.5 text-sm text-foreground backdrop-blur"
     >
       <WifiOffIcon aria-hidden="true" className="size-4 shrink-0" />
-      <span>You're offline — changes will sync when you reconnect</span>
+      <span>{t("sidebar.offline.banner")}</span>
     </div>
   )
 }

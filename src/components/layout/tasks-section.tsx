@@ -7,7 +7,9 @@ import {
   ChevronRight,
   ExternalLink,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -41,14 +43,12 @@ import { completeTaskById, openTaskSourceThread, useTasks } from "./use-tasks"
  * Todos list (design D6 non-goals).
  */
 export function TasksSection() {
+  const { t } = useTranslation()
   const [sort, setSort] = useState<"due" | "created">("due")
   const [todayOnly, setTodayOnly] = useState(false)
   const [completedOpen, setCompletedOpen] = useState(false)
   const { open, completed } = useTasks(sort)
-  const todayCount = useMemo(
-    () => open.filter(isTodayOrOverdue).length,
-    [open]
-  )
+  const todayCount = useMemo(() => open.filter(isTodayOrOverdue).length, [open])
   const visible = useMemo(
     () => (todayOnly ? open.filter(isTodayOrOverdue) : open),
     [open, todayOnly]
@@ -57,13 +57,13 @@ export function TasksSection() {
     <>
       <Separator />
       <nav
-        aria-label="Tasks"
+        aria-label={t("sidebar.tasks.title")}
         data-testid="tasks-section"
         className="grid items-start gap-0.5 p-2"
       >
         <div className="flex items-center justify-between gap-1 pr-0.5">
           <p className="px-2 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            Tasks
+            {t("sidebar.tasks.title")}
           </p>
           <Button
             variant="ghost"
@@ -71,15 +71,17 @@ export function TasksSection() {
             data-testid="tasks-sort-toggle"
             aria-label={
               sort === "due"
-                ? "Sorted by due date — switch to creation order"
-                : "Sorted by creation order — switch to due date"
+                ? t("sidebar.tasks.sortedByDue")
+                : t("sidebar.tasks.sortedByCreated")
             }
             title={
               sort === "due"
-                ? "Sorted by due date — switch to creation order"
-                : "Sorted by creation order — switch to due date"
+                ? t("sidebar.tasks.sortedByDue")
+                : t("sidebar.tasks.sortedByCreated")
             }
-            onClick={() => setSort((current) => (current === "due" ? "created" : "due"))}
+            onClick={() =>
+              setSort((current) => (current === "due" ? "created" : "due"))
+            }
           >
             <ArrowDownUp />
           </Button>
@@ -97,7 +99,7 @@ export function TasksSection() {
           )}
           onClick={() => setTodayOnly((value) => !value)}
         >
-          Today &amp; overdue
+          {t("sidebar.tasks.todayOverdue")}
           {todayCount > 0 && (
             <span className="ml-auto rounded-full bg-muted px-1.5 text-xs font-medium tabular-nums">
               {todayCount}
@@ -109,7 +111,9 @@ export function TasksSection() {
             data-testid="tasks-empty"
             className="px-2 py-1 text-sm text-muted-foreground"
           >
-            {todayOnly ? "Nothing due today" : "No open tasks"}
+            {todayOnly
+              ? t("sidebar.tasks.nothingDueToday")
+              : t("sidebar.tasks.noOpenTasks")}
           </p>
         ) : (
           visible.map((task) => <TaskRow key={task.id} task={task} />)
@@ -131,7 +135,9 @@ export function TasksSection() {
               ) : (
                 <ChevronRight className="size-3.5 shrink-0" />
               )}
-              Completed ({completed.length})
+              {t("sidebar.tasks.completedToggle", {
+                count: completed.length,
+              })}
             </button>
             {completedOpen &&
               completed.map((task) => (
@@ -139,7 +145,7 @@ export function TasksSection() {
                   key={task.id}
                   data-testid="task-completed-row"
                   data-task-id={task.id}
-                  className="flex min-w-0 items-center gap-1.5 py-1 pl-2 pr-2"
+                  className="flex min-w-0 items-center gap-1.5 py-1 pr-2 pl-2"
                 >
                   <Check
                     aria-hidden
@@ -149,7 +155,10 @@ export function TasksSection() {
                     {task.title}
                   </span>
                   <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                    {format(fromUnixTime(task.completedAt ?? task.createdAt), "MMM d")}
+                    {format(
+                      fromUnixTime(task.completedAt ?? task.createdAt),
+                      t("sidebar.dates.shortDate")
+                    )}
                   </span>
                 </div>
               ))}
@@ -193,12 +202,16 @@ function endOfTodaySeconds(): number {
  * tomorrow). */
 function formatTaskDue(dueAt: number): string {
   const date = fromUnixTime(dueAt)
-  if (isToday(date)) return format(date, "'Today' h:mm a")
-  if (isTomorrow(date)) return format(date, "'Tomorrow' h:mm a")
-  return format(date, "EEE, MMM d")
+  const time = () => format(date, i18next.t("sidebar.dates.time"))
+  if (isToday(date)) return i18next.t("sidebar.dates.todayAt", { time: time() })
+  if (isTomorrow(date)) {
+    return i18next.t("sidebar.dates.tomorrowAt", { time: time() })
+  }
+  return format(date, i18next.t("sidebar.dates.dayDate"))
 }
 
 function TaskRow({ task }: { task: Task }) {
+  const { t } = useTranslation()
   const title = task.title
   const sourceThreadId = task.sourceThreadId
   const openSource = sourceThreadId
@@ -215,7 +228,7 @@ function TaskRow({ task }: { task: Task }) {
         variant="ghost"
         size="icon-sm"
         data-testid="task-complete"
-        aria-label={`Complete task ${title}`}
+        aria-label={t("sidebar.tasks.complete", { title })}
         onClick={() => {
           void completeTaskById(task.id)
         }}
@@ -225,7 +238,7 @@ function TaskRow({ task }: { task: Task }) {
       {openSource ? (
         <button
           type="button"
-          title="Open the source message"
+          title={t("sidebar.tasks.openSourceTitle")}
           className="flex min-w-0 flex-1 flex-col px-0.5 py-1 text-start"
           onClick={openSource}
         >
@@ -257,7 +270,7 @@ function TaskRow({ task }: { task: Task }) {
           variant="ghost"
           size="icon-sm"
           data-testid="task-source-link"
-          aria-label={`Open source message for ${title}`}
+          aria-label={t("sidebar.tasks.openSource", { title })}
           onClick={openSource}
         >
           <ExternalLink />
@@ -270,6 +283,7 @@ function TaskRow({ task }: { task: Task }) {
 /** The formatted due date; overdue renders in the destructive tone (the
  * spec's overdue visual state). Due-less tasks render no date line. */
 function TaskDueLine({ task }: { task: Task }) {
+  const { t } = useTranslation()
   if (task.dueAt === null) return null
   return (
     <span
@@ -279,8 +293,9 @@ function TaskDueLine({ task }: { task: Task }) {
         task.isOverdue ? "text-destructive" : "text-muted-foreground"
       )}
     >
-      {task.isOverdue ? "Overdue · " : ""}
-      {formatTaskDue(task.dueAt)}
+      {task.isOverdue
+        ? t("sidebar.tasks.overdueDue", { date: formatTaskDue(task.dueAt) })
+        : formatTaskDue(task.dueAt)}
     </span>
   )
 }

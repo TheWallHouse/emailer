@@ -21,6 +21,8 @@ import { useAccountStore } from "@/stores/account-store"
 import { useUiStore } from "@/stores/ui-store"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
+
 /**
  * Shared composer-open helpers (tasks 7.6/8.4/8.6, mail-organization spec
  * "context menu mirrors the toolbar/keyboard actions"): ONE reply-prefill
@@ -306,8 +308,12 @@ export async function resumeDraft(
   if (restored.dropped.length > 0) {
     toast.warning(
       restored.dropped.length === 1
-        ? `Attachment "${restored.dropped[0]}" couldn't be restored and was removed`
-        : `Some attachments couldn't be restored and were removed: ${restored.dropped.join(", ")}`
+        ? i18next.t("reader.replyOpener.attachmentDropped", {
+            name: restored.dropped[0],
+          })
+        : i18next.t("reader.replyOpener.attachmentsDropped", {
+            names: restored.dropped.join(", "),
+          })
     )
   }
   return true

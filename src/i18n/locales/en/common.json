@@ -1,0 +1,22 @@
+{
+  "system": "System",
+  "folders": {
+    "inbox": "Inbox",
+    "starred": "Starred",
+    "sent": "Sent",
+    "drafts": "Drafts",
+    "archive": "Archive",
+    "spam": "Spam",
+    "trash": "Trash",
+    "all": "All mail",
+    "flagged": "Flagged"
+  },
+  "views": {
+    "search": "Search: {{query}}",
+    "contacts": "Contacts",
+    "attachments": "Attachments",
+    "calendar": "Calendar",
+    "settings": "Settings"
+  },
+  "notifications": "Notifications"
+}

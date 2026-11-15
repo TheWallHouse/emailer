@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -26,6 +27,7 @@ import {
  * list/counts are refreshed so the tabs catch up to the final state.
  */
 export function CategoryBackfillStatus() {
+  const { t } = useTranslation()
   const progress = useCategoryBackfillProgress()
   const active = isBackfillActive(progress)
   // Previous-snapshot tracking for the one-shot done toast: only the
@@ -36,9 +38,7 @@ export function CategoryBackfillStatus() {
     previousProgress.current = progress
     if (!previous.done && progress.done && progress.categorized > 0) {
       toast.success(
-        `Categorized ${progress.categorized} message${
-          progress.categorized === 1 ? "" : "s"
-        }`
+        t("sidebar.categoryBackfill.done", { count: progress.categorized })
       )
     }
     // The final batches changed threads.category behind the list store's
@@ -51,7 +51,7 @@ export function CategoryBackfillStatus() {
     ) {
       void refreshCategoryList()
     }
-  }, [progress])
+  }, [progress, t])
   // The "M" of "N of M": the remaining backfill candidates, re-read as the
   // job's numbers move. A failed count (e.g. no DB in plain vite) just
   // drops the estimate via the catch below.
@@ -81,10 +81,13 @@ export function CategoryBackfillStatus() {
     >
       <span data-testid="category-backfill-progress" className="tabular-nums">
         {total === null
-          ? `Categorizing… ${progress.scanned} ${
-              progress.scanned === 1 ? "thread" : "threads"
-            }`
-          : `Categorizing… ${progress.scanned} of ${total}`}
+          ? t("sidebar.categoryBackfill.progressThreads", {
+              count: progress.scanned,
+            })
+          : t("sidebar.categoryBackfill.progress", {
+              scanned: progress.scanned,
+              total,
+            })}
       </span>
       <Button
         variant="ghost"
@@ -93,7 +96,7 @@ export function CategoryBackfillStatus() {
         data-testid="category-backfill-cancel"
         onClick={cancelExistingMailBackfill}
       >
-        Cancel
+        {t("sidebar.categoryBackfill.cancel")}
       </Button>
     </div>
   )

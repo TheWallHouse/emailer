@@ -7,6 +7,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { sanitizeEmailHtml } from "@/services/renderer/sanitize"
@@ -252,6 +253,7 @@ function FrameContent({
   const [height, setHeight] = useState(MIN_EMAIL_FRAME_HEIGHT)
   // The host theme is a memo input: a light/dark flip rebuilds srcDoc so
   // the injected token values (text/background colors) never go stale.
+  const { t } = useTranslation()
   const isDark = useIsDarkTheme()
   // The thread's find session, when the frame is part of the reading pane
   // (context is null in popouts and the source dialog → no find support).
@@ -338,7 +340,7 @@ function FrameContent({
   return (
     <iframe
       ref={frameRef}
-      title="Email content"
+      title={t("reader.frame.title")}
       sandbox={SANDBOX}
       srcDoc={srcDoc}
       style={{ height }}

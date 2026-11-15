@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { SquarePen } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { ContactAvatar } from "@/components/contacts/contact-avatar"
 import { Button } from "@/components/ui/button"
@@ -107,6 +108,7 @@ export function ContactSidebar({
   /** Row activation: open that thread in the reading pane. */
   onOpenThread: (threadId: string) => void
 }) {
+  const { t } = useTranslation()
   const threads = useRecentParticipantThreads(email, excludeThreadId ?? null)
   const displayName = name?.trim() || email
 
@@ -114,7 +116,7 @@ export function ContactSidebar({
     <aside
       data-testid="contact-sidebar"
       className="flex w-64 shrink-0 flex-col border-l border-border"
-      aria-label={`Contact ${displayName}`}
+      aria-label={t("reader.contactSidebar.label", { name: displayName })}
     >
       <div className="flex items-start gap-3 p-3">
         {/* Task 2.5: ContactAvatar owns the Gravatar setting and the
@@ -133,8 +135,8 @@ export function ContactSidebar({
           size="icon-sm"
           data-testid="contact-compose"
           disabled={!accountId}
-          aria-label={`Compose to ${displayName}`}
-          title={`Compose to ${displayName}`}
+          aria-label={t("reader.contactSidebar.compose", { name: displayName })}
+          title={t("reader.contactSidebar.compose", { name: displayName })}
           onClick={() => {
             if (!accountId) return
             const composer = useComposerStore.getState()
@@ -149,15 +151,15 @@ export function ContactSidebar({
         </Button>
       </div>
       <section
-        aria-label="Recent threads"
+        aria-label={t("reader.contactSidebar.recentThreads")}
         className="flex min-h-0 flex-1 flex-col px-3 pb-3"
       >
         <p className="py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Recent threads
+          {t("reader.contactSidebar.recentThreads")}
         </p>
         {threads.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No recent threads with this contact.
+            {t("reader.contactSidebar.noRecent")}
           </p>
         ) : (
           <ul className="min-h-0 flex-1 overflow-y-auto">
@@ -174,12 +176,12 @@ export function ContactSidebar({
                   {thread.unread_count > 0 && (
                     <span
                       data-testid="contact-thread-unread"
-                      aria-label="Unread"
+                      aria-label={t("threadList.row.unread")}
                       className="size-2 shrink-0 rounded-full bg-primary"
                     />
                   )}
                   <span className="min-w-0 flex-1 truncate">
-                    {thread.subject || "(no subject)"}
+                    {thread.subject || t("threadList.noSubject")}
                   </span>
                   <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                     {formatRelativeDate(thread.last_message_at)}

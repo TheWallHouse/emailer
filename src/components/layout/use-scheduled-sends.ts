@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { addDays, format, set } from "date-fns"
 
+import { i18next } from "@/i18n"
 import { setAttachmentBytes } from "@/components/composer/attachment-bytes"
 import {
   buildSendEmailInput,
@@ -176,7 +177,7 @@ export async function scheduleComposerSend(
     if (!account) {
       return {
         status: "failed",
-        error: "the account for this message no longer exists",
+        error: i18next.t("sidebar.scheduled.accountMissing"),
       }
     }
     // Task 16.2, design D10: the From-picker selection rides into the
@@ -411,12 +412,16 @@ export function getScheduleSendPresets(now: Date = new Date()): {
     presets: [
       {
         id: "tomorrow_morning",
-        label: format(tomorrow, "'Tomorrow' h:mm a"),
+        label: i18next.t("sidebar.dates.tomorrowAt", {
+          time: format(tomorrow, i18next.t("sidebar.dates.time")),
+        }),
         dueAt: toUnixSeconds(tomorrow),
       },
       {
         id: "monday_morning",
-        label: format(monday, "'Monday' h:mm a"),
+        label: i18next.t("sidebar.dates.mondayAt", {
+          time: format(monday, i18next.t("sidebar.dates.time")),
+        }),
         dueAt: toUnixSeconds(monday),
       },
     ],

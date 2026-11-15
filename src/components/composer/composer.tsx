@@ -13,6 +13,7 @@ import { Underline } from "@tiptap/extension-underline"
 import { Node } from "@tiptap/react"
 import { EditorContent, useEditor } from "@tiptap/react"
 import { StarterKit } from "@tiptap/starter-kit"
+import { useTranslation } from "react-i18next"
 import { Placeholder } from "@tiptap/extensions"
 import {
   ChevronDown,
@@ -79,7 +80,7 @@ import {
 import { SnippetVariableDialog } from "./snippet-variable-dialog"
 import {
   captureTransformTarget,
-  COMPOSE_TRANSFORM_LABELS,
+  composeTransformLabel,
   replaceDraftRange,
   transformedTextToHtml,
 } from "./compose-transform"
@@ -117,10 +118,7 @@ import {
 } from "@/services/settings/preferences"
 import { scheduleComposerSend } from "@/components/layout/use-scheduled-sends"
 import { formatSnoozedUntil } from "@/components/layout/use-snoozed-threads"
-import {
-  defaultShortcutKeys,
-  type ShortcutId,
-} from "@/constants/shortcuts"
+import { defaultShortcutKeys, type ShortcutId } from "@/constants/shortcuts"
 import { setComposerKeyActions } from "./composer-key-actions"
 import {
   getSignature,
@@ -345,6 +343,7 @@ export function Composer() {
 }
 
 function ComposerView() {
+  const { t } = useTranslation()
   const mode = useComposerStore((state) => state.mode)
   const to = useComposerStore((state) => state.to)
   const cc = useComposerStore((state) => state.cc)
@@ -651,7 +650,6 @@ function ComposerView() {
     handleSend()
   }
 
-
   // ---- PGP send (task 18.5) ----
 
   const pgpSign = useComposerStore((state) => state.pgpSign)
@@ -773,9 +771,9 @@ function ComposerView() {
         const result = await sendComposerDraft(sendArgs)
         if (result.status === "queued") {
           if (result.queuedOffline) {
-            toast.info("Message queued")
+            toast.info(t("composer.send.queued"))
           } else {
-            toast.success("Message sent")
+            toast.success(t("composer.send.sent"))
           }
           reset()
           // sendComposerDraft already deleted the draft row; this sweep
@@ -826,9 +824,7 @@ function ComposerView() {
         const defaultKey = await getDefaultPrivateKey(executor, accountId)
         if (!defaultKey) {
           sendAttemptActive.current = false
-          setSendError(
-            "Add a PGP private key for this account before signing messages"
-          )
+          setSendError(t("composer.pgp.noPrivateKey"))
           return
         }
         if (pgpPassphraseRef.current === null) {
@@ -969,9 +965,7 @@ function ComposerView() {
       useComposerStore.getState().pgpSign ||
       useComposerStore.getState().pgpEncrypt
     ) {
-      setSendError(
-        "Scheduled sends don't support PGP yet — disable Sign/Encrypt or send directly"
-      )
+      setSendError(t("composer.schedule.pgpUnsupported"))
       return
     }
     setSending(true)
@@ -989,7 +983,11 @@ function ComposerView() {
           dueAt,
         })
         if (result.status === "scheduled") {
-          toast.success(`Scheduled for ${formatSnoozedUntil(dueAt)}`)
+          toast.success(
+            t("composer.schedule.scheduledFor", {
+              when: formatSnoozedUntil(dueAt),
+            })
+          )
           reset()
           // scheduleComposerSend already deleted the draft row; this
           // sweep also removes snapshots the autosave poll had not
@@ -1086,7 +1084,6 @@ function ComposerView() {
     return () => setComposerKeyActions(null)
   })
 
-
   // ---- Pop out to its own window (batch C2, Tauri only) ----
 
   /** Whether this surface offers the pop-out button: only under the Tauri
@@ -1165,7 +1162,8 @@ function ComposerView() {
       const overCapImage = attach.find((file) =>
         file.type.toLowerCase().startsWith("image/")
       )
-      if (overCapImage) toast.info(inlineImageTooLargeMessage(overCapImage.name))
+      if (overCapImage)
+        toast.info(inlineImageTooLargeMessage(overCapImage.name))
     }
     if (inline.length === 0 || !editor || editor.isDestroyed) return
     void (async () => {
@@ -1265,10 +1263,11 @@ function ComposerView() {
   } | null>(null)
 
   useEffect(() => {
-    setSnippetVariablePrompt((variables) =>
-      new Promise<Record<string, string> | null>((resolve) => {
-        setSnippetVariableRequest({ variables, resolve })
-      })
+    setSnippetVariablePrompt(
+      (variables) =>
+        new Promise<Record<string, string> | null>((resolve) => {
+          setSnippetVariableRequest({ variables, resolve })
+        })
     )
     return () => {
       setSnippetVariablePrompt(null)
@@ -1305,7 +1304,7 @@ function ComposerView() {
         openOnClick: false,
       }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Placeholder.configure({ placeholder: "Write your message…" }),
+      Placeholder.configure({ placeholder: t("composer.body.placeholder") }),
       // Inline images (batch C2): inline:true keeps images flowing inside
       // a paragraph and allowBase64 lets pasted/picked files ride as data
       // URLs until the MIME build extracts them into multipart/related
@@ -1323,7 +1322,7 @@ function ComposerView() {
     editorProps: {
       attributes: {
         class: "min-h-40 outline-none",
-        "aria-label": "Message body",
+        "aria-label": t("composer.body.label"),
       },
       // Clipboard paste of image FILES (batch C2): ProseMirror would
       // otherwise insert them with no size gate — the composer's
@@ -1472,8 +1471,10 @@ function ComposerView() {
   /** The bar's display name per offer kind (transform labels are shared
    * with the toolbar menu; the generative offers carry their own). */
   const pendingOfferLabel = (source: PendingOfferSource): string => {
-    if (source.kind === "transform") return COMPOSE_TRANSFORM_LABELS[source.mode]
-    return source.kind === "draftPrompt" ? "Draft from prompt" : "Generated reply"
+    if (source.kind === "transform") return composeTransformLabel(source.mode)
+    return source.kind === "draftPrompt"
+      ? t("composer.offers.draftFromPrompt")
+      : t("composer.offers.generatedReply")
   }
 
   /** Send one captured target to the provider and track it as pending.
@@ -1548,11 +1549,7 @@ function ComposerView() {
     if (!editor || editor.isDestroyed) return
     const target = captureTransformTarget(editor)
     if (!target) return
-    launchOffer(
-      { kind: "transform", mode, text: target.text },
-      target,
-      false
-    )
+    launchOffer({ kind: "transform", mode, text: target.text }, target, false)
   }
 
   /** Whole-body capture for the generative offers (batch C3): the range
@@ -1567,7 +1564,11 @@ function ComposerView() {
    * trimmed instruction; the generated body is offered whole-body. */
   const runDraftFromPrompt = (prompt: string) => {
     if (!editor || editor.isDestroyed) return
-    launchOffer({ kind: "draftPrompt", prompt }, captureWholeBodyTarget(), false)
+    launchOffer(
+      { kind: "draftPrompt", prompt },
+      captureWholeBodyTarget(),
+      false
+    )
   }
 
   /** "Generate reply" entry (batch C3): a full reply draft generated from
@@ -1589,7 +1590,10 @@ function ComposerView() {
     if (!pendingTransform) return
     launchOffer(
       pendingTransform.source,
-      { range: pendingTransform.range, originalHtml: pendingTransform.originalHtml },
+      {
+        range: pendingTransform.range,
+        originalHtml: pendingTransform.originalHtml,
+      },
       true
     )
   }
@@ -1624,21 +1628,26 @@ function ComposerView() {
     )
     setPendingTransform(null)
     if (!undo) return
-    toast.success(`${pendingOfferLabel(pending.source)} applied`, {
-      description: "The original text was replaced.",
-      duration: 10000,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          // Puts the captured original back over the replaced extent.
-          // Edits made elsewhere after accepting shift positions; the
-          // native editor undo remains the exact-granularity path.
-          if (editor && !editor.isDestroyed) {
-            replaceDraftRange(editor, undo.range, pending.originalHtml)
-          }
+    toast.success(
+      t("composer.offers.applied", {
+        label: pendingOfferLabel(pending.source),
+      }),
+      {
+        description: t("composer.offers.appliedDescription"),
+        duration: 10000,
+        action: {
+          label: t("composer.offers.undo"),
+          onClick: () => {
+            // Puts the captured original back over the replaced extent.
+            // Edits made elsewhere after accepting shift positions; the
+            // native editor undo remains the exact-granularity path.
+            if (editor && !editor.isDestroyed) {
+              replaceDraftRange(editor, undo.range, pending.originalHtml)
+            }
+          },
         },
-      },
-    })
+      }
+    )
   }
 
   /** Discard (spec: the explicit alternative): drop the offer. The
@@ -1661,10 +1670,10 @@ function ComposerView() {
       <section
         aria-label={
           mode.kind === "reply"
-            ? "Reply"
+            ? t("composer.header.reply")
             : mode.kind === "forward"
-              ? "Forward"
-              : "New message"
+              ? t("composer.header.forward")
+              : t("composer.header.newMessage")
         }
         // The keyboard layer's composer gate matches focus by this marker
         // (use-keyboard-shortcuts.ts): with the centered card non-modal,
@@ -1684,14 +1693,14 @@ function ComposerView() {
             pointer lands inside this row and not on a button. */}
         <div
           data-composer-drag-handle
-          className="flex cursor-grab select-none items-center justify-between px-4 pt-3 active:cursor-grabbing"
+          className="flex cursor-grab items-center justify-between px-4 pt-3 select-none active:cursor-grabbing"
         >
           <span className="text-sm font-medium text-muted-foreground">
             {mode.kind === "reply"
-              ? "Reply"
+              ? t("composer.header.reply")
               : mode.kind === "forward"
-                ? "Forward"
-                : "New message"}
+                ? t("composer.header.forward")
+                : t("composer.header.newMessage")}
           </span>
           <div className="flex items-center gap-0.5">
             {/* Size toggle (batch C2): collapse the full surface to the
@@ -1705,18 +1714,17 @@ function ComposerView() {
               size="icon"
               aria-label={
                 composerMode === "centered"
-                  ? "Expand composer"
-                  : "Collapse composer"
+                  ? t("composer.header.expand")
+                  : t("composer.header.collapse")
               }
               title={
                 composerMode === "centered"
-                  ? "Expand to full window"
-                  : "Shrink to centered card"
+                  ? t("composer.header.expandTitle")
+                  : t("composer.header.collapseTitle")
               }
               data-testid="composer-size-toggle"
               onClick={() => {
-                const next =
-                  composerMode === "centered" ? "full" : "centered"
+                const next = composerMode === "centered" ? "full" : "centered"
                 setComposerMode(next)
                 try {
                   void setComposerModePreference(getExecutor(), next).catch(
@@ -1742,8 +1750,8 @@ function ComposerView() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Pop out composer"
-                title="Open in its own window"
+                aria-label={t("composer.header.popOut")}
+                title={t("composer.header.popOutTitle")}
                 disabled={poppingOut}
                 data-testid="composer-pop-out"
                 onClick={handlePopOut}
@@ -1756,8 +1764,10 @@ function ComposerView() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Minimize composer"
-              title={`Minimize to tray${keysHint("close-composer")}`}
+              aria-label={t("composer.header.minimize")}
+              title={t("composer.header.minimizeTitle", {
+                keys: keysHint("close-composer"),
+              })}
               data-testid="composer-minimize"
               onClick={handleMinimize}
             >
@@ -1770,8 +1780,8 @@ function ComposerView() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Close and save draft"
-              title="Save draft and close"
+              aria-label={t("composer.header.closeAndSave")}
+              title={t("composer.header.saveAndClose")}
               onClick={handleCloseKeepDraft}
             >
               <X aria-hidden />
@@ -1787,11 +1797,11 @@ function ComposerView() {
                 htmlFor="composer-from"
                 className="w-14 shrink-0 text-muted-foreground"
               >
-                From
+                {t("composer.fields.from")}
               </Label>
               <select
                 id="composer-from"
-                aria-label="From address"
+                aria-label={t("composer.fields.fromAddress")}
                 value={fromAlias?.email ?? ""}
                 onChange={(event) => {
                   const email = event.target.value
@@ -1811,7 +1821,7 @@ function ComposerView() {
                     ? composerAccount.displayName
                       ? `${composerAccount.displayName} <${composerAccount.email}>`
                       : composerAccount.email
-                    : "Account address"}
+                    : t("composer.fields.accountAddress")}
                 </option>
                 {aliases.map((alias) => (
                   <option key={alias.id} value={alias.email}>
@@ -1829,7 +1839,7 @@ function ComposerView() {
               htmlFor="composer-to"
               className="w-14 shrink-0 text-muted-foreground"
             >
-              To
+              {t("composer.fields.to")}
             </Label>
             <RecipientField
               id="composer-to"
@@ -1846,7 +1856,7 @@ function ComposerView() {
                 aria-expanded={ccVisible}
                 onClick={toggleCc}
               >
-                Cc
+                {t("composer.fields.cc")}
               </Button>
               <Button
                 variant="ghost"
@@ -1854,7 +1864,7 @@ function ComposerView() {
                 aria-expanded={bccVisible}
                 onClick={toggleBcc}
               >
-                Bcc
+                {t("composer.fields.bcc")}
               </Button>
             </div>
           </div>
@@ -1865,7 +1875,7 @@ function ComposerView() {
                 htmlFor="composer-cc"
                 className="w-14 shrink-0 text-muted-foreground"
               >
-                Cc
+                {t("composer.fields.cc")}
               </Label>
               <RecipientField
                 id="composer-cc"
@@ -1883,7 +1893,7 @@ function ComposerView() {
                 htmlFor="composer-bcc"
                 className="w-14 shrink-0 text-muted-foreground"
               >
-                Bcc
+                {t("composer.fields.bcc")}
               </Label>
               <RecipientField
                 id="composer-bcc"
@@ -1900,13 +1910,13 @@ function ComposerView() {
               htmlFor="composer-subject"
               className="w-14 shrink-0 text-muted-foreground"
             >
-              Subject
+              {t("composer.fields.subject")}
             </Label>
             <Input
               id="composer-subject"
               value={subject}
               onChange={(event) => setSubject(event.target.value)}
-              placeholder="Subject"
+              placeholder={t("composer.fields.subject")}
               autoComplete="off"
               className="border-0 bg-transparent px-0 focus-visible:ring-0 dark:bg-transparent"
             />
@@ -1972,7 +1982,7 @@ function ComposerView() {
               data-testid="composer-attachment-notice-dismiss"
               onClick={() => setAttachmentNotice(null)}
             >
-              Dismiss
+              {t("composer.notice.dismiss")}
             </Button>
           </div>
         ) : null}
@@ -1993,7 +2003,7 @@ function ComposerView() {
             {/* Retry re-runs only the send (performSend): the attempt's
                 guards were already answered before it failed. */}
             <Button variant="outline" size="xs" onClick={performSend}>
-              Retry
+              {t("composer.send.retry")}
             </Button>
           </div>
         ) : null}
@@ -2005,13 +2015,13 @@ function ComposerView() {
               account has one to offer. */}
           {signatureOptions.length > 0 ? (
             <select
-              aria-label="Signature"
-              title="Signature"
+              aria-label={t("composer.signature.label")}
+              title={t("composer.signature.label")}
               value={signatureSelection ?? ""}
               onChange={(event) => handleSignatureSelect(event.target.value)}
               className="h-7 max-w-48 shrink-0 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
-              <option value="">No signature</option>
+              <option value="">{t("composer.signature.none")}</option>
               {signatureOptions.map((option) => (
                 <option key={option.accountId} value={option.accountId}>
                   {option.label}
@@ -2025,10 +2035,10 @@ function ComposerView() {
             onClick={handleAttachClick}
           >
             <Paperclip aria-hidden />
-            Attach file
+            {t("composer.footer.attachFile")}
           </Button>
           <Button variant="outline" onClick={handleDiscard}>
-            Discard
+            {t("composer.footer.discard")}
           </Button>
           {/* Schedule send (task 10.1): the send-later picker beside Send;
               enabled on the same sendable gate. */}
@@ -2044,10 +2054,12 @@ function ComposerView() {
             <Button
               disabled={!canSend || sending}
               onClick={() => startSendAttempt(false)}
-              title={`Send${keysHint("send-message")}`}
+              title={t("composer.send.sendTitle", {
+                keys: keysHint("send-message"),
+              })}
               className={sourceThreadId ? "rounded-e-none" : undefined}
             >
-              {sending ? "Sending…" : "Send"}
+              {sending ? t("composer.send.sending") : t("composer.send.send")}
             </Button>
             {sourceThreadId ? (
               <DropdownMenu>
@@ -2055,8 +2067,8 @@ function ComposerView() {
                   render={
                     <Button
                       disabled={!canSend || sending}
-                      aria-label="More send options"
-                      title="More send options"
+                      aria-label={t("composer.send.moreOptions")}
+                      title={t("composer.send.moreOptions")}
                       data-testid="send-options"
                       className="rounded-s-none border-s border-s-border px-1.5"
                     >
@@ -2064,12 +2076,15 @@ function ComposerView() {
                     </Button>
                   }
                 />
-                <DropdownMenuContent align="end" data-testid="send-options-menu">
+                <DropdownMenuContent
+                  align="end"
+                  data-testid="send-options-menu"
+                >
                   <DropdownMenuItem
                     data-testid="send-and-archive"
                     onClick={() => startSendAttempt(true)}
                   >
-                    Send &amp; Archive
+                    {t("composer.send.sendAndArchive")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -2097,19 +2112,19 @@ function ComposerView() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Missing encryption keys</DialogTitle>
+              <DialogTitle>{t("composer.pgp.missingKeysTitle")}</DialogTitle>
               <DialogDescription>
-                No PGP public key is known for: {pgpMissingKeys?.join(", ")}.
-                Import their keys in settings, remove the recipients, or send
-                without encryption.
+                {t("composer.pgp.missingKeysDescription", {
+                  recipients: pgpMissingKeys?.join(", ") ?? "",
+                })}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={handlePgpMissingDismiss}>
-                Keep editing
+                {t("composer.pgp.keepEditing")}
               </Button>
               <Button onClick={handlePgpDisableEncryption}>
-                Disable encryption and send
+                {t("composer.pgp.disableEncryption")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2133,16 +2148,16 @@ function ComposerView() {
               }}
             >
               <DialogHeader>
-                <DialogTitle>PGP passphrase</DialogTitle>
+                <DialogTitle>{t("composer.pgp.passphraseTitle")}</DialogTitle>
                 <DialogDescription>
-                  Enter the passphrase of your signing key to sign this message.
+                  {t("composer.pgp.passphraseDescription")}
                 </DialogDescription>
               </DialogHeader>
               <Input
                 type="password"
                 value={passphraseValue}
                 onChange={(event) => setPassphraseValue(event.target.value)}
-                aria-label="PGP passphrase"
+                aria-label={t("composer.pgp.passphraseTitle")}
                 autoComplete="off"
                 autoFocus
               />
@@ -2152,10 +2167,10 @@ function ComposerView() {
                   variant="outline"
                   onClick={handlePassphraseCancel}
                 >
-                  Cancel
+                  {t("composer.pgp.cancel")}
                 </Button>
                 <Button type="submit" disabled={passphraseValue === ""}>
-                  Sign and send
+                  {t("composer.pgp.signAndSend")}
                 </Button>
               </DialogFooter>
             </form>
@@ -2191,9 +2206,9 @@ function ComposerView() {
         <Dialog open={confirmDiscard} onOpenChange={setConfirmDiscard}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Discard draft?</DialogTitle>
+              <DialogTitle>{t("composer.discard.title")}</DialogTitle>
               <DialogDescription>
-                Your message will be deleted.
+                {t("composer.discard.description")}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -2201,10 +2216,10 @@ function ComposerView() {
                 variant="outline"
                 onClick={() => setConfirmDiscard(false)}
               >
-                Cancel
+                {t("composer.discard.cancel")}
               </Button>
               <Button variant="destructive" onClick={discardDraft}>
-                Discard
+                {t("composer.discard.confirm")}
               </Button>
             </DialogFooter>
           </DialogContent>

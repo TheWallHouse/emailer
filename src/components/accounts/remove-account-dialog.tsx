@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -38,6 +39,7 @@ export function RemoveAccountDialog({
   open,
   onOpenChange,
 }: RemoveAccountDialogProps) {
+  const { t } = useTranslation()
   const [removing, setRemoving] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -50,7 +52,7 @@ export function RemoveAccountDialog({
       onOpenChange(false)
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Could not remove the account."
+        error instanceof Error ? error.message : t("accounts.remove.failed")
       )
     } finally {
       setRemoving(false)
@@ -69,12 +71,13 @@ export function RemoveAccountDialog({
       {account && (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove account</DialogTitle>
+            <DialogTitle>{t("accounts.remove.title")}</DialogTitle>
             <DialogDescription>
-              Remove <span className="font-medium">{account.email}</span> from
-              this device? Every locally stored message, thread and label of
-              this account will be deleted. The account itself is not deleted at
-              the provider — adding it again syncs fresh from the server.
+              <Trans
+                i18nKey="accounts.remove.description"
+                values={{ email: account.email }}
+                components={{ email: <span className="font-medium" /> }}
+              />
             </DialogDescription>
           </DialogHeader>
           {errorMessage && (
@@ -88,7 +91,7 @@ export function RemoveAccountDialog({
               onClick={() => onOpenChange(false)}
               disabled={removing}
             >
-              Cancel
+              {t("accounts.remove.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -100,7 +103,7 @@ export function RemoveAccountDialog({
               {removing && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              Remove account
+              {t("accounts.remove.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

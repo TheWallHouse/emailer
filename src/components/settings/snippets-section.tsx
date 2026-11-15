@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { CirclePlus, Loader2, Pencil, Trash2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -56,6 +57,7 @@ function SnippetDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const { t } = useTranslation()
   const editing = target.mode === "edit" ? target.snippet : null
   const [name, setName] = useState(editing?.name ?? "")
   const [shortcut, setShortcut] = useState(editing?.shortcut ?? "")
@@ -88,7 +90,9 @@ function SnippetDialog({
       onOpenChange(false)
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Could not save the snippet."
+        error instanceof Error
+          ? error.message
+          : t("settingsMail.snippets.saveFailed")
       )
       setSaving(false)
     }
@@ -98,9 +102,13 @@ function SnippetDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{editing ? "Edit Snippet" : "Add Snippet"}</DialogTitle>
+          <DialogTitle>
+            {editing
+              ? t("settingsMail.snippets.editTitle")
+              : t("settingsMail.snippets.addTitle")}
+          </DialogTitle>
           <DialogDescription>
-            Snippets are available from every account's composer.
+            {t("settingsMail.snippets.dialogDescription")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -111,32 +119,38 @@ function SnippetDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="snippet-name">Name</Label>
+            <Label htmlFor="snippet-name">
+              {t("settingsMail.snippets.name")}
+            </Label>
             <Input
               id="snippet-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Thanks"
+              placeholder={t("settingsMail.snippets.namePlaceholder")}
               autoFocus
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="snippet-shortcut">Shortcut (optional)</Label>
+            <Label htmlFor="snippet-shortcut">
+              {t("settingsMail.snippets.shortcut")}
+            </Label>
             <Input
               id="snippet-shortcut"
               value={shortcut}
               onChange={(event) => setShortcut(event.target.value)}
-              placeholder="e.g. thx"
+              placeholder={t("settingsMail.snippets.shortcutPlaceholder")}
               className="font-mono"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="snippet-body">Body</Label>
+            <Label htmlFor="snippet-body">
+              {t("settingsMail.snippets.body")}
+            </Label>
             <Textarea
               id="snippet-body"
               value={body}
               onChange={(event) => setBody(event.target.value)}
-              placeholder="Text inserted into the composer"
+              placeholder={t("settingsMail.snippets.bodyPlaceholder")}
               rows={5}
             />
           </div>
@@ -152,13 +166,15 @@ function SnippetDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settingsMail.snippets.cancel")}
             </Button>
             <Button type="submit" disabled={!canSave}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              {editing ? "Save Changes" : "Save Snippet"}
+              {editing
+                ? t("settingsMail.snippets.saveChanges")
+                : t("settingsMail.snippets.save")}
             </Button>
           </DialogFooter>
         </form>
@@ -176,6 +192,7 @@ function DeleteSnippetDialog({
   onOpenChange: (open: boolean) => void
   onDeleted: () => void
 }) {
+  const { t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
 
   async function handleConfirm(): Promise<void> {
@@ -194,11 +211,15 @@ function DeleteSnippetDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete snippet</DialogTitle>
+          <DialogTitle>{t("settingsMail.snippets.deleteTitle")}</DialogTitle>
           <DialogDescription>
-            Delete{" "}
-            <span className="font-medium text-foreground">{snippet.name}</span>?
-            This cannot be undone.
+            <Trans
+              i18nKey="settingsMail.snippets.deleteConfirm"
+              values={{ name: snippet.name }}
+              components={{
+                name: <span className="font-medium text-foreground" />,
+              }}
+            />
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -207,7 +228,7 @@ function DeleteSnippetDialog({
             onClick={() => onOpenChange(false)}
             disabled={deleting}
           >
-            Cancel
+            {t("settingsMail.snippets.cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -219,7 +240,7 @@ function DeleteSnippetDialog({
             {deleting && (
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
             )}
-            Delete
+            {t("settingsMail.snippets.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -236,6 +257,7 @@ function SnippetRowItem({
   onEdit: (snippet: SnippetRow) => void
   onDelete: (snippet: SnippetRow) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       data-testid="settings-snippet-row"
@@ -257,20 +279,22 @@ function SnippetRowItem({
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Edit ${snippet.name}`}
+        aria-label={t("settingsMail.snippets.editAria", { name: snippet.name })}
         onClick={() => onEdit(snippet)}
       >
         <Pencil />
-        Edit
+        {t("settingsMail.snippets.edit")}
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Delete ${snippet.name}`}
+        aria-label={t("settingsMail.snippets.deleteAria", {
+          name: snippet.name,
+        })}
         onClick={() => onDelete(snippet)}
       >
         <Trash2 />
-        Delete
+        {t("settingsMail.snippets.delete")}
       </Button>
     </div>
   )
@@ -285,15 +309,18 @@ function SnippetRowItem({
  * asks once per insertion and the answer fills every occurrence.
  */
 function TemplateVariablesHelp() {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-2" data-testid="snippet-variables-help">
       <h3 className="text-sm font-medium text-foreground">
-        Template variables
+        {t("settingsMail.snippets.variables.title")}
       </h3>
       <p className="text-xs text-muted-foreground">
-        A snippet body can contain{" "}
-        <code className="font-mono">{"{{variable}}"}</code> placeholders, which
-        fill automatically when the snippet is inserted.
+        <Trans
+          i18nKey="settingsMail.snippets.variables.intro"
+          values={{ placeholder: "{{variable}}" }}
+          components={{ code: <code className="font-mono" /> }}
+        />
       </p>
       <ul className="flex flex-col gap-1.5">
         {SNIPPET_VARIABLES.map((variable) => (
@@ -305,20 +332,22 @@ function TemplateVariablesHelp() {
             <code className="font-mono text-foreground">
               {`{{${variable.id}}}`}
             </code>{" "}
-            — {variable.description} (e.g. {variable.example})
+            {t("settingsMail.snippets.variables.entry", {
+              description: variable.description,
+              example: variable.example,
+            })}
           </li>
         ))}
       </ul>
       <p className="text-xs text-muted-foreground">
-        A variable the message context can't fill — including ids not listed
-        here — prompts once per insertion, and the answer applies to every
-        occurrence in the snippet.
+        {t("settingsMail.snippets.variables.prompt")}
       </p>
     </div>
   )
 }
 
 export function SnippetsSection() {
+  const { t } = useTranslation()
   const [snippets, setSnippets] = useState<SnippetRow[]>([])
   const [dialog, setDialog] = useState<DialogTarget | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<SnippetRow | null>(null)
@@ -340,23 +369,28 @@ export function SnippetsSection() {
   useEffect(reload, [reload])
 
   return (
-    <section aria-label="Snippets" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.snippets.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Snippets</h2>
+          <h2 className="text-base font-semibold text-foreground">
+            {t("settingsMail.snippets.title")}
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Reusable text templates for the composer, shared by every account.
+            {t("settingsMail.snippets.subtitle")}
           </p>
         </div>
         <Button size="sm" onClick={() => setDialog({ mode: "add" })}>
           <CirclePlus />
-          Add Snippet
+          {t("settingsMail.snippets.add")}
         </Button>
       </div>
       <Separator />
       {snippets.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No snippets yet. Add one to reuse text while composing.
+          {t("settingsMail.snippets.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">

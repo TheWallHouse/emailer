@@ -13,6 +13,7 @@ import {
   SquarePen,
   Zap,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -177,6 +178,7 @@ function useNudgeCount(): number {
 }
 
 export function Sidebar({ isCollapsed }: SidebarProps) {
+  const { t } = useTranslation()
   const view = useUiStore((state) => state.view)
   const setView = useUiStore((state) => state.setView)
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
@@ -303,7 +305,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
             render={
               <Button
                 size="icon-lg"
-                aria-label="Compose"
+                aria-label={t("sidebar.compose")}
                 className="mx-auto"
                 onClick={() => useUiStore.getState().setComposerOpen(true)}
               >
@@ -311,7 +313,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
               </Button>
             }
           />
-          <TooltipContent side="right">Compose</TooltipContent>
+          <TooltipContent side="right">{t("sidebar.compose")}</TooltipContent>
         </Tooltip>
       ) : (
         <div className="px-2">
@@ -321,7 +323,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
             onClick={() => useUiStore.getState().setComposerOpen(true)}
           >
             <SquarePen />
-            Compose
+            {t("sidebar.compose")}
           </Button>
         </div>
       )}
@@ -330,7 +332,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         {/* justify-items-center: grid cells stretch by default, which
             pins the icon buttons to the rail's left edge when collapsed. */}
         <nav
-          aria-label="Folders"
+          aria-label={t("sidebar.foldersNav")}
           className={cn(
             "grid items-start gap-0.5 p-2",
             isCollapsed && "justify-items-center"
@@ -348,7 +350,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                   render={
                     <button
                       type="button"
-                      aria-label="Unified inbox"
+                      aria-label={t("sidebar.unifiedInbox")}
                       aria-current={unifiedActive ? "true" : undefined}
                       className={cn(
                         buttonVariants({ variant: "ghost", size: "icon-lg" }),
@@ -361,7 +363,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                     </button>
                   }
                 />
-                <TooltipContent side="right">Unified inbox</TooltipContent>
+                <TooltipContent side="right">
+                  {t("sidebar.unifiedInbox")}
+                </TooltipContent>
               </Tooltip>
             ) : (
               <button
@@ -375,7 +379,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 onClick={enterUnifiedInbox}
               >
                 <Layers />
-                Unified inbox
+                {t("sidebar.unifiedInbox")}
               </button>
             ))}
           {/* Priority inbox (task 13.2, design D7): the classified view —
@@ -389,7 +393,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                   render={
                     <button
                       type="button"
-                      aria-label="Priority"
+                      aria-label={t("sidebar.priority")}
                       aria-current={priorityActive ? "true" : undefined}
                       className={cn(
                         buttonVariants({ variant: "ghost", size: "icon-lg" }),
@@ -402,7 +406,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                     </button>
                   }
                 />
-                <TooltipContent side="right">Priority</TooltipContent>
+                <TooltipContent side="right">
+                  {t("sidebar.priority")}
+                </TooltipContent>
               </Tooltip>
             ) : (
               <button
@@ -416,7 +422,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 onClick={enterPriorityInbox}
               >
                 <Zap />
-                Priority
+                {t("sidebar.priority")}
               </button>
             ))}
           {/* Nudges (task 14.1, design D8): the awaiting-reply threads the
@@ -431,7 +437,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                   render={
                     <button
                       type="button"
-                      aria-label="Nudges"
+                      aria-label={t("sidebar.nudges")}
                       aria-current={nudgesActive ? "true" : undefined}
                       className={cn(
                         buttonVariants({ variant: "ghost", size: "icon-lg" }),
@@ -445,7 +451,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                   }
                 />
                 <TooltipContent side="right" className="gap-2">
-                  Nudges
+                  {t("sidebar.nudges")}
                   {nudgeCount > 0 && (
                     <span className="text-muted-foreground tabular-nums">
                       {nudgeCount}
@@ -465,7 +471,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 onClick={enterNudges}
               >
                 <BellRing />
-                Nudges
+                {t("sidebar.nudges")}
                 {nudgeCount > 0 && (
                   <span className="ml-auto rounded-full bg-muted px-1.5 text-xs font-medium text-muted-foreground tabular-nums">
                     {nudgeCount}
@@ -484,7 +490,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                   render={
                     <button
                       type="button"
-                      aria-label="Contacts"
+                      aria-label={t("sidebar.contacts")}
                       aria-current={contactsActive ? "true" : undefined}
                       className={cn(
                         buttonVariants({ variant: "ghost", size: "icon-lg" }),
@@ -497,7 +503,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                     </button>
                   }
                 />
-                <TooltipContent side="right">Contacts</TooltipContent>
+                <TooltipContent side="right">
+                  {t("sidebar.contacts")}
+                </TooltipContent>
               </Tooltip>
             ) : (
               <button
@@ -511,7 +519,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 onClick={enterContacts}
               >
                 <BookUser />
-                Contacts
+                {t("sidebar.contacts")}
               </button>
             ))}
           {/* Attachments (task 3.7, design D14): the current account's
@@ -527,7 +535,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                   render={
                     <button
                       type="button"
-                      aria-label="Attachments"
+                      aria-label={t("sidebar.attachments")}
                       aria-current={attachmentsActive ? "true" : undefined}
                       className={cn(
                         buttonVariants({ variant: "ghost", size: "icon-lg" }),
@@ -540,7 +548,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                     </button>
                   }
                 />
-                <TooltipContent side="right">Attachments</TooltipContent>
+                <TooltipContent side="right">
+                  {t("sidebar.attachments")}
+                </TooltipContent>
               </Tooltip>
             ) : (
               <button
@@ -554,7 +564,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 onClick={enterAttachments}
               >
                 <Paperclip />
-                Attachments
+                {t("sidebar.attachments")}
               </button>
             ))}
           {/* Calendar (task 5.3, design D5): the connected calendars'
@@ -570,7 +580,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                   render={
                     <button
                       type="button"
-                      aria-label="Calendar"
+                      aria-label={t("sidebar.calendar")}
                       aria-current={calendarActive ? "true" : undefined}
                       className={cn(
                         buttonVariants({ variant: "ghost", size: "icon-lg" }),
@@ -583,7 +593,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                     </button>
                   }
                 />
-                <TooltipContent side="right">Calendar</TooltipContent>
+                <TooltipContent side="right">
+                  {t("sidebar.calendar")}
+                </TooltipContent>
               </Tooltip>
             ) : (
               <button
@@ -597,7 +609,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 onClick={enterCalendar}
               >
                 <Calendar />
-                Calendar
+                {t("sidebar.calendar")}
               </button>
             ))}
           {FOLDER_ITEMS.map((item) =>
@@ -692,10 +704,13 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
         {!isCollapsed && (
           <>
             <Separator />
-            <nav aria-label="Labels" className="grid items-start gap-0.5 p-2">
+            <nav
+              aria-label={t("sidebar.labels.title")}
+              className="grid items-start gap-0.5 p-2"
+            >
               <div className="flex items-center justify-between gap-1 pr-0.5">
                 <p className="px-2 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  Labels
+                  {t("sidebar.labels.title")}
                 </p>
                 <Tooltip>
                   <TooltipTrigger
@@ -703,7 +718,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                       <Button
                         size="icon-sm"
                         variant="ghost"
-                        aria-label="New label"
+                        aria-label={t("sidebar.labels.newLabel")}
                         disabled={activeAccount === null}
                         onClick={() => setLabelDialog({ mode: "create" })}
                       >
@@ -711,7 +726,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                       </Button>
                     }
                   />
-                  <TooltipContent side="right">New label</TooltipContent>
+                  <TooltipContent side="right">
+                    {t("sidebar.labels.newLabel")}
+                  </TooltipContent>
                 </Tooltip>
               </div>
               {labelNodes.map(({ label, depth, display }) => (
@@ -783,7 +800,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
               render={
                 <button
                   type="button"
-                  aria-label="Settings"
+                  aria-label={t("sidebar.settings")}
                   aria-current={view.kind === "settings" ? "true" : undefined}
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon-lg" }),
@@ -796,7 +813,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                 </button>
               }
             />
-            <TooltipContent side="right">Settings</TooltipContent>
+            <TooltipContent side="right">
+              {t("sidebar.settings")}
+            </TooltipContent>
           </Tooltip>
         ) : (
           <button
@@ -810,7 +829,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
             onClick={() => setView({ kind: "settings" })}
           >
             <Settings />
-            Settings
+            {t("sidebar.settings")}
           </button>
         )}
         <Tooltip>
@@ -819,7 +838,11 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
               <Button
                 size={isCollapsed ? "icon-lg" : "icon"}
                 variant="ghost"
-                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                aria-label={
+                  isCollapsed
+                    ? t("sidebar.expandSidebar")
+                    : t("sidebar.collapseSidebar")
+                }
                 className={cn(!isCollapsed && "ml-auto")}
                 onClick={() => {
                   setSidebarCollapsedWithPersist(
@@ -833,7 +856,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
             }
           />
           {isCollapsed && (
-            <TooltipContent side="right">Expand sidebar</TooltipContent>
+            <TooltipContent side="right">
+              {t("sidebar.expandSidebar")}
+            </TooltipContent>
           )}
         </Tooltip>
       </div>

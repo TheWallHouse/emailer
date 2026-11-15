@@ -1,9 +1,10 @@
 import { useState, type PropsWithChildren } from "react"
+import { useTranslation } from "react-i18next"
 
 import { toast } from "sonner"
 
 import { SnoozeCustomPicker } from "./snooze-menu"
-import { SNOOZE_CUSTOM_LABEL } from "./snooze-flow"
+import { snoozeCustomLabel } from "./snooze-flow"
 import type { ThreadStateKind } from "./thread-state-flow"
 import { BlockSenderDialog } from "./block-sender-dialog"
 import { CreateTaskDialog } from "./create-task-dialog"
@@ -179,6 +180,7 @@ export function ThreadContextMenu({
   handlers,
   children,
 }: PropsWithChildren<ThreadContextMenuProps>) {
+  const { t } = useTranslation()
   const unread = thread.unread_count > 0
   const starred = thread.is_starred === 1
   // Local-only states (task 3.3): the item labels flip on the state, like
@@ -213,20 +215,21 @@ export function ThreadContextMenu({
       .then((result) => {
         if (!result) return
         const missed = result.unavailableAttachments.length
+        const count = result.files.length
         toast.success(
-          `Exported ${result.files.length} message${
-            result.files.length === 1 ? "" : "s"
-          } as .eml` +
-            (missed > 0
-              ? ` — ${missed} attachment file${
-                  missed === 1 ? "" : "s"
-                } not cached, exported empty`
-              : "")
+          missed > 0
+            ? t("threadList.contextMenu.export.successWithMissing", {
+                count,
+                missing: t("threadList.contextMenu.export.missingAttachments", {
+                  count: missed,
+                }),
+              })
+            : t("threadList.contextMenu.export.success", { count })
         )
       })
       .catch((error) => {
         console.warn("[data-portability] eml export failed", error)
-        toast.error("Export failed — the messages could not be written")
+        toast.error(t("threadList.contextMenu.export.failed"))
       })
   }
   return (
@@ -234,20 +237,20 @@ export function ThreadContextMenu({
       {children}
       <ContextMenuContent data-testid="thread-context-menu">
         <ContextMenuItem onClick={() => handlers.onOpen(thread.id)}>
-          Open
+          {t("threadList.contextMenu.open")}
         </ContextMenuItem>
         {handlers.onOpenInNewWindow && (
           <ContextMenuItem
             onClick={() => handlers.onOpenInNewWindow?.(thread.id)}
           >
-            Open in new window
+            {t("threadList.contextMenu.openInNewWindow")}
           </ContextMenuItem>
         )}
         <ContextMenuItem onClick={() => handlers.onReply(thread.id)}>
-          Reply
+          {t("threadList.contextMenu.reply")}
         </ContextMenuItem>
         <ContextMenuItem onClick={exportEmlFromMenu}>
-          Export as EML
+          {t("threadList.contextMenu.exportEml")}
         </ContextMenuItem>
         {/* Task 5.7 (tasks spec "Task from email"): convert THIS thread
             into a task — a per-thread action like Open/Reply (never a
@@ -259,54 +262,64 @@ export function ThreadContextMenu({
           data-testid="menu-create-task"
           onClick={() => setCreateTaskOpen(true)}
         >
-          Create task
+          {t("threadList.contextMenu.createTask")}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem
           onClick={() => handlers.onAction("archive", targetIds)}
         >
-          Archive
+          {t("threadList.actions.archive")}
         </ContextMenuItem>
         <ContextMenuItem onClick={() => handlers.onAction("trash", targetIds)}>
-          Trash
+          {t("threadList.actions.trash")}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() =>
             handlers.onAction(unread ? "read" : "unread", targetIds)
           }
         >
-          {unread ? "Mark read" : "Mark unread"}
+          {unread
+            ? t("threadList.actions.markRead")
+            : t("threadList.actions.markUnread")}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() =>
             handlers.onAction(starred ? "unstar" : "star", targetIds)
           }
         >
-          {starred ? "Unstar" : "Star"}
+          {starred
+            ? t("threadList.actions.unstar")
+            : t("threadList.actions.star")}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() =>
             handlers.onThreadState(muted ? "unmute" : "mute", targetIds)
           }
         >
-          {muted ? "Unmute" : "Mute"}
+          {muted
+            ? t("threadList.actions.unmute")
+            : t("threadList.actions.mute")}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() =>
             handlers.onThreadState(pinned ? "unpin" : "pin", targetIds)
           }
         >
-          {pinned ? "Unpin" : "Pin"}
+          {pinned ? t("threadList.actions.unpin") : t("threadList.actions.pin")}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={() =>
             handlers.onThreadState(done ? "undone" : "done", targetIds)
           }
         >
-          {done ? "Mark not done" : "Mark done"}
+          {done
+            ? t("threadList.actions.markNotDone")
+            : t("threadList.actions.markDone")}
         </ContextMenuItem>
         <ContextMenuSub>
-          <ContextMenuSubTrigger>Snooze</ContextMenuSubTrigger>
+          <ContextMenuSubTrigger>
+            {t("threadList.actions.snooze")}
+          </ContextMenuSubTrigger>
           <ContextMenuSubContent data-testid="snooze-submenu">
             {getSnoozePresets().presets.map((preset) => (
               <ContextMenuItem
@@ -321,7 +334,7 @@ export function ThreadContextMenu({
             ))}
             <ContextMenuSeparator />
             <ContextMenuItem onClick={() => setCustomOpen(true)}>
-              {SNOOZE_CUSTOM_LABEL}
+              {snoozeCustomLabel()}
             </ContextMenuItem>
           </ContextMenuSubContent>
         </ContextMenuSub>
@@ -330,19 +343,21 @@ export function ThreadContextMenu({
             variant="destructive"
             onClick={() => handlers.onAction("delete_forever", targetIds)}
           >
-            Delete forever
+            {t("threadList.contextMenu.deleteForever")}
           </ContextMenuItem>
         )}
         {blockSender && (
           <ContextMenuItem onClick={() => setBlockOpen(true)}>
-            Block sender
+            {t("threadList.contextMenu.blockSender")}
           </ContextMenuItem>
         )}
         {userLabels.length > 0 && (
           <>
             <ContextMenuSeparator />
             <ContextMenuSub>
-              <ContextMenuSubTrigger>Labels</ContextMenuSubTrigger>
+              <ContextMenuSubTrigger>
+                {t("threadList.actions.labels")}
+              </ContextMenuSubTrigger>
               <ContextMenuSubContent>
                 {userLabels.map((label) => {
                   const member = memberLabelIds.includes(label.id)
@@ -373,7 +388,9 @@ export function ThreadContextMenu({
           <>
             <ContextMenuSeparator />
             <ContextMenuSub>
-              <ContextMenuSubTrigger>Move to category</ContextMenuSubTrigger>
+              <ContextMenuSubTrigger>
+                {t("threadList.contextMenu.moveToCategory")}
+              </ContextMenuSubTrigger>
               <ContextMenuSubContent data-testid="move-to-category-submenu">
                 {CATEGORIES.map((category) => {
                   const current = currentCategory === category
@@ -400,7 +417,9 @@ export function ThreadContextMenu({
         {categoriesEnabled && handlers.onAlwaysFromSender && blockSender && (
           <ContextMenuSub>
             <ContextMenuSubTrigger>
-              Always categorize {blockSender} as
+              {t("threadList.contextMenu.alwaysCategorize", {
+                sender: blockSender,
+              })}
             </ContextMenuSubTrigger>
             <ContextMenuSubContent data-testid="always-from-sender-submenu">
               {CATEGORIES.map((category) => (
@@ -427,7 +446,9 @@ export function ThreadContextMenu({
           <>
             <ContextMenuSeparator />
             <ContextMenuSub>
-              <ContextMenuSubTrigger>Quick step</ContextMenuSubTrigger>
+              <ContextMenuSubTrigger>
+                {t("threadList.contextMenu.quickStep")}
+              </ContextMenuSubTrigger>
               <ContextMenuSubContent data-testid="quick-step-submenu">
                 {quickSteps.map((step) => (
                   <ContextMenuItem

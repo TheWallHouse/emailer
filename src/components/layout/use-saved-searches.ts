@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import type { SqlExecutor } from "@/services/db/executor"
 import { getExecutor } from "@/services/db/executor"
 import {
@@ -137,10 +138,12 @@ export async function saveSearchWithToast(
   query: string
 ): Promise<boolean> {
   if (await saveSearch(name, query)) {
-    toast.success(`Saved search “${name.trim()}”`)
+    toast.success(
+      i18next.t("sidebar.savedSearches.saved", { name: name.trim() })
+    )
     return true
   }
-  toast.error("Could not save the search.")
+  toast.error(i18next.t("sidebar.savedSearches.saveFailed"))
   return false
 }
 

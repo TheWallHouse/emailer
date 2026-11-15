@@ -1,4 +1,5 @@
 import { Minus, Square, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { isTauriRuntime } from "@/services/desktop/popout"
@@ -33,6 +34,7 @@ function isMacPlatform(): boolean {
 }
 
 export function Titlebar() {
+  const { t } = useTranslation()
   if (!isTauriRuntime()) return null
 
   const mac = isMacPlatform()
@@ -53,7 +55,7 @@ export function Titlebar() {
       {!mac && (
         <div className="flex shrink-0 items-stretch self-stretch">
           <TitlebarButton
-            label="Minimize"
+            label={t("sidebar.titlebar.minimize")}
             onClick={() => {
               void window.minimize()
             }}
@@ -61,7 +63,7 @@ export function Titlebar() {
             <Minus />
           </TitlebarButton>
           <TitlebarButton
-            label="Maximize"
+            label={t("sidebar.titlebar.maximize")}
             onClick={() => {
               void window.toggleMaximize()
             }}
@@ -69,7 +71,7 @@ export function Titlebar() {
             <Square />
           </TitlebarButton>
           <TitlebarButton
-            label="Close"
+            label={t("sidebar.titlebar.close")}
             onClick={() => {
               void window.close()
             }}

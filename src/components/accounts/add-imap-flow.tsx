@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { ArrowLeft, Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -45,10 +47,12 @@ import { HistoryWindowField } from "./history-window-field"
  * database (accounts spec "Connection test fails").
  */
 
-const SECURITY_ITEMS: Record<SecurityKind, string> = {
-  tls: "SSL/TLS",
-  starttls: "STARTTLS",
-  none: "None",
+function securityItems(t: TFunction): Record<SecurityKind, string> {
+  return {
+    tls: "SSL/TLS",
+    starttls: "STARTTLS",
+    none: t("accounts.imap.securityNone"),
+  }
 }
 
 const SECURITY_OPTIONS = ["tls", "starttls", "none"] as const
@@ -105,14 +109,14 @@ interface AddImapFlowProps {
 }
 
 export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
+  const { t } = useTranslation()
   const [stage, setStage] = useState<"identity" | "servers">("identity")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [identityError, setIdentityError] = useState<string | null>(null)
   const [discovered, setDiscovered] = useState(false)
   const [servers, setServers] = useState<ServerForm>(defaultServers)
-  const [historyWindow, setHistoryWindow] =
-    useState<HistoryWindowSetting>(null)
+  const [historyWindow, setHistoryWindow] = useState<HistoryWindowSetting>(null)
   const [tests, setTests] = useState<Record<Side, SideTestState>>(IDLE_BOTH)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -126,11 +130,11 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
     event.preventDefault()
     const trimmedEmail = email.trim()
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setIdentityError("Enter a valid email address.")
+      setIdentityError(t("accounts.imap.invalidEmail"))
       return
     }
     if (!password) {
-      setIdentityError("Enter the account password (or app password).")
+      setIdentityError(t("accounts.imap.enterPassword"))
       return
     }
     setIdentityError(null)
@@ -186,9 +190,9 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
   function validateSide(side: Side): string | null {
     const host = (side === "imap" ? servers.imapHost : servers.smtpHost).trim()
     const port = Number(side === "imap" ? servers.imapPort : servers.smtpPort)
-    if (!host) return "Enter the server host."
+    if (!host) return t("accounts.imap.enterHost")
     if (!Number.isInteger(port) || port < 1 || port > 65535) {
-      return "Enter a port between 1 and 65535."
+      return t("accounts.imap.enterPort")
     }
     return null
   }
@@ -210,15 +214,15 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
         const result = await testImapSettings(testConfig, password)
         markSide("imap", {
           status: "passed",
-          message: `Connected — ${result.folderCount} folder${
-            result.folderCount === 1 ? "" : "s"
-          }`,
+          message: t("accounts.imap.connectedFolders", {
+            count: result.folderCount,
+          }),
         })
       } else {
         await testSmtpSettings(testConfig, password)
         markSide("smtp", {
           status: "passed",
-          message: "Connected, sign-in accepted",
+          message: t("accounts.imap.smtpAccepted"),
         })
       }
     } catch (error) {
@@ -259,7 +263,7 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
           setSaveError(
             error instanceof Error
               ? error.message
-              : "Could not save the account."
+              : t("accounts.imap.saveFailed")
           )
         }
       } finally {
@@ -280,7 +284,7 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
       onSuccess()
     } catch (error) {
       setSaveError(
-        error instanceof Error ? error.message : "Could not save the account."
+        error instanceof Error ? error.message : t("accounts.imap.saveFailed")
       )
     } finally {
       setSaving(false)
@@ -291,15 +295,16 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
     return (
       <>
         <DialogHeader>
-          <DialogTitle>Add an email account</DialogTitle>
+          <DialogTitle>{t("accounts.imap.identityTitle")}</DialogTitle>
           <DialogDescription>
-            Your address and password stay on this device; known providers are
-            filled in automatically.
+            {t("accounts.imap.identityDescription")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleIdentitySubmit} className="grid gap-3">
           <div className="grid gap-1.5">
-            <Label htmlFor="imap-email">Email address</Label>
+            <Label htmlFor="imap-email">
+              {t("accounts.imap.emailAddress")}
+            </Label>
             <Input
               id="imap-email"
               autoFocus
@@ -315,25 +320,24 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
             {detectedBrand && (
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ProviderIcon provider={detectedBrand} className="size-3.5" />
-                {providerBrandName(detectedBrand)} detected — server settings
-                will be prefilled.
+                {t("accounts.imap.brandDetected", {
+                  brand: providerBrandName(detectedBrand),
+                })}
               </p>
             )}
             {isMicrosoftGraphEmail(email.trim()) && (
               <p className="text-xs text-muted-foreground">
-                Outlook/Hotmail/Live addresses connect better via “Microsoft
-                365 / Outlook.com” on the previous screen (modern OAuth sign-in
-                instead of a password).
+                {t("accounts.imap.microsoftHint")}
               </p>
             )}
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="imap-password">Password</Label>
+            <Label htmlFor="imap-password">{t("accounts.imap.password")}</Label>
             <Input
               id="imap-password"
               type="password"
               autoComplete="off"
-              placeholder="Password or app password"
+              placeholder={t("accounts.imap.passwordPlaceholder")}
               value={password}
               onChange={(event) => {
                 setPassword(event.target.value)
@@ -355,9 +359,9 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
               className="gap-1"
             >
               <ArrowLeft className="size-3.5" aria-hidden />
-              Back
+              {t("accounts.imap.back")}
             </Button>
-            <Button type="submit">Continue</Button>
+            <Button type="submit">{t("accounts.imap.continue")}</Button>
           </div>
         </form>
       </>
@@ -372,19 +376,21 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Server settings</DialogTitle>
+        <DialogTitle>{t("accounts.imap.serversTitle")}</DialogTitle>
         <DialogDescription>
           {discovered
             ? detectedBrand
-              ? `Auto-filled from ${providerBrandName(detectedBrand)}'s known settings — edit if they differ.`
-              : "Auto-filled from this provider's known settings — edit if they differ."
-            : "This provider is not in the known list — enter the server details from your provider."}
+              ? t("accounts.imap.autoFilledBrand", {
+                  brand: providerBrandName(detectedBrand),
+                })
+              : t("accounts.imap.autoFilled")
+            : t("accounts.imap.unknownProvider")}
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleConnect} className="grid gap-4">
         <ServerSection
           side="imap"
-          title="Incoming mail (IMAP)"
+          title={t("accounts.imap.incoming")}
           servers={servers}
           disabled={saving}
           test={tests.imap}
@@ -395,7 +401,7 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
         />
         <ServerSection
           side="smtp"
-          title="Outgoing mail (SMTP)"
+          title={t("accounts.imap.outgoing")}
           servers={servers}
           disabled={saving}
           test={tests.smtp}
@@ -425,13 +431,15 @@ export function AddImapFlow({ onBack, onSuccess }: AddImapFlowProps) {
             className="gap-1"
           >
             <ArrowLeft className="size-3.5" aria-hidden />
-            Back
+            {t("accounts.imap.back")}
           </Button>
           <Button type="submit" disabled={!bothPassed || anyTesting || saving}>
             {saving && (
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
             )}
-            {bothPassed ? "Save account" : "Test and save"}
+            {bothPassed
+              ? t("accounts.imap.saveAccount")
+              : t("accounts.imap.testAndSave")}
           </Button>
         </div>
       </form>
@@ -466,6 +474,8 @@ function ServerSection({
   onSecurityChange,
   onTest,
 }: ServerSectionProps) {
+  const { t } = useTranslation()
+  const items = securityItems(t)
   const id = (suffix: string) => `${side}-${suffix}`
   const host = side === "imap" ? servers.imapHost : servers.smtpHost
   const port = side === "imap" ? servers.imapPort : servers.smtpPort
@@ -478,7 +488,7 @@ function ServerSection({
       <div className="grid grid-cols-[1fr_5rem] gap-2">
         <div className="grid gap-1">
           <Label htmlFor={id("host")} className="text-xs text-muted-foreground">
-            {sideLabel} server
+            {t("accounts.imap.server", { side: sideLabel })}
           </Label>
           <Input
             id={id("host")}
@@ -490,7 +500,7 @@ function ServerSection({
         </div>
         <div className="grid gap-1">
           <Label htmlFor={id("port")} className="text-xs text-muted-foreground">
-            {sideLabel} port
+            {t("accounts.imap.port", { side: sideLabel })}
           </Label>
           <Input
             id={id("port")}
@@ -508,10 +518,10 @@ function ServerSection({
             htmlFor={id("security")}
             className="text-xs text-muted-foreground"
           >
-            {sideLabel} security
+            {t("accounts.imap.security", { side: sideLabel })}
           </Label>
           <Select
-            items={SECURITY_ITEMS}
+            items={items}
             value={security}
             onValueChange={(value) => {
               if (
@@ -528,7 +538,7 @@ function ServerSection({
             <SelectContent>
               {SECURITY_OPTIONS.map((option) => (
                 <SelectItem key={option} value={option}>
-                  {SECURITY_ITEMS[option]}
+                  {items[option]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -545,7 +555,7 @@ function ServerSection({
           {test.status === "testing" && (
             <Loader2 className="size-3.5 animate-spin" aria-hidden />
           )}
-          Test
+          {t("accounts.imap.test")}
         </Button>
       </div>
       {test.status !== "idle" && test.status !== "testing" && (
@@ -560,7 +570,7 @@ function ServerSection({
         >
           {test.status === "failed"
             ? test.message
-            : (test.message ?? "Connected")}
+            : (test.message ?? t("accounts.imap.connected"))}
         </p>
       )}
     </fieldset>

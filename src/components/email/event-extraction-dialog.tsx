@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
-import {
-  format,
-  fromUnixTime,
-  isSameDay,
-  startOfDay,
-} from "date-fns"
+import { format, fromUnixTime, isSameDay, startOfDay } from "date-fns"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,7 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-import { EventDialog, type EventDialogRequest } from "@/components/calendar/event-dialog"
+import {
+  EventDialog,
+  type EventDialogRequest,
+} from "@/components/calendar/event-dialog"
+import { i18next } from "@/i18n"
 import { getExecutor } from "@/services/db/executor"
 import {
   extractEvents,
@@ -64,16 +64,19 @@ function suggestionTimeLine(suggestion: EventSuggestion): string {
   if (suggestion.allDay) {
     // The service exports no end for an all-day suggestion — single-day
     // by construction.
-    return `All day · ${format(start, "MMM d, yyyy")}`
+    return i18next.t("reader.eventExtraction.allDay", {
+      date: format(start, i18next.t("reader.dates.date")),
+    })
   }
+  const dateTime = i18next.t("reader.dates.dateTime")
   if (suggestion.endAt === undefined) {
-    return format(start, "MMM d, yyyy, HH:mm")
+    return format(start, dateTime)
   }
   const end = fromUnixTime(suggestion.endAt)
   if (isSameDay(start, end)) {
-    return `${format(start, "MMM d, yyyy, HH:mm")}–${format(end, "HH:mm")}`
+    return `${format(start, dateTime)}–${format(end, i18next.t("reader.dates.time"))}`
   }
-  return `${format(start, "MMM d, yyyy, HH:mm")} – ${format(end, "MMM d, yyyy, HH:mm")}`
+  return `${format(start, dateTime)} – ${format(end, dateTime)}`
 }
 
 /**
@@ -113,6 +116,7 @@ export function EventExtractionDialog({
   open,
   onOpenChange,
 }: EventExtractionDialogProps) {
+  const { t } = useTranslation()
   const [phase, setPhase] = useState<"extracting" | "ready" | "error">(
     "extracting"
   )
@@ -140,13 +144,15 @@ export function EventExtractionDialog({
         })
         .catch((error: unknown) => {
           setErrorMessage(
-            error instanceof Error ? error.message : "Event extraction failed."
+            error instanceof Error
+              ? error.message
+              : i18next.t("reader.eventExtraction.failed")
           )
           setPhase("error")
         })
     } catch {
       // No executor (plain vite / early startup) — same inline-error path.
-      setErrorMessage("Event extraction is unavailable right now.")
+      setErrorMessage(i18next.t("reader.eventExtraction.unavailable"))
       setPhase("error")
     }
   }, [threadId])
@@ -177,11 +183,9 @@ export function EventExtractionDialog({
         className="sm:max-w-md"
       >
         <DialogHeader>
-          <DialogTitle>Suggested events</DialogTitle>
+          <DialogTitle>{t("reader.eventExtraction.title")}</DialogTitle>
           <DialogDescription>
-            AI-generated suggestions from this conversation — review each one
-            in the calendar event form. Nothing is saved until you confirm it
-            there.
+            {t("reader.eventExtraction.description")}
           </DialogDescription>
         </DialogHeader>
         {phase === "extracting" && (
@@ -189,7 +193,7 @@ export function EventExtractionDialog({
             data-testid="event-extraction-busy"
             className="py-6 text-center text-sm text-muted-foreground"
           >
-            Reviewing the conversation for events…
+            {t("reader.eventExtraction.busy")}
           </div>
         )}
         {phase === "error" && (
@@ -198,7 +202,7 @@ export function EventExtractionDialog({
             className="flex flex-col items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm"
           >
             <span className="text-destructive">
-              {errorMessage ?? "Event extraction failed."}
+              {errorMessage ?? t("reader.eventExtraction.failed")}
             </span>
             <Button
               variant="outline"
@@ -206,7 +210,7 @@ export function EventExtractionDialog({
               data-testid="event-extraction-retry"
               onClick={runExtraction}
             >
-              Retry
+              {t("reader.eventExtraction.retry")}
             </Button>
           </div>
         )}
@@ -224,7 +228,7 @@ export function EventExtractionDialog({
                   data-testid="event-extraction-retry"
                   onClick={runExtraction}
                 >
-                  Retry
+                  {t("reader.eventExtraction.retry")}
                 </Button>
               </div>
             )}
@@ -233,7 +237,7 @@ export function EventExtractionDialog({
                 data-testid="event-extraction-empty"
                 className="py-6 text-center text-sm text-muted-foreground"
               >
-                No events were found in this conversation.
+                {t("reader.eventExtraction.empty")}
               </div>
             ) : (
               <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
@@ -251,9 +255,9 @@ export function EventExtractionDialog({
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                aria-label="Close event suggestions"
+                aria-label={t("reader.eventExtraction.closeLabel")}
               >
-                Close
+                {t("reader.eventExtraction.close")}
               </Button>
             </DialogFooter>
           </>
@@ -286,13 +290,14 @@ function SuggestionRow({
   index: number
   onAccept: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       data-testid={`event-suggestion-${index}`}
       className="flex items-start gap-2.5 rounded-lg border border-border p-2.5"
     >
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium leading-snug">{suggestion.title}</p>
+        <p className="text-sm leading-snug font-medium">{suggestion.title}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">
           <span data-testid={`event-suggestion-time-${index}`}>
             {suggestionTimeLine(suggestion)}
@@ -311,8 +316,13 @@ function SuggestionRow({
         )}
         <p className="mt-1 text-xs text-muted-foreground">
           <span data-testid={`event-suggestion-source-${index}`}>
-            From {suggestion.messageFrom} ·{" "}
-            {format(fromUnixTime(suggestion.messageDate), "MMM d, yyyy")}
+            {t("reader.eventExtraction.source", {
+              from: suggestion.messageFrom,
+              date: format(
+                fromUnixTime(suggestion.messageDate),
+                t("reader.dates.date")
+              ),
+            })}
           </span>
         </p>
       </div>
@@ -321,10 +331,12 @@ function SuggestionRow({
         size="sm"
         className="shrink-0"
         data-testid={`event-suggestion-review-${index}`}
-        aria-label={`Review "${suggestion.title}" in calendar`}
+        aria-label={t("reader.eventExtraction.reviewLabel", {
+          title: suggestion.title,
+        })}
         onClick={onAccept}
       >
-        Review in calendar
+        {t("reader.eventExtraction.review")}
       </Button>
     </div>
   )

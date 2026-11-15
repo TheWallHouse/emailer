@@ -1,11 +1,9 @@
 import { useRef, useState } from "react"
-import {
-  ArchiveRestore,
-  HardDriveDownload,
-  Loader2,
-} from "lucide-react"
+import { ArchiveRestore, HardDriveDownload, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -25,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import {
+  BACKUP_MANIFEST_VERSION,
   BackupError,
   exportBackup,
   inspectBackupArchive,
@@ -63,13 +62,24 @@ interface RestoreFailure {
 
 /** Map the typed errors onto settings-UI copy (kinds are stable). */
 function backupFailure(cause: unknown): RestoreFailure {
+  // The services' error messages are English (they double as log text);
+  // the UI copy is localized here from the typed fields.
   if (cause instanceof UnsupportedManifestVersionError) {
-    return { title: cause.message }
+    return {
+      title:
+        cause.manifestVersion > BACKUP_MANIFEST_VERSION
+          ? i18next.t("settings.backup.errors.newerVersion", {
+              version: cause.manifestVersion,
+            })
+          : i18next.t("settings.backup.errors.unreadableVersion", {
+              version: cause.manifestVersion,
+            }),
+    }
   }
   if (cause instanceof RestoreCancelledError) {
     return {
-      title: "Restore cancelled",
-      detail: cause.message,
+      title: i18next.t("settings.backup.errors.cancelled"),
+      detail: i18next.t("settings.backup.errors.cancelledDetail"),
     }
   }
   if (cause instanceof BackupError) {
@@ -79,50 +89,54 @@ function backupFailure(cause: unknown): RestoreFailure {
       case "missing_entry":
       case "bad_manifest":
         return {
-          title: "This file is not a readable Emailer backup.",
-          detail:
-            "It may be damaged, incomplete or tampered with. Your existing data was not touched.",
+          title: i18next.t("settings.backup.errors.unreadable"),
+          detail: i18next.t("settings.backup.errors.unreadableDetail"),
         }
       case "io":
         return {
-          title: "Emailer could not access that file.",
+          title: i18next.t("settings.backup.errors.io"),
           detail: cause.message,
         }
     }
   }
   return {
-    title: "The backup failed.",
+    title: i18next.t("settings.backup.errors.generic"),
     detail: cause instanceof Error ? cause.message : String(cause),
   }
 }
 
 function mergeSummaryLines(summary: MergeSummary): string[] {
+  const k = "settings.backup.mergeSummary"
   return [
-    summary.accountsAdded === 1
-      ? "1 account added"
-      : `${summary.accountsAdded} accounts added`,
+    i18next.t(`${k}.accountsAdded`, { count: summary.accountsAdded }),
     ...(summary.accountsKept > 0
-      ? [
-          `${summary.accountsKept} existing account${
-            summary.accountsKept === 1 ? "" : "s"
-          } left as-is`,
-        ]
+      ? [i18next.t(`${k}.accountsKept`, { count: summary.accountsKept })]
       : []),
     ...(summary.profilesAdded > 0
-      ? [`${summary.profilesAdded} profile(s)`]
+      ? [i18next.t(`${k}.profiles`, { count: summary.profilesAdded })]
       : []),
-    ...(summary.rulesAdded > 0 ? [`${summary.rulesAdded} rule(s)`] : []),
+    ...(summary.rulesAdded > 0
+      ? [i18next.t(`${k}.rules`, { count: summary.rulesAdded })]
+      : []),
     ...(summary.snippetsAdded > 0
-      ? [`${summary.snippetsAdded} snippet(s)`]
+      ? [i18next.t(`${k}.snippets`, { count: summary.snippetsAdded })]
       : []),
     ...(summary.savedSearchesAdded > 0
-      ? [`${summary.savedSearchesAdded} saved search(es)`]
+      ? [
+          i18next.t(`${k}.savedSearches`, {
+            count: summary.savedSearchesAdded,
+          }),
+        ]
       : []),
     ...(summary.senderCategoriesAdded > 0
-      ? [`${summary.senderCategoriesAdded} category override(s)`]
+      ? [
+          i18next.t(`${k}.categoryOverrides`, {
+            count: summary.senderCategoriesAdded,
+          }),
+        ]
       : []),
     ...(summary.settingsAdded > 0
-      ? [`${summary.settingsAdded} setting(s)`]
+      ? [i18next.t(`${k}.settings`, { count: summary.settingsAdded })]
       : []),
   ]
 }
@@ -144,15 +158,16 @@ function RestoreDialog({
   onStart: (mode: RestoreMode) => void
   onCancelRestore: () => void
 }) {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<RestoreMode>("replace")
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent data-testid="backup-restore-dialog">
         <DialogHeader>
-          <DialogTitle>Restore from backup</DialogTitle>
+          <DialogTitle>{t("settings.backup.restoreDialog.title")}</DialogTitle>
           <DialogDescription>
-            Verified archive — every checksum matched.
+            {t("settings.backup.restoreDialog.verified")}
           </DialogDescription>
         </DialogHeader>
 
@@ -160,11 +175,15 @@ function RestoreDialog({
           data-testid="backup-manifest-facts"
           className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm"
         >
-          <dt className="text-muted-foreground">Format</dt>
+          <dt className="text-muted-foreground">
+            {t("settings.backup.restoreDialog.format")}
+          </dt>
           <dd className="text-foreground">v{manifest.version}</dd>
           {manifest.createdAt && (
             <>
-              <dt className="text-muted-foreground">Exported</dt>
+              <dt className="text-muted-foreground">
+                {t("settings.backup.restoreDialog.exported")}
+              </dt>
               <dd className="text-foreground">
                 {new Date(manifest.createdAt).toLocaleString()}
               </dd>
@@ -172,18 +191,24 @@ function RestoreDialog({
           )}
           {manifest.appVersion && (
             <>
-              <dt className="text-muted-foreground">Made with</dt>
-              <dd className="text-foreground">
-                Emailer {manifest.appVersion}
-              </dd>
+              <dt className="text-muted-foreground">
+                {t("settings.backup.restoreDialog.madeWith")}
+              </dt>
+              <dd className="text-foreground">Emailer {manifest.appVersion}</dd>
             </>
           )}
         </dl>
 
         <div className="grid gap-1.5">
-          <Label htmlFor="backup-restore-mode">What should happen?</Label>
+          <Label htmlFor="backup-restore-mode">
+            {t("settings.backup.restoreDialog.modeLabel")}
+          </Label>
           <Select
             value={mode}
+            items={{
+              replace: t("settings.backup.restoreDialog.replace"),
+              merge: t("settings.backup.restoreDialog.merge"),
+            }}
             onValueChange={(value) => setMode(value as RestoreMode)}
             disabled={restoring}
           >
@@ -192,10 +217,10 @@ function RestoreDialog({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="replace">
-                Replace everything on this device
+                {t("settings.backup.restoreDialog.replace")}
               </SelectItem>
               <SelectItem value="merge">
-                Merge into my current data
+                {t("settings.backup.restoreDialog.merge")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -206,22 +231,14 @@ function RestoreDialog({
             data-testid="backup-mode-warning"
             className="text-sm text-destructive"
           >
-            Replacing deletes everything Emailer keeps on this device first —
-            every account, message body, setting, profile and rule — and
-            restores the backup in its place. Accounts from the backup carry
-            no passwords or tokens: you will sign in to each one again before
-            it syncs or sends. Your mail servers are not touched.
+            {t("settings.backup.restoreDialog.replaceWarning")}
           </p>
         ) : (
           <p
             data-testid="backup-mode-warning"
             className="text-sm text-muted-foreground"
           >
-            Merging adds what your current setup is missing — accounts are
-            matched by email address, and existing entries stay as they are.
-            Message bodies are NOT restored by a merge: they sync fresh from
-            the server on each account's first sync. Restored accounts sign
-            in again before syncing.
+            {t("settings.backup.restoreDialog.mergeWarning")}
           </p>
         )}
 
@@ -233,7 +250,7 @@ function RestoreDialog({
                 aria-live="polite"
               >
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
-                Restoring…
+                {t("settings.backup.restoreDialog.restoring")}
               </span>
               {mode === "merge" && (
                 <Button
@@ -241,7 +258,7 @@ function RestoreDialog({
                   data-testid="backup-cancel-restore"
                   onClick={onCancelRestore}
                 >
-                  Cancel restore
+                  {t("settings.backup.restoreDialog.cancelRestore")}
                 </Button>
               )}
             </>
@@ -252,7 +269,7 @@ function RestoreDialog({
                 onClick={() => onOpenChange(false)}
                 data-testid="backup-cancel"
               >
-                Cancel
+                {t("settings.backup.restoreDialog.cancel")}
               </Button>
               <Button
                 variant={mode === "replace" ? "destructive" : "default"}
@@ -260,7 +277,9 @@ function RestoreDialog({
                 onClick={() => onStart(mode)}
               >
                 <ArchiveRestore />
-                Restore {path.split("/").pop()?.split("\\").pop()}
+                {t("settings.backup.restoreDialog.start", {
+                  file: path.split("/").pop()?.split("\\").pop(),
+                })}
               </Button>
             </>
           )}
@@ -284,6 +303,7 @@ type RestoreStep =
   | { kind: "failed"; failure: RestoreFailure }
 
 export function BackupSection() {
+  const { t } = useTranslation()
   const [exporting, setExporting] = useState(false)
   const [exported, setExported] = useState<{
     path: string
@@ -304,7 +324,7 @@ export function BackupSection() {
       }
     } catch (cause) {
       console.warn("[settings] backup export failed", cause)
-      toast.error("Could not write the backup", {
+      toast.error(i18next.t("settings.backup.exportFailed"), {
         description: backupFailure(cause).title,
       })
     } finally {
@@ -345,26 +365,26 @@ export function BackupSection() {
   }
 
   return (
-    <section aria-label="Backup & restore" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.backup.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
         <h2 className="text-base font-semibold text-foreground">
-          Backup &amp; restore
+          {t("settings.backup.title")}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Move your Emailer setup between machines with a single,
-          checksummed archive file.
+          {t("settings.backup.description")}
         </p>
       </div>
 
       <div className="flex items-center justify-between gap-6">
         <div className="grid gap-0.5">
-          <h3 className="text-sm font-medium text-foreground">Export</h3>
+          <h3 className="text-sm font-medium text-foreground">
+            {t("settings.backup.export.title")}
+          </h3>
           <p className="text-xs text-muted-foreground">
-            Writes your accounts' settings, profiles, rules, snippets, quick
-            steps, signatures, saved searches, categories and a verified
-            database snapshot — with synced mail — into one file. No
-            passwords or tokens are ever included; each restored account
-            signs in again.
+            {t("settings.backup.export.hint")}
           </p>
           {exported && (
             <p
@@ -372,8 +392,10 @@ export function BackupSection() {
               className="text-xs text-foreground"
               aria-live="polite"
             >
-              Backed up to {exported.path} ({formatStorageSize(exported.bytes)}
-              ).
+              {t("settings.backup.export.done", {
+                path: exported.path,
+                size: formatStorageSize(exported.bytes),
+              })}
             </p>
           )}
         </div>
@@ -390,7 +412,7 @@ export function BackupSection() {
           ) : (
             <HardDriveDownload />
           )}
-          Export backup…
+          {t("settings.backup.export.button")}
         </Button>
       </div>
 
@@ -398,11 +420,11 @@ export function BackupSection() {
 
       <div className="flex items-center justify-between gap-6">
         <div className="grid gap-0.5">
-          <h3 className="text-sm font-medium text-foreground">Restore</h3>
+          <h3 className="text-sm font-medium text-foreground">
+            {t("settings.backup.restore.title")}
+          </h3>
           <p className="text-xs text-muted-foreground">
-            Restore a backup file. Every checksum is verified before
-            anything changes, and a failed or cancelled restore leaves your
-            current data intact.
+            {t("settings.backup.restore.hint")}
           </p>
         </div>
         <Button
@@ -419,7 +441,7 @@ export function BackupSection() {
           ) : (
             <ArchiveRestore />
           )}
-          Restore backup…
+          {t("settings.backup.restore.button")}
         </Button>
       </div>
 
@@ -442,20 +464,19 @@ export function BackupSection() {
         >
           {restore.result.mode === "replace" ? (
             <p className="text-sm text-foreground">
-              {restore.result.accountsRequiringReauth === 1
-                ? "1 account was restored."
-                : `${restore.result.accountsRequiringReauth} accounts were restored.`}{" "}
-              Sign in to each one to start syncing again — your restored mail
-              is readable right now.
+              {t("settings.backup.restore.replaceDone", {
+                count: restore.result.accountsRequiringReauth,
+              })}
             </p>
           ) : (
             <>
               <p className="text-sm text-foreground">
-                Restored: {mergeSummaryLines(restore.result.summary).join(", ")}.
+                {t("settings.backup.restore.mergeDone", {
+                  items: mergeSummaryLines(restore.result.summary).join(", "),
+                })}
               </p>
               <p className="text-xs text-muted-foreground">
-                Message bodies are not part of a merge — each account
-                downloads its mail again on first sync.
+                {t("settings.backup.restore.mergeNote")}
               </p>
             </>
           )}

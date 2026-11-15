@@ -1,6 +1,8 @@
 import { getHTMLFromFragment } from "@tiptap/core"
 import type { Editor } from "@tiptap/react"
 
+import { i18next } from "@/i18n"
+
 import type { ComposeTransformMode } from "@/services/ai/compose-transform"
 
 /**
@@ -35,7 +37,9 @@ export function captureTransformTarget(
   editor: Editor
 ): ComposeTransformTarget | null {
   const { from, to, empty } = editor.state.selection
-  const range = empty ? { from: 0, to: editor.state.doc.content.size } : { from, to }
+  const range = empty
+    ? { from: 0, to: editor.state.doc.content.size }
+    : { from, to }
   const text = editor.state.doc.textBetween(range.from, range.to, "\n\n")
   if (text.trim() === "") return null
   const fragment = editor.state.doc.cut(range.from, range.to).content
@@ -110,9 +114,22 @@ export function replaceDraftRange(
   return { range: { from, to: to + (sizeAfter - sizeBefore) } }
 }
 
-/** Visible labels for the three modes (toolbar menu + bar copy). */
-export const COMPOSE_TRANSFORM_LABELS: Record<ComposeTransformMode, string> = {
-  improve: "Improve writing",
-  shorten: "Shorten",
-  formalize: "Formalize",
+/** The three modes, in toolbar-menu order. */
+export const COMPOSE_TRANSFORM_MODES: readonly ComposeTransformMode[] = [
+  "improve",
+  "shorten",
+  "formalize",
+]
+
+/** Visible label for a mode (toolbar menu + bar copy), in the active
+ * interface language — resolved per call, never frozen at import time. */
+export function composeTransformLabel(mode: ComposeTransformMode): string {
+  switch (mode) {
+    case "improve":
+      return i18next.t("composer.transform.improve")
+    case "shorten":
+      return i18next.t("composer.transform.shorten")
+    case "formalize":
+      return i18next.t("composer.transform.formalize")
+  }
 }

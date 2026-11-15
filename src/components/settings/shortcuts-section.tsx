@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -70,6 +71,7 @@ function ShortcutRow({
   onReset,
   onCancel,
 }: ShortcutRowProps) {
+  const { t } = useTranslation()
   const rebindable = REBINDABLE_GROUPS.has(binding.group)
   return (
     <div
@@ -82,15 +84,17 @@ function ShortcutRow({
       {capturing ? (
         <div className="flex flex-col items-end gap-1">
           <kbd data-testid="shortcut-capture-hint" className={KBD_CLASS}>
-            Press a key…
+            {t("settings.shortcuts.pressKey")}
           </kbd>
           {conflictWith.length > 0 && (
             <p
               data-testid={`shortcut-conflict-${binding.id}`}
               className="text-right text-xs text-destructive"
             >
-              {binding.description} would collide with{" "}
-              {conflictWith.join(" and ")} — press another key or cancel.
+              {t("settings.shortcuts.conflict", {
+                action: binding.description,
+                others: conflictWith.join(t("settings.shortcuts.and")),
+              })}
             </p>
           )}
           <Button
@@ -99,7 +103,7 @@ function ShortcutRow({
             data-testid="cancel-rebind"
             onClick={onCancel}
           >
-            Cancel
+            {t("settings.shortcuts.cancel")}
           </Button>
         </div>
       ) : (
@@ -115,10 +119,12 @@ function ShortcutRow({
               variant="ghost"
               size="xs"
               data-testid={`rebind-${binding.id}`}
-              aria-label={`Change shortcut for: ${binding.description}`}
+              aria-label={t("settings.shortcuts.changeAria", {
+                action: binding.description,
+              })}
               onClick={onChange}
             >
-              Change
+              {t("settings.shortcuts.change")}
             </Button>
           )}
           {rebindable && overridden && (
@@ -126,10 +132,12 @@ function ShortcutRow({
               variant="ghost"
               size="xs"
               data-testid={`reset-shortcut-${binding.id}`}
-              aria-label={`Reset to default: ${binding.description}`}
+              aria-label={t("settings.shortcuts.resetAria", {
+                action: binding.description,
+              })}
               onClick={onReset}
             >
-              Reset
+              {t("settings.shortcuts.reset")}
             </Button>
           )}
         </div>
@@ -139,6 +147,7 @@ function ShortcutRow({
 }
 
 export function ShortcutsSection() {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState("")
   const [capturingId, setCapturingId] = useState<ShortcutId | null>(null)
   const [conflictWith, setConflictWith] = useState<string[]>([])
@@ -239,12 +248,17 @@ export function ShortcutsSection() {
   )
 
   return (
-    <section aria-label="Shortcuts" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.shortcuts.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Shortcuts</h2>
+          <h2 className="text-base font-semibold text-foreground">
+            {t("settings.shortcuts.title")}
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Every keyboard binding. Press ? anytime for the quick reference.
+            {t("settings.shortcuts.description")}
           </p>
         </div>
         {hasOverrides && (
@@ -254,20 +268,22 @@ export function ShortcutsSection() {
             data-testid="reset-all-shortcuts"
             onClick={resetAllBindings}
           >
-            Reset all to defaults
+            {t("settings.shortcuts.resetAll")}
           </Button>
         )}
       </div>
       <Input
         type="text"
-        placeholder="Filter shortcuts…"
-        aria-label="Filter shortcuts"
+        placeholder={t("settings.shortcuts.filterPlaceholder")}
+        aria-label={t("settings.shortcuts.filter")}
         value={filter}
         onChange={(event) => setFilter(event.target.value)}
         className="max-w-sm"
       />
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No matching shortcuts</p>
+        <p className="text-sm text-muted-foreground">
+          {t("settings.shortcuts.noMatches")}
+        </p>
       ) : (
         <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
           {SHORTCUT_GROUPS.map((group) => {

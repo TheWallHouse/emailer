@@ -2,6 +2,7 @@ import { open } from "@tauri-apps/plugin-dialog"
 import { readFile } from "@tauri-apps/plugin-fs"
 import type { Editor } from "@tiptap/react"
 
+import { i18next } from "@/i18n"
 import { bytesToBase64 } from "@/services/email/mime-builder"
 
 import { baseName, mimeTypeFor } from "./attachment-input"
@@ -29,7 +30,7 @@ export const MAX_INLINE_IMAGE_BYTES = 2 * 1024 * 1024
 /** One image is above the inline cap (the composer toasts this text). */
 export function inlineImageTooLargeMessage(fileName: string): string {
   const mb = MAX_INLINE_IMAGE_BYTES / (1024 * 1024)
-  return `"${fileName}" is too large to embed inline (over ${mb} MB) — attached as a file instead`
+  return i18next.t("composer.inlineImage.tooLarge", { name: fileName, mb })
 }
 
 const IMAGE_MIME_PREFIX = "image/"
@@ -135,7 +136,7 @@ export async function pickInlineImages(
     multiple: true,
     filters: [
       {
-        name: "Images",
+        name: i18next.t("composer.inlineImage.pickerFilter"),
         extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "avif"],
       },
     ],

@@ -1,0 +1,40 @@
+{
+  "rowMenu": {
+    "options": "Options for {{name}}",
+    "rename": "Rename…",
+    "changeColor": "Change color…",
+    "delete": "Delete…"
+  },
+  "colorPicker": {
+    "label": "Label color",
+    "default": "Default",
+    "color": "Color {{number}}"
+  },
+  "dialog": {
+    "titles": {
+      "create": "New label",
+      "rename": "Rename label",
+      "color": "Change color"
+    },
+    "saveFailed": "Could not save the label.",
+    "createDescription": "Labels nest through \"/\" in the name — pick a parent or type the full path yourself.",
+    "renameDescription": "Renaming <name>{{name}}</name> updates the label locally and on the server.",
+    "colorDescription": "Pick a display color for <name>{{name}}</name>. The color is stored locally; server colors are imported from Gmail when set.",
+    "name": "Name",
+    "fullName": "Full name: <name>{{name}}</name>",
+    "parent": "Parent label",
+    "noParent": "No parent",
+    "color": "Color",
+    "cancel": "Cancel",
+    "create": "Create label",
+    "save": "Save"
+  },
+  "deleteDialog": {
+    "title": "Delete label",
+    "deleteFailed": "Could not delete the label.",
+    "description": "Delete <name>{{name}}</name>? The label is removed from every local thread and the deletion is queued for the server. The messages themselves are kept.",
+    "descriptionFolder": "Delete <name>{{name}}</name>? The label is removed from every local thread and the deletion is queued for the server. The messages themselves are kept unless the server deletes the folder's contents.",
+    "cancel": "Cancel",
+    "confirm": "Delete label"
+  }
+}

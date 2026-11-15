@@ -1,0 +1,301 @@
+{
+  "ai": {
+    "ariaLabel": "IA",
+    "title": "Asistencia de IA",
+    "description": "Ayuda opcional de IA con tu correo, a través de un proveedor que tú configuras (incluido un endpoint de Ollama totalmente local). El correo nunca depende de la IA.",
+    "loading": "Cargando…",
+    "enableHint": "Desactivada de forma predeterminada. Con la IA desactivada, no aparece ninguna función de IA en la aplicación y nunca se envía nada a ningún proveedor.",
+    "offHint": "Activa la asistencia de IA para configurar un proveedor, probar la conexión y elegir qué funciones pueden usarlo.",
+    "keysFinePrint": "Las claves de API de los proveedores se guardan cifradas en este equipo y nunca se incluyen en los datos exportados: las exportaciones solo contienen el contenido del buzón. Ollama funciona íntegramente en local.",
+    "kinds": {
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "gemini": "Google Gemini",
+      "ollama": "Ollama (local)",
+      "custom": "Personalizado (compatible con OpenAI)"
+    },
+    "customDefaultLabel": "Endpoint personalizado",
+    "modelPlaceholders": {
+      "anthropic": "p. ej., claude-sonnet-4-5",
+      "openai": "p. ej., gpt-4.1",
+      "gemini": "p. ej., gemini-2.5-flash",
+      "ollama": "p. ej., llama3.1",
+      "custom": "cualquier ID de modelo que ofrezca el endpoint"
+    },
+    "surfaces": {
+      "title": "Funciones de IA",
+      "description": "Cada función se puede desactivar por separado. Las funciones solo envían el contenido sobre el que las usas expresamente, y solo al proveedor activo.",
+      "summaries": {
+        "label": "Resúmenes de conversaciones",
+        "description": "Resume una conversación abierta cuando lo pidas."
+      },
+      "smartReplies": {
+        "label": "Respuestas inteligentes",
+        "description": "Redacta sugerencias de respuesta con tu estilo de escritura."
+      },
+      "composeTransform": {
+        "label": "Transformaciones al redactar",
+        "description": "Mejora, acorta o formaliza el texto seleccionado del borrador."
+      },
+      "askInbox": {
+        "label": "Pregunta a tu bandeja",
+        "description": "Convierte preguntas en lenguaje natural en búsquedas en el buzón."
+      },
+      "taskExtraction": {
+        "label": "Extracción de tareas",
+        "description": "Sugiere tareas a partir de los mensajes abiertos."
+      },
+      "categorizationAssist": {
+        "label": "Ayuda para categorizar (opcional)",
+        "description": "Deja que el proveedor clasifique los mensajes que el motor de reglas no puede. Desactivada de forma predeterminada."
+      },
+      "quickReplies": {
+        "label": "Respuestas rápidas",
+        "description": "Ofrece respuestas breves de un toque bajo el mensaje abierto. No se envía nada automáticamente."
+      },
+      "ruleAssist": {
+        "label": "Reglas en lenguaje natural",
+        "description": "Convierte la descripción escrita de una regla en una vista previa de la regla. Solo se envía tu descripción."
+      },
+      "eventExtraction": {
+        "label": "Extracción de eventos",
+        "description": "Sugiere eventos de calendario a partir de las conversaciones abiertas. Al aceptar uno se abre el formulario del evento ya rellenado; no se guarda nada hasta que tú lo hagas."
+      },
+      "translation": {
+        "label": "Traducir",
+        "description": "Traduce un mensaje a tu idioma de respuesta cuando lo pidas. Solo se envía el texto de ese mensaje."
+      },
+      "folderDigest": {
+        "label": "Ponme al día",
+        "description": "Resume las conversaciones no leídas de la carpeta en la que lo uses. Solo se envían las conversaciones de esa carpeta."
+      },
+      "assistant": {
+        "label": "Asistente de IA",
+        "description": "Chatea con tu buzón: haz preguntas y el asistente consulta las conversaciones en modo de solo lectura para responder. No modifica nada."
+      },
+      "voiceProfile": {
+        "label": "Aprendizaje de tu forma de escribir",
+        "description": "La acción de una sola llamada que aprende tu forma de escribir a partir del correo enviado para redactar a partir del dictado. Solo se ejecuta cuando haces clic en «Aprender mi estilo de escritura»."
+      }
+    },
+    "tiers": {
+      "instant": "Instantáneo",
+      "cheap": "Económico",
+      "intelligent": "Inteligente",
+      "title": "Niveles de modelo",
+      "description": "Cada función usa uno de los tres niveles. Indica un ID de modelo por nivel para el proveedor activo; un nivel vacío usa el modelo predeterminado del proveedor.",
+      "current": "Nivel: {{tier}}",
+      "tierFor": "Nivel para {{surface}}",
+      "modelId": "ID del modelo {{tier}}",
+      "placeholders": {
+        "instant": "p. ej., el modelo más rápido del proveedor",
+        "cheap": "p. ej., el modelo económico del proveedor",
+        "intelligent": "p. ej., el modelo más potente del proveedor"
+      },
+      "outputLanguage": "Idioma de respuesta",
+      "outputLanguagePlaceholder": "p. ej., alemán (déjalo vacío para deducirlo del texto)",
+      "outputLanguageHint": "Si lo indicas, las funciones generativas responden en este idioma; si lo dejas vacío, el idioma sigue al de la conversación."
+    },
+    "providers": {
+      "title": "Proveedores",
+      "description": "Añade un proveedor, prueba la conexión y marca uno como activo. Los ID de modelo son texto libre: escribe lo que ofrezca tu proveedor.",
+      "add": "Añadir proveedor",
+      "empty": "Aún no hay proveedores configurados. Hasta que haya uno activo, no aparece ninguna función de IA en la aplicación.",
+      "use": "Usar {{label}} para la IA",
+      "noKeyNeeded": "no necesita clave",
+      "keySaved": "clave guardada",
+      "noApiKey": "sin clave de API",
+      "noModel": "sin modelo",
+      "testConnection": "Probar conexión",
+      "connectionOk": "Conexión correcta.",
+      "edit": "Editar {{label}}",
+      "remove": "Quitar {{label}}"
+    },
+    "dialog": {
+      "editTitle": "Editar proveedor",
+      "addTitle": "Añadir un proveedor de IA",
+      "description": "Tu clave se guarda cifrada en este equipo y solo se envía, en cada solicitud, al proveedor que has configurado.",
+      "providerTypeValue": "Tipo de proveedor: {{kind}}",
+      "providerType": "Tipo de proveedor",
+      "name": "Nombre",
+      "namePlaceholder": "Anthropic del trabajo",
+      "modelId": "ID del modelo",
+      "baseUrl": "URL base",
+      "baseUrlOptional": "URL base (opcional)",
+      "ollamaHint": "Ollama funciona en este equipo: las solicitudes nunca salen de tu ordenador y no hace falta clave de API.",
+      "apiKey": "Clave de API",
+      "apiKeySaved": "Guardada: déjalo en blanco para conservar la clave guardada",
+      "apiKeyPlaceholder": "Pega tu clave (se guarda cifrada en este equipo)",
+      "notFound": "Este proveedor ya no existe.",
+      "saveFailed": "No se ha podido guardar el proveedor.",
+      "cancel": "Cancelar",
+      "saveChanges": "Guardar cambios",
+      "add": "Añadir proveedor"
+    },
+    "cache": {
+      "title": "Resultados de IA en caché",
+      "description": "Los resultados de la IA se guardan en caché en este equipo, según el contenido de entrada y el modelo, y se reutilizan cuando se repite la misma entrada. Al quitar una cuenta se eliminan automáticamente los resultados obtenidos de su correo.",
+      "loading": "Cargando…",
+      "total_one": "{{count}} resultado en caché",
+      "total_other": "{{count}} resultados en caché",
+      "confirm_one": "¿Borrar {{count}} resultado en caché?",
+      "confirm_other": "¿Borrar los {{count}} resultados en caché?",
+      "clearAll": "Borrar todo",
+      "cancel": "Cancelar"
+    },
+    "usage": {
+      "title": "Uso",
+      "description": "Solicitudes y total de tokens por función, registrados en este equipo. Los resultados en caché se reutilizan sin hacer ninguna solicitud y no se cuentan.",
+      "loading": "Cargando…",
+      "empty": "Aún no hay uso registrado.",
+      "line_one": "{{surface}}: {{count}} solicitud · {{prompt}} de entrada · {{completion}} de salida · {{total}} tokens en total",
+      "line_other": "{{surface}}: {{count}} solicitudes · {{prompt}} de entrada · {{completion}} de salida · {{total}} tokens en total",
+      "lineApprox_one": "{{surface}}: {{count}} solicitud · {{prompt}} de entrada · {{completion}} de salida · {{total}} tokens en total (aprox.)",
+      "lineApprox_other": "{{surface}}: {{count}} solicitudes · {{prompt}} de entrada · {{completion}} de salida · {{total}} tokens en total (aprox.)",
+      "confirm_one": "¿Borrar el uso registrado ({{count}} solicitud)?",
+      "confirm_other": "¿Borrar el uso registrado ({{count}} solicitudes)?",
+      "clear": "Borrar uso",
+      "cancel": "Cancelar"
+    },
+    "writingStyle": {
+      "ariaLabel": "Estilo de escritura",
+      "title": "Estilo de escritura",
+      "description": "Las respuestas inteligentes siguen tu estilo de escritura. Para crear el perfil se analizan tus mensajes enviados recientes con el proveedor activo; las sugerencias son siempre borradores editables y nunca se envía nada automáticamente.",
+      "rebuild": "Volver a crear",
+      "build": "Crear perfil",
+      "delete": "Eliminar el perfil de estilo de escritura",
+      "noAccount": "No hay ninguna cuenta activa: el perfil se crea para cada cuenta a partir de su correo enviado.",
+      "built_one": "Creado {{when}} · {{count}} muestra",
+      "built_other": "Creado {{when}} · {{count}} muestras",
+      "none": "Aún no hay perfil.",
+      "loading": "Cargando…",
+      "rebuilt_one": "Perfil creado de nuevo a partir de {{count}} mensaje enviado.",
+      "rebuilt_other": "Perfil creado de nuevo a partir de {{count}} mensajes enviados.",
+      "rebuildFailed": "No se ha podido volver a crear el perfil.",
+      "deleted": "Perfil de estilo de escritura eliminado.",
+      "failures": {
+        "notConfigured": "La asistencia de IA no está configurada.",
+        "noSentMail": "No se han encontrado mensajes enviados recientes que analizar.",
+        "parse": "No se ha podido leer el estilo de escritura en la respuesta del modelo. Vuelve a intentarlo.",
+        "provider": "Ha fallado la solicitud al proveedor.",
+        "providerWithMessage": "Ha fallado la solicitud al proveedor. {{message}}"
+      }
+    }
+  },
+  "semanticSearch": {
+    "title": "Búsqueda semántica",
+    "description": "Permite que el asistente encuentre también conversaciones por su SIGNIFICADO, no solo por palabras exactas. Funciona íntegramente en este equipo: se descarga una sola vez de Hugging Face un modelo de lenguaje de {{size}}, que nunca envía tu correo a ningún sitio.",
+    "loading": "Cargando…",
+    "modelReady": "Modelo descargado ({{size}}).",
+    "downloading": "Descargando el modelo… {{received}}",
+    "downloadingOf": "Descargando el modelo… {{received}} de {{total}}",
+    "downloadingPercent": "Descargando el modelo… {{received}} de {{total}} ({{percent}} %)",
+    "cancelDownload": "Cancelar descarga",
+    "downloadFailed": "No se ha podido descargar el modelo ({{error}}). Puedes volver a intentarlo.",
+    "unknownError": "error desconocido",
+    "downloadCancelled": "Descarga cancelada: la búsqueda semántica seguirá desactivada hasta que se descargue el modelo.",
+    "download": "Descargar modelo ({{size}})",
+    "indexing_one": "Indexando tu correo… {{indexed}} de {{count}} conversación",
+    "indexing_other": "Indexando tu correo… {{indexed}} de {{count}} conversaciones",
+    "indexed_one": "{{indexed}} de {{count}} conversación indexadas",
+    "indexed_other": "{{indexed}} de {{count}} conversaciones indexadas",
+    "indexedUpToDate_one": "{{indexed}} de {{count}} conversación indexadas (al día)",
+    "indexedUpToDate_other": "{{indexed}} de {{count}} conversaciones indexadas (al día)",
+    "noneIndexed": "Aún no se ha indexado ningún correo.",
+    "spill_one": "Este buzón supera el límite en memoria: la conversación más antigua ({{formatted}}) no forma parte de los resultados semánticos.",
+    "spill_other": "Este buzón supera el límite en memoria: las {{formatted}} conversaciones más antiguas no forman parte de los resultados semánticos."
+  },
+  "pgp": {
+    "title": "Cifrado",
+    "description": "Firma y cifrado con OpenPGP. Las claves se generan y se guardan solo en este equipo.",
+    "noAccount": "Añade una cuenta para gestionar sus claves de cifrado.",
+    "enable": "Activar OpenPGP",
+    "enableHint": "Por cuenta: {{email}}. Al activarlo aparecen abajo las herramientas de claves; firmar y cifrar se siguen eligiendo en cada mensaje al redactar.",
+    "manager": {
+      "description": "Las claves firman y descifran el correo de esta cuenta. Nunca salen de este equipo; comparte solo la clave pública.",
+      "import": "Importar clave",
+      "generate": "Generar par de claves",
+      "loading": "Cargando las claves de cifrado…",
+      "yourKeys": "Tus claves",
+      "noKeys": "Aún no hay claves. Genera un par de claves para empezar a firmar y cifrar, o importa una clave privada existente.",
+      "publicKeys": "Claves públicas de tus contactos",
+      "noPublicKeys": "Aún no se ha importado ninguna clave pública. Importa la clave pública de un contacto para cifrar el correo que le envíes.",
+      "footer": "Firmar y cifrar se eligen en cada mensaje al redactar; para buscar las claves de los destinatarios se usan las claves públicas que aparecen aquí.",
+      "materialMissing": "Falta el contenido de la clave pública.",
+      "copiedFor": "Clave pública de {{email}} copiada en el portapapeles",
+      "copiedForThisKey": "Clave pública de esta clave copiada en el portapapeles",
+      "clipboardFailed": "No se ha podido acceder al portapapeles.",
+      "copyFailed": "No se ha podido copiar la clave pública.",
+      "setDefaultFailed": "No se ha podido establecer la clave predeterminada."
+    },
+    "row": {
+      "created": "{{fingerprint}} · creada el {{date}}",
+      "defaultSigningKey": "Clave de firma predeterminada",
+      "default": "Predeterminada",
+      "makeDefault": "Hacer que {{email}} sea la clave predeterminada",
+      "setDefault": "Predeterminar",
+      "copyPublicKeyFor": "Copiar la clave pública de {{email}}",
+      "copyPublicKey": "Copiar clave pública",
+      "deleteKeyFor": "Eliminar la clave de {{email}}",
+      "deletePublicKeyFor": "Eliminar la clave pública de {{email}}",
+      "delete": "Eliminar",
+      "copy": "Copiar",
+      "imported": "Importada",
+      "fromYourKey": "De tu clave"
+    },
+    "generate": {
+      "title": "Generar par de claves",
+      "description": "Crea un par de claves OpenPGP para esta cuenta, protegido con la frase de contraseña y guardado cifrado en este equipo.",
+      "name": "Nombre",
+      "namePlaceholder": "p. ej., Ada Lovelace",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "p. ej., ada@example.com",
+      "passphrase": "Frase de contraseña",
+      "passphraseHint": "Obligatoria. Sin ella, la clave privada no se puede usar ni recuperar, y no hay forma de restablecerla.",
+      "confirmPassphrase": "Confirmar frase de contraseña",
+      "mismatch": "Las frases de contraseña no coinciden.",
+      "failed": "No se ha podido generar el par de claves.",
+      "cancel": "Cancelar",
+      "submit": "Generar",
+      "saveTitle": "Guarda tu clave pública",
+      "saveDescription": "Se ha generado el par de claves de {{email}}. Comparte la clave pública con tus contactos para que puedan cifrar los mensajes que te envíen y verificar tus firmas.",
+      "publicKey": "Clave pública",
+      "recoveryWarning": "La clave privada no se puede recuperar sin su frase de contraseña: si la pierdes, la clave y todos los mensajes cifrados con ella dejarán de poder leerse. No hay copia de seguridad en ningún servidor; guarda una copia de este par de claves en un lugar seguro antes de continuar.",
+      "copyPublicKey": "Copiar clave pública",
+      "exportKeyFile": "Exportar archivo de clave",
+      "done": "Hecho",
+      "copied": "Clave pública copiada en el portapapeles",
+      "clipboardFailed": "No se ha podido acceder al portapapeles.",
+      "savedTo": "Clave pública guardada en {{path}}",
+      "exportFailed": "No se ha podido exportar la clave pública."
+    },
+    "import": {
+      "title": "Importar clave",
+      "description": "Pega una clave OpenPGP con armadura o cárgala desde un archivo. Una clave privada se vuelve a proteger con la frase de contraseña que indiques aquí; si la clave ya tiene una, debe ser esa misma.",
+      "keyType": "Tipo de clave",
+      "publicKey": "Clave pública",
+      "privateKey": "Clave privada",
+      "armoredKey": "Clave con armadura",
+      "loadFromFile": "Cargar la clave con armadura desde un archivo",
+      "passphrase": "Frase de contraseña",
+      "passphraseHint": "Se comprueba con la clave antes de guardar nada: las claves nunca se guardan sin una frase de contraseña que hayas demostrado conocer.",
+      "importedPublic": "Clave pública importada",
+      "importedPrivate": "Clave privada importada y protegida con tu frase de contraseña",
+      "failed": "No se ha podido importar la clave.",
+      "readFileFailed": "No se ha podido leer el archivo seleccionado.",
+      "cancel": "Cancelar",
+      "submit": "Importar"
+    },
+    "delete": {
+      "titlePrivate": "Eliminar clave privada",
+      "titlePublic": "Eliminar clave pública",
+      "descriptionPrivate": "¿Eliminar la clave privada de {{label}}? Los mensajes cifrados con ella ya no se podrán descifrar y ya no podrá firmar correo. Esta acción no se puede deshacer.",
+      "descriptionPublic": "¿Eliminar la clave pública de {{label}}? Ya no podrás cifrar correo para {{label}} con esta clave. Esta acción no se puede deshacer.",
+      "deletedPrivate": "Clave de {{label}} eliminada",
+      "deletedPublic": "Clave pública de {{label}} eliminada",
+      "failed": "No se ha podido eliminar la clave.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar clave"
+    }
+  }
+}

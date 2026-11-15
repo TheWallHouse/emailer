@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+
 import { cn } from "@/lib/utils"
 
 /**
@@ -11,18 +13,19 @@ import { cn } from "@/lib/utils"
  */
 
 interface LabelColorPreset {
-  name: string
+  /** Swatch number shown as "Color N"; null for the default dot. */
+  number: number | null
   /** Token reference ("var(--chart-1)") or null for the default dot. */
   value: string | null
 }
 
 const LABEL_COLOR_PRESETS: LabelColorPreset[] = [
-  { name: "Default", value: null },
-  { name: "Color 1", value: "var(--chart-1)" },
-  { name: "Color 2", value: "var(--chart-2)" },
-  { name: "Color 3", value: "var(--chart-3)" },
-  { name: "Color 4", value: "var(--chart-4)" },
-  { name: "Color 5", value: "var(--chart-5)" },
+  { number: null, value: null },
+  { number: 1, value: "var(--chart-1)" },
+  { number: 2, value: "var(--chart-2)" },
+  { number: 3, value: "var(--chart-3)" },
+  { number: 4, value: "var(--chart-4)" },
+  { number: 5, value: "var(--chart-5)" },
 ]
 
 interface LabelColorPickerProps {
@@ -36,22 +39,27 @@ export function LabelColorPicker({
   onChange,
   disabled = false,
 }: LabelColorPickerProps) {
+  const { t } = useTranslation()
   return (
     <div
       role="radiogroup"
-      aria-label="Label color"
+      aria-label={t("labels.colorPicker.label")}
       className="flex flex-wrap items-center gap-1.5"
     >
       {LABEL_COLOR_PRESETS.map((preset) => {
         const selected = (preset.value ?? null) === (value ?? null)
+        const name =
+          preset.number === null
+            ? t("labels.colorPicker.default")
+            : t("labels.colorPicker.color", { number: preset.number })
         return (
           <button
-            key={preset.name}
+            key={preset.value ?? "default"}
             type="button"
             role="radio"
             aria-checked={selected}
-            aria-label={preset.name}
-            title={preset.name}
+            aria-label={name}
+            title={name}
             disabled={disabled}
             className={cn(
               "flex size-6 items-center justify-center rounded-full transition-shadow outline-none select-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",

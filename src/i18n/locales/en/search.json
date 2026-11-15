@@ -1,0 +1,67 @@
+{
+  "field": {
+    "assistant": "AI assistant",
+    "placeholder": "Search mail…",
+    "label": "Search mail",
+    "clear": "Clear search"
+  },
+  "palette": {
+    "groups": {
+      "actions": "Actions",
+      "quickSteps": "Quick steps",
+      "folders": "Folders",
+      "labels": "Labels",
+      "accounts": "Accounts"
+    },
+    "compose": "Compose new message",
+    "search": "Search mail",
+    "settings": "Open settings",
+    "help": "Open help center",
+    "assistant": "Open AI assistant",
+    "runQuickStep": "Run quick step: {{name}}",
+    "switchAccount": "Switch to {{email}}",
+    "placeholder": "Search mail or jump to a folder, label, account…",
+    "empty": "No matching commands",
+    "hintNavigate": "↑↓ navigate",
+    "hintSelect": "↵ select",
+    "hintClose": "esc close"
+  },
+  "askInbox": {
+    "title": "Ask My Inbox",
+    "providerUnreachable": "The AI provider could not be reached.",
+    "description": "Ask a question about your mail in plain language. Your question and the search grammar are sent to the AI provider; your messages stay on this machine.",
+    "retry": "Retry",
+    "refineQuestion": "Refine your question",
+    "yourQuestion": "Your question",
+    "questionPlaceholder": "e.g. attachments from maria since monday",
+    "interpretedQuery": "Interpreted query",
+    "editHint": "Edit the query if the translation missed something, then search.",
+    "search": "Search",
+    "askAgain": "Ask again",
+    "cancel": "Cancel",
+    "asking": "Asking…",
+    "ask": "Ask"
+  },
+  "createFilter": {
+    "label": "Create filter with this search"
+  },
+  "saveAsSplit": {
+    "label": "Save as Split",
+    "nameTaken": "A split named “{{name}}” already exists.",
+    "createFailed": "Could not create the split.",
+    "description": "The query becomes a named tab above the inbox; saving enters it right away. Splits are stored locally.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Boss mail",
+    "query": "Query",
+    "cancel": "Cancel",
+    "create": "Create split"
+  },
+  "saveSearch": {
+    "label": "Save search",
+    "description": "The query <query>{{query}}</query> is stored locally and re-runs from the sidebar's Saved searches section.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Unread from client",
+    "cancel": "Cancel",
+    "save": "Save"
+  }
+}

@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns"
 import { AlertCircleIcon, Loader2Icon, RefreshCwIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { useSyncStore } from "@/stores/sync-store"
@@ -22,6 +23,7 @@ export function SyncIndicator({
   accountId: string
   className?: string
 }) {
+  const { t } = useTranslation()
   const status = useSyncStore(
     (state) => state.perAccount[accountId]?.status ?? "idle"
   )
@@ -50,17 +52,19 @@ export function SyncIndicator({
       )}
       <span className="truncate text-xs whitespace-nowrap">
         {lastSyncAt
-          ? `Synced ${formatDistanceToNow(new Date(lastSyncAt * 1000), {
-              addSuffix: true,
-            })}`
-          : "Not synced yet"}
+          ? t("sidebar.sync.synced", {
+              when: formatDistanceToNow(new Date(lastSyncAt * 1000), {
+                addSuffix: true,
+              }),
+            })
+          : t("sidebar.sync.notSynced")}
       </span>
       <span className="sr-only">
         {status === "error"
-          ? "Last sync failed"
+          ? t("sidebar.sync.failed")
           : status === "syncing"
-            ? "Syncing now"
-            : "Up to date"}
+            ? t("sidebar.sync.syncing")
+            : t("sidebar.sync.upToDate")}
       </span>
     </div>
   )

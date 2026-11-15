@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import { listActiveAccounts } from "@/services/db/accounts"
 import type { SqlExecutor } from "@/services/db/executor"
 import { getExecutor } from "@/services/db/executor"
@@ -134,11 +135,13 @@ export async function createSplitWithToast(input: {
     })
   } catch (error) {
     console.warn("[splits] create failed", error)
-    toast.error("Could not create the split.")
+    toast.error(i18next.t("sidebar.splits.createFailed"))
     return { ok: false, error: "failed" }
   }
   if (!result.ok) return result
-  toast.success(`Split “${result.split.name}” created`)
+  toast.success(
+    i18next.t("sidebar.splits.created", { name: result.split.name })
+  )
   notifySplitsChanged()
   if (input.enter) await enterSplit(result.split)
   return result

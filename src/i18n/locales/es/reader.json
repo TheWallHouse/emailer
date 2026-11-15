@@ -1,0 +1,354 @@
+{
+  "readingPane": {
+    "backToList": "Volver a la lista"
+  },
+  "findBar": {
+    "find": "Buscar en el mensaje",
+    "previous": "Coincidencia anterior",
+    "next": "Coincidencia siguiente",
+    "close": "Cerrar búsqueda",
+    "noMatches": "0 coincidencias",
+    "position": "{{current}} de {{total}}",
+    "collapsed_one": "{{count}} en mensajes contraídos",
+    "collapsed_other": "{{count}} en mensajes contraídos"
+  },
+  "frame": {
+    "title": "Contenido del correo"
+  },
+  "meeting": {
+    "untitled": "(reunión sin título)",
+    "cancelled": "Cancelada",
+    "organizer": "Organizador: {{person}}",
+    "joinWith": "Unirse — {{label}}",
+    "joinWithout": "Unirse ({{label}})",
+    "respondTo": "Responder a:",
+    "wholeSeries": "Toda la serie",
+    "thisOccurrence": "Solo esta",
+    "accept": "Aceptar",
+    "tentative": "Quizás",
+    "decline": "Rechazar",
+    "noCalendar": "No hay ningún calendario conectado para este evento: tu respuesta se envía al organizador por correo.",
+    "toasts": {
+      "acceptedUpdated": "Invitación aceptada: calendario actualizado y respuesta en cola",
+      "declinedUpdated": "Invitación rechazada: calendario actualizado y respuesta en cola",
+      "tentativeUpdated": "Respuesta «quizás» registrada: calendario actualizado y respuesta en cola",
+      "writeBackFailed": "Respuesta al organizador en cola, pero no se ha podido actualizar el calendario: {{message}}",
+      "replyQueued": "Respuesta al organizador en cola",
+      "replyFailed": "No se ha podido poner en cola el correo de respuesta: {{message}}",
+      "sendFailed": "No se ha podido enviar la respuesta."
+    }
+  },
+  "quickReplies": {
+    "label": "Respuestas rápidas",
+    "chipTitle": "Abrir como borrador de respuesta"
+  },
+  "translate": {
+    "failed": "No se ha podido traducir.",
+    "unavailable": "La traducción no está disponible.",
+    "hide": "Ocultar traducción",
+    "translating": "Traduciendo…",
+    "translate": "Traducir",
+    "translatedTo": "Idioma de la traducción: {{language}}",
+    "retry": "Reintentar"
+  },
+  "contactSidebar": {
+    "label": "Contacto {{name}}",
+    "compose": "Redactar a {{name}}",
+    "recentThreads": "Conversaciones recientes",
+    "noRecent": "No hay conversaciones recientes con este contacto."
+  },
+  "replyOpener": {
+    "attachmentDropped": "No se ha podido restaurar el adjunto «{{name}}» y se ha quitado",
+    "attachmentsDropped": "No se han podido restaurar algunos adjuntos y se han quitado: {{names}}"
+  },
+  "blockSender": {
+    "toast": "Se ha bloqueado a {{sender}}",
+    "toastMoved_one": "Se ha bloqueado a {{sender}} y se ha movido {{count}} conversación",
+    "toastMoved_other": "Se ha bloqueado a {{sender}} y se han movido {{count}} conversaciones",
+    "title": "Bloquear a {{sender}}",
+    "description": "El correo que llegue de esta dirección se marcará como leído y se sacará de la bandeja de entrada automáticamente, sin notificaciones.",
+    "action": "Acción",
+    "thenFutureMail": "Qué hacer con el correo futuro",
+    "movedToTrash": "Moverlo a la papelera",
+    "archived": "Archivarlo",
+    "moveExisting": "Mover también las conversaciones existentes de este remitente",
+    "moveExistingCount_one": "Mover también {{count}} conversación existente de este remitente",
+    "moveExistingCount_other": "Mover también {{count}} conversaciones existentes de este remitente",
+    "cancelLabel": "Cancelar bloqueo",
+    "cancel": "Cancelar",
+    "confirmLabel": "Confirmar bloqueo de {{sender}}",
+    "confirm": "Bloquear"
+  },
+  "createTask": {
+    "title": "Crear tarea",
+    "description": "Crea una tarea vinculada a este mensaje. La conversación se queda en tu bandeja de entrada tal cual.",
+    "titleLabel": "Título",
+    "notesLabel": "Notas (opcional)",
+    "notesPlaceholder": "Añade contexto del mensaje…",
+    "cancel": "Cancelar",
+    "confirm": "Crear tarea"
+  },
+  "dates": {
+    "date": "d MMM yyyy",
+    "dateTime": "d MMM yyyy, H:mm",
+    "time": "H:mm"
+  },
+  "eventExtraction": {
+    "allDay": "Todo el día · {{date}}",
+    "failed": "No se han podido extraer los eventos.",
+    "unavailable": "La extracción de eventos no está disponible ahora mismo.",
+    "title": "Eventos sugeridos",
+    "description": "Sugerencias generadas por IA a partir de esta conversación: revisa cada una en el formulario de evento del calendario. No se guarda nada hasta que lo confirmes allí.",
+    "busy": "Buscando eventos en la conversación…",
+    "empty": "No se han encontrado eventos en esta conversación.",
+    "closeLabel": "Cerrar eventos sugeridos",
+    "close": "Cerrar",
+    "retry": "Reintentar",
+    "source": "De {{from}} · {{date}}",
+    "reviewLabel": "Revisar «{{title}}» en el calendario",
+    "review": "Revisar en el calendario"
+  },
+  "taskExtraction": {
+    "failed": "No se han podido extraer las tareas.",
+    "unavailable": "La extracción de tareas no está disponible ahora mismo.",
+    "tasksUnavailable": "El módulo de tareas llegará en una próxima actualización",
+    "addFailed_one": "No se ha podido añadir {{count}} sugerencia. Vuelve a intentarlo.",
+    "addFailed_other": "No se han podido añadir {{count}} sugerencias. Vuelve a intentarlo.",
+    "addUnavailable": "No se pueden añadir tareas ahora mismo. Vuelve a intentarlo.",
+    "title": "Tareas sugeridas",
+    "description": "Sugerencias generadas por IA a partir de esta conversación: revisa cada una antes de añadirla. No se crea nada hasta que la aceptes.",
+    "busy": "Buscando tareas en la conversación…",
+    "retry": "Reintentar",
+    "empty": "No se han encontrado tareas sugeridas en esta conversación.",
+    "closeLabel": "Cerrar tareas sugeridas",
+    "close": "Cerrar",
+    "addCount_one": "Añadir {{count}} tarea",
+    "addCount_other": "Añadir {{count}} tareas",
+    "include": "Incluir «{{title}}»",
+    "due": "Vence el {{date}}",
+    "added": "Añadida",
+    "dismissed": "Descartada",
+    "addOne": "Añadir «{{title}}»",
+    "add": "Añadir"
+  },
+  "smartReply": {
+    "errors": {
+      "notConfigured": "El asistente de IA no está configurado.",
+      "noSentMail": "No se han encontrado mensajes enviados recientes que analizar.",
+      "parse": "No se ha podido leer el estilo de escritura en la respuesta del modelo. Vuelve a intentarlo.",
+      "provider": "Ha fallado la solicitud al proveedor.",
+      "surfaceDisabled": "Las respuestas inteligentes están desactivadas en Ajustes.",
+      "noProfile": "No hay ningún perfil de estilo de escritura: crea uno primero.",
+      "noThread": "No se ha podido cargar esta conversación.",
+      "buildFailed": "No se ha podido crear el perfil de estilo de escritura.",
+      "generateFailed": "No se ha podido redactar la sugerencia."
+    },
+    "builtInfo_one": "Perfil creado a partir de {{count}} mensaje enviado.",
+    "builtInfo_other": "Perfil creado a partir de {{count}} mensajes enviados.",
+    "title": "Respuesta inteligente",
+    "description": "Una sugerencia de borrador con tu estilo de escritura, para que la edites. No se envía nada automáticamente.",
+    "checking": "Comprobando tu perfil de estilo de escritura…",
+    "consent": "Emailer analiza tus mensajes enviados recientes para aprender tu estilo de escritura y que las sugerencias suenen como tú. El análisis se hace con el proveedor de IA activo y el perfil se queda en este equipo.",
+    "consentNote": "No se envía nada automáticamente: las sugerencias son siempre borradores para que los revises y edites.",
+    "closeLabel": "Cerrar respuestas inteligentes",
+    "cancel": "Cancelar",
+    "analyze": "Analizar correo enviado",
+    "analyzing": "Analizando tus mensajes enviados recientes…",
+    "generate": "Generar sugerencia",
+    "generating": "Redactando una sugerencia con tu estilo…",
+    "previewNote": "Generado por IA: al insertarlo se abre el editor con este borrador para que lo edites antes de enviarlo.",
+    "dismissLabel": "Descartar respuesta inteligente",
+    "dismiss": "Descartar",
+    "regenerate": "Volver a generar",
+    "use": "Usar respuesta",
+    "retry": "Reintentar"
+  },
+  "sourceView": {
+    "noAccount": "La cuenta del mensaje no está disponible.",
+    "loadFailed": "No se ha podido cargar el código fuente.",
+    "copiedToast": "Código fuente del mensaje copiado",
+    "clipboardFailed": "No se ha podido acceder al portapapeles.",
+    "title": "Código fuente del mensaje",
+    "description": "Código fuente RFC 822 sin procesar de «{{subject}}»: solo lectura, no se ejecuta nada.",
+    "loading": "Cargando código fuente…",
+    "copied": "Copiado.",
+    "characters_one": "{{count}} carácter",
+    "characters_other": "{{count}} caracteres",
+    "copy": "Copiar código fuente",
+    "close": "Cerrar"
+  },
+  "pgp": {
+    "title": "Desbloquear tu clave privada",
+    "description": "Introduce la frase de contraseña de tu clave privada para descifrar este mensaje. La frase de contraseña se usa una sola vez y nunca se guarda.",
+    "passphrase": "Frase de contraseña PGP",
+    "cancel": "Cancelar",
+    "decrypting": "Descifrando…",
+    "decrypt": "Descifrar",
+    "errors": {
+      "generic": "no se ha podido descifrar el mensaje",
+      "bodyMissing": "falta el cuerpo del mensaje",
+      "payloadMissing": "falta la parte cifrada de este mensaje",
+      "payloadNotArmored": "la parte cifrada no contiene datos PGP con armadura",
+      "decryptedEmpty": "el mensaje descifrado está vacío"
+    },
+    "signature": {
+      "valid": "Firmado con una clave conocida: la firma es válida.",
+      "invalid": "La comprobación de la firma ha FALLADO: el contenido se modificó después de firmarlo o no coincide con la clave del firmante.",
+      "unknownSigner": "Firmado con una clave desconocida: importa la clave pública del firmante para verificar esta firma.",
+      "checking": "Comprobando la firma…"
+    },
+    "mimeSigned": "Este mensaje tiene firma PGP/MIME. Su firma no se puede verificar desde la copia guardada.",
+    "encrypted": "Este mensaje está cifrado."
+  },
+  "digest": {
+    "failed": "No se ha podido crear el resumen.",
+    "title": "Ponme al día",
+    "description": "Un resumen generado por IA de las conversaciones no leídas de esta vista. Solo se envía al proveedor el texto de esas conversaciones.",
+    "busy": "Poniéndote al día…",
+    "empty": "No hay conversaciones sin leer.",
+    "retry": "Reintentar",
+    "meta_one": "Incluye {{count}} conversación sin leer",
+    "meta_other": "Incluye {{count}} conversaciones sin leer",
+    "metaWithOmitted_one": "Incluye {{count}} conversación sin leer y quedan {{omitted}} más sin incluir",
+    "metaWithOmitted_other": "Incluye {{count}} conversaciones sin leer y quedan {{omitted}} más sin incluir",
+    "closeLabel": "Cerrar resumen",
+    "close": "Cerrar"
+  },
+  "quickStepConfirm": {
+    "title": "¿Ejecutar «{{name}}»?",
+    "description": "Este paso rápido mueve conversaciones a la papelera.",
+    "affected_one": "Afectará a {{count}} conversación.",
+    "affected_other": "Afectará a {{count}} conversaciones.",
+    "dontAskAgain": "No volver a preguntar",
+    "cancel": "Cancelar",
+    "run": "Ejecutar"
+  },
+  "thread": {
+    "noMessageSelected": "No hay ningún mensaje seleccionado",
+    "loading": "Cargando conversación…",
+    "notFound": "No se ha encontrado el mensaje"
+  },
+  "toolbar": {
+    "print": "Imprimir",
+    "printMessage": "Imprimir este mensaje",
+    "printThread": "Imprimir toda la conversación",
+    "moveToTrash": "Mover a la papelera",
+    "star": "Destacar conversación",
+    "unstar": "Quitar destacado",
+    "markRead": "Marcar como leído",
+    "markUnread": "Marcar como no leído",
+    "mute": "Silenciar conversación",
+    "unmute": "Dejar de silenciar",
+    "pin": "Fijar conversación",
+    "unpin": "Dejar de fijar",
+    "inTodosTitle": "En Pendientes: haz clic para moverla al final",
+    "inTodos": "En Pendientes",
+    "addToTodos": "Añadir a Pendientes",
+    "editNote": "Editar nota",
+    "addNote": "Añadir una nota",
+    "suggestTasks": "Sugerir tareas",
+    "suggestEvents": "Sugerir eventos",
+    "summarize": "Resumir conversación",
+    "contactSidebar": "Panel del contacto"
+  },
+  "inlineReply": {
+    "participants": "los participantes",
+    "replyTo": "Responder a {{name}}…",
+    "to": "Para:",
+    "cc": "CC:",
+    "subject": "Asunto:",
+    "replyAll": "Responder a todos",
+    "cancel": "Cancelar",
+    "opensEditor": "Abre el editor completo"
+  },
+  "notes": {
+    "title": "Nota",
+    "private": "Privada: solo se guarda en este dispositivo",
+    "saved": "Guardada",
+    "label": "Nota de la conversación",
+    "placeholder": "Añade una nota privada…"
+  },
+  "summary": {
+    "disabled": "Los resúmenes están desactivados.",
+    "title": "Resumen con IA",
+    "generatedBy": "Generado por {{model}}: contenido de IA, puede contener errores",
+    "generatedByCached": "Generado por {{model}} · en caché: contenido de IA, puede contener errores",
+    "regenerate": "Volver a generar el resumen",
+    "expand": "Expandir resumen",
+    "collapse": "Contraer resumen",
+    "loading": "Resumiendo la conversación…",
+    "stale": "La conversación ha cambiado desde este resumen: vuelve a generarlo para incluir los últimos mensajes.",
+    "empty": "No hay mensajes que resumir.",
+    "retry": "Reintentar"
+  },
+  "message": {
+    "noContent": "(sin contenido)",
+    "sendAgain": "Enviar de nuevo",
+    "viewSource": "Ver código fuente",
+    "collapse": "Contraer",
+    "junk": "Tu filtro de correo no deseado ha movido esta conversación a Spam.",
+    "notSpam": "No es spam",
+    "loading": "Cargando mensaje…",
+    "phishingTitle": "Mensaje sospechoso",
+    "dismiss": "Descartar",
+    "imagesHidden": "Las imágenes están ocultas",
+    "showImages": "Mostrar imágenes",
+    "alwaysAllow": "Permitir siempre de este remitente",
+    "dmarcFail": "La autenticación DMARC ha FALLADO: puede que este mensaje esté suplantando al remitente que dice ser."
+  },
+  "unsubscribe": {
+    "queuedToast": "Cancelación de suscripción en cola: se enviará cuando vuelvas a tener conexión",
+    "doneToast": "Suscripción cancelada",
+    "failed": "No se ha podido cancelar la suscripción",
+    "autoArchiveToast": "El correo que llegue de {{sender}} se archivará",
+    "autoArchiveFailed": "No se ha podido crear la regla de archivado automático",
+    "offer": "Este remitente ofrece la opción de cancelar la suscripción.",
+    "unsubscribe": "Cancelar suscripción",
+    "confirmPrompt": "¿Enviar la solicitud de cancelación de suscripción a <url>{{url}}</url>?",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "doneArchived": "Suscripción cancelada: el correo que llegue de este remitente se archivará.",
+    "done": "Suscripción cancelada.",
+    "autoArchive": "Archivar automáticamente el correo de este remitente"
+  },
+  "attachments": {
+    "loadFailed": "No se han podido cargar los adjuntos.",
+    "count_one": "{{count}} adjunto",
+    "count_other": "{{count}} adjuntos",
+    "risk": {
+      "dangerous": "Peligroso",
+      "macros": "Macros"
+    },
+    "riskLabel": "Tipo de archivo: {{risk}}",
+    "saveFailed": "No se ha podido guardar este archivo.",
+    "openFailed": "No se ha podido abrir este archivo.",
+    "unnamed": "(sin nombre)",
+    "maliciousLabel": "Marcado como malicioso por el análisis antimalware",
+    "malicious": "Malicioso",
+    "suspiciousLabel": "Marcado como sospechoso por el análisis antimalware",
+    "suspicious": "Sospechoso",
+    "addToCalendar": "Añadir al calendario",
+    "saving": "Guardando…",
+    "save": "Guardar",
+    "opening": "Abriendo…",
+    "open": "Abrir"
+  },
+  "popout": {
+    "threadGone": "Esta conversación ya no existe.",
+    "noContext": "Falta el contexto de la ventana de conversación.",
+    "loading": "Cargando…",
+    "closeGuard": {
+      "title": "¿Guardar el borrador antes de cerrar?",
+      "description": "Esta ventana tiene un mensaje a medias. El borrador se guarda automáticamente en Borradores: si cierras, se conserva; si lo descartas, se elimina.",
+      "cancel": "Cancelar",
+      "discard": "Descartar y cerrar",
+      "save": "Guardar y cerrar"
+    }
+  },
+  "print": {
+    "gone": "No hay nada que imprimir: este mensaje ya no existe.",
+    "documentTitle": "Impresión de Emailer",
+    "noContext": "Falta el contexto de la ventana de impresión.",
+    "loading": "Cargando…"
+  }
+}

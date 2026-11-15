@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +11,7 @@ import {
   unblockSender,
 } from "@/services/db/blocked-senders"
 import { getExecutor } from "@/services/db/executor"
+import { i18next } from "@/i18n"
 import { useActiveAccount } from "@/stores/account-store"
 
 /**
@@ -24,10 +26,13 @@ import { useActiveAccount } from "@/stores/account-store"
  */
 
 function actionChipLabel(action: BlockedSenderRow["action"]): string {
-  return action === "trash" ? "Auto-trash" : "Auto-archive"
+  return action === "trash"
+    ? i18next.t("settingsMail.blockedSenders.autoTrash")
+    : i18next.t("settingsMail.blockedSenders.autoArchive")
 }
 
 export function BlockedSendersSection() {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   const [rows, setRows] = useState<BlockedSenderRow[]>([])
 
@@ -53,7 +58,9 @@ export function BlockedSendersSection() {
   async function handleUnblock(row: BlockedSenderRow): Promise<void> {
     try {
       await unblockSender(getExecutor(), row.id)
-      toast.success(`Unblocked ${row.sender}`)
+      toast.success(
+        t("settingsMail.blockedSenders.unblocked", { sender: row.sender })
+      )
       reload()
     } catch (error) {
       console.warn("[settings] failed to unblock sender", error)
@@ -61,30 +68,33 @@ export function BlockedSendersSection() {
   }
 
   return (
-    <section aria-label="Blocked senders" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.blockedSenders.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
         <h2 className="text-base font-semibold text-foreground">
-          Blocked senders
+          {t("settingsMail.blockedSenders.title")}
         </h2>
         <p className="text-sm text-muted-foreground">
           {account
-            ? `Mail from these addresses skips the inbox for ${account.email}.`
-            : "Mail from these addresses skips the inbox."}
+            ? t("settingsMail.blockedSenders.subtitleAccount", {
+                email: account.email,
+              })
+            : t("settingsMail.blockedSenders.subtitle")}
         </p>
       </div>
       <p className="text-xs text-muted-foreground">
-        Blocked in the thread context menu. Future mail is marked as read and
-        moved to Trash or archived, per the choice made at block time, without
-        notifications. Blocking is local and applies per account.
+        {t("settingsMail.blockedSenders.help")}
       </p>
       <Separator />
       {!account ? (
         <p className="text-sm text-muted-foreground">
-          Add an account to manage its blocked senders.
+          {t("settingsMail.blockedSenders.noAccount")}
         </p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No blocked senders. Mail arrives untouched.
+          {t("settingsMail.blockedSenders.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">
@@ -107,12 +117,14 @@ export function BlockedSendersSection() {
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Unblock ${row.sender}`}
+                aria-label={t("settingsMail.blockedSenders.unblockAria", {
+                  sender: row.sender,
+                })}
                 onClick={() => {
                   void handleUnblock(row)
                 }}
               >
-                Unblock
+                {t("settingsMail.blockedSenders.unblock")}
               </Button>
             </div>
           ))}

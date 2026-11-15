@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 
 // The gate + transport seams are mocked exactly like the ask-inbox-dialog
 // suite: the executor is a stand-in and the settings gates are mocked, so
@@ -18,8 +24,9 @@ vi.mock("@/services/db/executor", () => ({
 vi.mock("@/services/ai/settings", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/services/ai/settings")>()),
   isAiConfigured: vi.fn(async () => true),
-  isSurfaceEnabled: vi.fn(async (_executor: unknown, surface: string) =>
-    surface === "assistant" || surface === "askInbox"
+  isSurfaceEnabled: vi.fn(
+    async (_executor: unknown, surface: string) =>
+      surface === "assistant" || surface === "askInbox"
   ),
 }))
 
@@ -28,10 +35,7 @@ vi.mock("@/services/ai/client", async (importOriginal) => ({
   aiChat: vi.fn(),
 }))
 
-import {
-  isAiConfigured,
-  isSurfaceEnabled,
-} from "@/services/ai/settings"
+import { isAiConfigured, isSurfaceEnabled } from "@/services/ai/settings"
 import { DEFAULT_VIEW, useUiStore } from "@/stores/ui-store"
 import { SearchField } from "../search-field"
 

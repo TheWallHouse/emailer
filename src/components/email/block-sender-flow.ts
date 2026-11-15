@@ -1,5 +1,7 @@
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
+
 import { refreshThreadList } from "@/stores/thread-list-store"
 import {
   applyBlockToExistingMail,
@@ -45,10 +47,8 @@ export async function blockSenderWithRefresh(
       : 0
     toast.success(
       moved > 0
-        ? `Blocked ${sender} — moved ${moved} conversation${
-            moved === 1 ? "" : "s"
-          }`
-        : `Blocked ${sender}`
+        ? i18next.t("reader.blockSender.toastMoved", { sender, count: moved })
+        : i18next.t("reader.blockSender.toast", { sender })
     )
   } catch (error) {
     console.warn("[block-sender] failed", error)

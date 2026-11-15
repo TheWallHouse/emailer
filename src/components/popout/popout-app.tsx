@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Toaster } from "@/components/ui/sonner"
+import { i18next } from "@/i18n"
 import { Titlebar } from "@/components/layout/titlebar"
 import { ThreadView } from "@/components/email/thread-view"
 import { initAccountStore, useAccountStore } from "@/stores/account-store"
@@ -49,6 +51,7 @@ const Composer = lazy(() =>
  */
 
 export function PopoutApp() {
+  const { t } = useTranslation()
   const threadId = popoutThreadId()
   const [booted, setBooted] = useState(false)
   const [bootError, setBootError] = useState<string | null>(null)
@@ -70,7 +73,7 @@ export function PopoutApp() {
         const thread = await getThread(getExecutor(), threadId)
         if (cancelled) return
         if (!thread) {
-          setBootError("This thread no longer exists.")
+          setBootError(i18next.t("reader.popout.threadGone"))
           return
         }
         await initAccountStore()
@@ -129,7 +132,7 @@ export function PopoutApp() {
     // window (dev curiosity) — say so instead of a blank window.
     return (
       <div className="flex h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        No thread window context.
+        {t("reader.popout.noContext")}
       </div>
     )
   }
@@ -150,7 +153,7 @@ export function PopoutApp() {
       <div className="flex h-screen flex-col bg-background text-foreground">
         <Titlebar />
         <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-          Loading…
+          {t("reader.popout.loading")}
         </div>
       </div>
     )
@@ -159,7 +162,10 @@ export function PopoutApp() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
       <Titlebar />
-      <div className="min-h-0 flex-1 overflow-hidden" data-testid="popout-thread">
+      <div
+        className="min-h-0 flex-1 overflow-hidden"
+        data-testid="popout-thread"
+      >
         <ThreadView />
       </div>
       {composerOpen && (
@@ -176,11 +182,9 @@ export function PopoutApp() {
         <Dialog open onOpenChange={setCloseGuardOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Save draft before closing?</DialogTitle>
+              <DialogTitle>{t("reader.popout.closeGuard.title")}</DialogTitle>
               <DialogDescription>
-                This window has a message in progress. The draft is saved
-                automatically in Drafts — closing keeps it; discarding
-                deletes it.
+                {t("reader.popout.closeGuard.description")}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -188,7 +192,7 @@ export function PopoutApp() {
                 variant="outline"
                 onClick={() => setCloseGuardOpen(false)}
               >
-                Cancel
+                {t("reader.popout.closeGuard.cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -198,7 +202,7 @@ export function PopoutApp() {
                   void forceClosePopout().catch(() => {})
                 }}
               >
-                Discard &amp; close
+                {t("reader.popout.closeGuard.discard")}
               </Button>
               <Button
                 onClick={() => {
@@ -209,7 +213,7 @@ export function PopoutApp() {
                   void forceClosePopout().catch(() => {})
                 }}
               >
-                Save &amp; close
+                {t("reader.popout.closeGuard.save")}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -1,0 +1,19 @@
+{
+  "unifiedInbox": "Unified Inbox",
+  "priorityInbox": "Priority inbox",
+  "nudges": "Nudges",
+  "sync": {
+    "notSynced": "Not synced yet",
+    "syncing": "Syncing…",
+    "failed": "Last sync failed",
+    "synced": "Synced {{when}}",
+    "accountsLabel": "Account sync status",
+    "accountState": "{{email}}: {{state}}",
+    "accountStateTitle": "{{email}} — {{state}}"
+  },
+  "filter": {
+    "label": "Filter threads",
+    "allMail": "All mail",
+    "unread": "Unread"
+  }
+}

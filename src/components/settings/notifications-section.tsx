@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Bell, Loader2, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -65,13 +67,21 @@ import { useActiveAccount } from "@/stores/account-store"
  */
 
 const MATCH_TYPE_LABELS: Record<NotificationRuleMatchType, string> = {
-  sender: "Sender",
-  label: "Label",
+  get sender() {
+    return i18next.t("settings.notifications.matchType.sender")
+  },
+  get label() {
+    return i18next.t("settings.notifications.matchType.label")
+  },
 }
 
 const ACTION_LABELS: Record<NotificationRuleAction, string> = {
-  always: "Always notify",
-  never: "Never notify",
+  get always() {
+    return i18next.t("settings.notifications.action.always")
+  },
+  get never() {
+    return i18next.t("settings.notifications.action.never")
+  },
 }
 
 function RuleRowItem({
@@ -81,6 +91,7 @@ function RuleRowItem({
   rule: NotificationRuleRow
   onDelete: (rule: NotificationRuleRow) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       data-testid="settings-notification-rule-row"
@@ -91,7 +102,9 @@ function RuleRowItem({
           {rule.match_value}
         </p>
         <p className="text-xs text-muted-foreground">
-          {rule.match_type === "sender" ? "By sender" : "By label"}
+          {rule.match_type === "sender"
+            ? t("settings.notifications.bySender")
+            : t("settings.notifications.byLabel")}
         </p>
       </div>
       <Badge variant="outline">{MATCH_TYPE_LABELS[rule.match_type]}</Badge>
@@ -101,11 +114,13 @@ function RuleRowItem({
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Delete ${rule.match_value}`}
+        aria-label={t("settings.notifications.deleteRule", {
+          value: rule.match_value,
+        })}
         onClick={() => onDelete(rule)}
       >
         <Trash2 />
-        Delete
+        {t("settings.notifications.delete")}
       </Button>
     </div>
   )
@@ -120,6 +135,7 @@ function AddRuleDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const { t } = useTranslation()
   const [matchType, setMatchType] =
     useState<NotificationRuleMatchType>("sender")
   const [matchValue, setMatchValue] = useState("")
@@ -145,9 +161,7 @@ function AddRuleDialog({
     } catch {
       // Most commonly the table's UNIQUE(account_id, match_type,
       // match_value) rejecting an exact duplicate.
-      setErrorMessage(
-        "Could not save the rule — an identical rule may already exist."
-      )
+      setErrorMessage(i18next.t("settings.notifications.addDialog.saveFailed"))
       setSaving(false)
     }
   }
@@ -156,10 +170,11 @@ function AddRuleDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Notification Rule</DialogTitle>
+          <DialogTitle>
+            {t("settings.notifications.addDialog.title")}
+          </DialogTitle>
           <DialogDescription>
-            Always or never show new-mail notifications for one sender or label
-            of this account.
+            {t("settings.notifications.addDialog.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -170,10 +185,15 @@ function AddRuleDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="notification-rule-match-type">Match by</Label>
+            <Label htmlFor="notification-rule-match-type">
+              {t("settings.notifications.addDialog.matchBy")}
+            </Label>
             <Select
               value={matchType}
-              items={{ sender: "Sender address", label: "Label" }}
+              items={{
+                sender: t("settings.notifications.addDialog.senderAddress"),
+                label: t("settings.notifications.matchType.label"),
+              }}
               onValueChange={(value) =>
                 setMatchType(String(value) as NotificationRuleMatchType)
               }
@@ -182,30 +202,43 @@ function AddRuleDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sender">Sender address</SelectItem>
-                <SelectItem value="label">Label</SelectItem>
+                <SelectItem value="sender">
+                  {t("settings.notifications.addDialog.senderAddress")}
+                </SelectItem>
+                <SelectItem value="label">
+                  {t("settings.notifications.matchType.label")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="notification-rule-match-value">
-              {matchType === "sender" ? "Sender address" : "Label name"}
+              {matchType === "sender"
+                ? t("settings.notifications.addDialog.senderAddress")
+                : t("settings.notifications.addDialog.labelName")}
             </Label>
             <Input
               id="notification-rule-match-value"
               value={matchValue}
               onChange={(event) => setMatchValue(event.target.value)}
               placeholder={
-                matchType === "sender" ? "e.g. news@x.com" : "e.g. Receipts"
+                matchType === "sender"
+                  ? t("settings.notifications.addDialog.senderPlaceholder")
+                  : t("settings.notifications.addDialog.labelPlaceholder")
               }
               autoFocus
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="notification-rule-action">Then</Label>
+            <Label htmlFor="notification-rule-action">
+              {t("settings.notifications.addDialog.then")}
+            </Label>
             <Select
               value={action}
-              items={{ never: "Never notify", always: "Always notify" }}
+              items={{
+                never: t("settings.notifications.action.never"),
+                always: t("settings.notifications.action.always"),
+              }}
               onValueChange={(value) =>
                 setAction(String(value) as NotificationRuleAction)
               }
@@ -214,8 +247,12 @@ function AddRuleDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="never">Never notify</SelectItem>
-                <SelectItem value="always">Always notify</SelectItem>
+                <SelectItem value="never">
+                  {t("settings.notifications.action.never")}
+                </SelectItem>
+                <SelectItem value="always">
+                  {t("settings.notifications.action.always")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -231,13 +268,13 @@ function AddRuleDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settings.notifications.addDialog.cancel")}
             </Button>
             <Button type="submit" disabled={!canSave}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              Add Rule
+              {t("settings.notifications.addRule")}
             </Button>
           </DialogFooter>
         </form>
@@ -247,6 +284,7 @@ function AddRuleDialog({
 }
 
 export function NotificationsSection() {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   const [rules, setRules] = useState<NotificationRuleRow[]>([])
   const [addOpen, setAddOpen] = useState(false)
@@ -330,30 +368,36 @@ export function NotificationsSection() {
   }
 
   return (
-    <section aria-label="Notifications" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.notifications.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-semibold text-foreground">
-            Notifications
+            {t("settings.notifications.title")}
           </h2>
           <p className="text-sm text-muted-foreground">
             {account
-              ? `Per-sender and per-label overrides for ${account.email}.`
-              : "Per-sender and per-label notification overrides."}
+              ? t("settings.notifications.descriptionFor", {
+                  email: account.email,
+                })
+              : t("settings.notifications.description")}
           </p>
         </div>
         <Button size="sm" disabled={!account} onClick={() => setAddOpen(true)}>
           <Bell />
-          Add Rule
+          {t("settings.notifications.addRule")}
         </Button>
       </div>
       <div className="divide-y divide-border">
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
-            <Label htmlFor="notifications-new-mail-sound">New-mail sound</Label>
+            <Label htmlFor="notifications-new-mail-sound">
+              {t("settings.notifications.newMailSound.label")}
+            </Label>
             <p className="text-xs text-muted-foreground">
-              Play a chime with new-mail notifications. Senders and threads
-              that are silenced stay silent — no banner, no sound.
+              {t("settings.notifications.newMailSound.hint")}
             </p>
           </div>
           <Switch
@@ -366,10 +410,11 @@ export function NotificationsSection() {
         </div>
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
-            <Label htmlFor="notifications-sent-sound">Sent-message sound</Label>
+            <Label htmlFor="notifications-sent-sound">
+              {t("settings.notifications.sentSound.label")}
+            </Label>
             <p className="text-xs text-muted-foreground">
-              Play a chime when a message is sent. Off for messages that are
-              only queued while offline.
+              {t("settings.notifications.sentSound.hint")}
             </p>
           </div>
           <Switch
@@ -383,18 +428,15 @@ export function NotificationsSection() {
       </div>
       <Separator />
       <p className="text-xs text-muted-foreground">
-        Rules apply when sync finds new mail. A "never" rule wins over an
-        "always" rule when both match, and muted threads stay silent either way.
-        Suppressed messages are still delivered and unread — including in the
-        unread badge — so the badge can show mail you were not notified about.
+        {t("settings.notifications.rulesNote")}
       </p>
       {!account ? (
         <p className="text-sm text-muted-foreground">
-          Add an account to manage its notification rules.
+          {t("settings.notifications.noAccount")}
         </p>
       ) : rules.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No rules yet. New mail notifies as usual.
+          {t("settings.notifications.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">

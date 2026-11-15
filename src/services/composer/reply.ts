@@ -1,3 +1,4 @@
+import { i18next } from "@/i18n"
 import type { ComposerMode, Recipient } from "@/stores/composer-store"
 
 import type { ContactRef, MessageRow } from "../db/messages"
@@ -133,13 +134,37 @@ const MONTHS = [
   "Dec",
 ]
 
+const MONTHS_ES = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sept",
+  "oct",
+  "nov",
+  "dic",
+]
+
+const WEEKDAYS_ES = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"]
+
 /**
- * Quote/forward-header date: "Nov 14, 2023, 10:13 PM". UTC on purpose —
- * the builders are pure and must not render differently per machine TZ.
+ * Quote/forward-header date, in the interface language at build time:
+ * en "Nov 14, 2023, 10:13 PM"; es (Gmail-style) "mar, 14 nov 2023, 22:13".
+ * UTC on purpose — the builders are pure and must not render differently
+ * per machine TZ.
  */
 export function formatQuoteDate(epochSeconds: number): string {
   const date = new Date(epochSeconds * 1000)
   if (Number.isNaN(date.getTime())) return ""
+  if (i18next.language === "es") {
+    const hh = String(date.getUTCHours()).padStart(2, "0")
+    const mm = String(date.getUTCMinutes()).padStart(2, "0")
+    return `${WEEKDAYS_ES[date.getUTCDay()]}, ${date.getUTCDate()} ${MONTHS_ES[date.getUTCMonth()]} ${date.getUTCFullYear()}, ${hh}:${mm}`
+  }
   const hours = date.getUTCHours()
   const hour12 = hours % 12 === 0 ? 12 : hours % 12
   const minutes = String(date.getUTCMinutes()).padStart(2, "0")
@@ -271,28 +296,41 @@ function quotedOriginal(message: MessageRow): string {
   return "<p></p>"
 }
 
-/** Gmail-style quoted history: "On <date>, <sender> wrote:" + blockquote. */
+/**
+ * Gmail-style quoted history: "On <date>, <sender> wrote:" + blockquote.
+ * The header is outgoing mail content, written in the interface language
+ * at the moment the reply is built (Spanish follows Gmail's wording).
+ */
 export function buildQuotedHistory(message: MessageRow): string {
   const writer = escapeHtml(
     contactLabel(message.from_name, message.from_address)
   )
-  const header = `<p>On ${escapeHtml(formatQuoteDate(message.date))}, ${writer} wrote:</p>`
+  const header = `<p>${i18next.t("composer.outgoing.quoteHeader", {
+    date: escapeHtml(formatQuoteDate(message.date)),
+    writer,
+  })}</p>`
   return `${header}<blockquote>${quotedOriginal(message)}</blockquote>`
 }
 
 /** Classic forwarded-message header block + the quoted body. */
 export function buildForwardQuote(message: MessageRow): string {
   const lines = [
-    `From: ${contactLabel(message.from_name, message.from_address)}`,
-    `Date: ${formatQuoteDate(message.date)}`,
-    ...(message.subject ? [`Subject: ${message.subject}`] : []),
+    i18next.t("composer.outgoing.from", {
+      value: contactLabel(message.from_name, message.from_address),
+    }),
+    i18next.t("composer.outgoing.date", {
+      value: formatQuoteDate(message.date),
+    }),
+    ...(message.subject
+      ? [i18next.t("composer.outgoing.subject", { value: message.subject })]
+      : []),
   ]
   const to = contactListLabel(parseContacts(message.to_json))
-  if (to) lines.push(`To: ${to}`)
+  if (to) lines.push(i18next.t("composer.outgoing.to", { value: to }))
   const cc = contactListLabel(parseContacts(message.cc_json))
-  if (cc) lines.push(`Cc: ${cc}`)
+  if (cc) lines.push(i18next.t("composer.outgoing.cc", { value: cc }))
   const header = `<p>${lines.map((line) => escapeHtml(line)).join("<br>")}</p>`
-  return `<p>---------- Forwarded message ----------</p>${header}<blockquote>${quotedOriginal(message)}</blockquote>`
+  return `<p>${escapeHtml(i18next.t("composer.outgoing.forwardedMessage"))}</p>${header}<blockquote>${quotedOriginal(message)}</blockquote>`
 }
 
 /** Join non-empty sections with one blank line (no leading/trailing sep). */

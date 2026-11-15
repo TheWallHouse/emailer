@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Filter } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { RuleDialog } from "@/components/rules/rule-dialog"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import { useActiveAccount } from "@/stores/account-store"
  * so the prefill reads back exactly what the user searched.
  */
 export function CreateFilterButton({ query }: { query: string }) {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   const [open, setOpen] = useState(false)
   if (!account) return null
@@ -24,8 +26,8 @@ export function CreateFilterButton({ query }: { query: string }) {
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Create filter with this search"
-        title="Create filter with this search"
+        aria-label={t("search.createFilter.label")}
+        title={t("search.createFilter.label")}
         data-testid="create-filter-button"
         onClick={() => setOpen(true)}
       >

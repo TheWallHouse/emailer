@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { addDays, format, set } from "date-fns"
 import { Clock } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -82,6 +83,7 @@ function ScheduleCustomForm({
   onCancel: () => void
   onConfirm: (dueAt: number) => void
 }) {
+  const { t } = useTranslation()
   const [value, setValue] = useState(defaultCustomValue)
   // The default draft is in the future; validity (parseable + not in the
   // past) is sampled in the change handler, not during render.
@@ -101,7 +103,7 @@ function ScheduleCustomForm({
         htmlFor="schedule-custom-input"
         className="text-xs font-medium text-muted-foreground"
       >
-        Schedule for
+        {t("composer.schedule.scheduleFor")}
       </label>
       <Input
         id="schedule-custom-input"
@@ -112,10 +114,10 @@ function ScheduleCustomForm({
       />
       <div className="flex items-center justify-end gap-1">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          Cancel
+          {t("composer.schedule.cancel")}
         </Button>
         <Button type="button" size="sm" disabled={!valid} onClick={confirm}>
-          Schedule
+          {t("composer.schedule.schedule")}
         </Button>
       </div>
     </>
@@ -138,6 +140,7 @@ export function ScheduleSendMenu({
   disabled,
   onSchedule,
 }: ScheduleSendMenuProps) {
+  const { t } = useTranslation()
   const [customOpen, setCustomOpen] = useState(false)
   const [anchor, setAnchor] = useState<Element | null>(null)
   return (
@@ -148,7 +151,7 @@ export function ScheduleSendMenu({
             <Button
               variant="outline"
               disabled={disabled}
-              aria-label="Schedule send"
+              aria-label={t("composer.schedule.scheduleSend")}
             >
               <Clock aria-hidden />
             </Button>
@@ -165,7 +168,7 @@ export function ScheduleSendMenu({
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setCustomOpen(true)}>
-            Pick date &amp; time…
+            {t("composer.schedule.pickDateTime")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

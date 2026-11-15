@@ -8,6 +8,7 @@ import {
   MapPin,
   Users,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
@@ -19,7 +20,10 @@ import type { MessageRow } from "@/services/db/messages"
 import type { EmailAccount } from "@/services/email/types"
 import { describeIcsEventTime } from "@/services/calendar/ics"
 import { detectInvite } from "@/services/calendar/invites"
-import type { DetectedInvite, LinkedEventInfo } from "@/services/calendar/invites"
+import type {
+  DetectedInvite,
+  LinkedEventInfo,
+} from "@/services/calendar/invites"
 import type { AttachmentDeps } from "@/services/attachments"
 import {
   respondToInvite,
@@ -79,6 +83,7 @@ export function MeetingInviteCard({
   attachmentDeps?: AttachmentDeps
   deps?: MeetingCardDeps
 }) {
+  const { t } = useTranslation()
   const [invite, setInvite] = useState<DetectedInvite | null>(null)
   const [busy, setBusy] = useState(false)
   /** The occurrence-vs-series choice (only offered when the invite
@@ -148,26 +153,34 @@ export function MeetingInviteCard({
       if (outcome.reply.status === "queued") {
         if (outcome.writeBack.status === "applied") {
           toast.success(
-            `Response ${answer === "yes" ? "accepted" : answer === "no" ? "declined" : "marked tentative"} — calendar updated, reply queued`
+            answer === "yes"
+              ? t("reader.meeting.toasts.acceptedUpdated")
+              : answer === "no"
+                ? t("reader.meeting.toasts.declinedUpdated")
+                : t("reader.meeting.toasts.tentativeUpdated")
           )
         } else if (outcome.writeBack.status === "failed") {
           toast.warning(
-            `Reply to the organizer queued, but the calendar update failed: ${outcome.writeBack.message}`
+            t("reader.meeting.toasts.writeBackFailed", {
+              message: outcome.writeBack.message,
+            })
           )
         } else {
-          toast.success("Reply to the organizer queued")
+          toast.success(t("reader.meeting.toasts.replyQueued"))
         }
         setInvite(refreshAnswer(current, linkedEvent, answer))
       } else {
         // Queued-send failure: the standard retryable queued-send path
         // owns it; the answer stays recorded either way.
         toast.error(
-          `The response mail could not be queued: ${outcome.reply.message}`
+          t("reader.meeting.toasts.replyFailed", {
+            message: outcome.reply.message,
+          })
         )
       }
     } catch (error) {
       console.warn("[meeting-card] RSVP failed", error)
-      toast.error("The response could not be sent.")
+      toast.error(t("reader.meeting.toasts.sendFailed"))
     } finally {
       setBusy(false)
     }
@@ -199,7 +212,7 @@ export function MeetingInviteCard({
                 isCancelled && "line-through"
               )}
             >
-              {event.summary ?? "(untitled meeting)"}
+              {event.summary ?? t("reader.meeting.untitled")}
             </span>
             {isCancelled && (
               <Badge
@@ -207,7 +220,7 @@ export function MeetingInviteCard({
                 data-testid="meeting-card-cancelled"
                 className="border-destructive/30 bg-destructive/10 text-destructive"
               >
-                Cancelled
+                {t("reader.meeting.cancelled")}
               </Badge>
             )}
             {!isCancelled && currentPartstat && (
@@ -224,7 +237,7 @@ export function MeetingInviteCard({
           {time && (
             <p
               data-testid="meeting-card-time"
-              className="text-xs tabular-nums text-muted-foreground"
+              className="text-xs text-muted-foreground tabular-nums"
             >
               {time}
             </p>
@@ -232,7 +245,9 @@ export function MeetingInviteCard({
           {(event.location || joinLink) && (
             <p className="flex items-center gap-1 text-xs text-foreground">
               <MapPin className="size-3 shrink-0 text-muted-foreground" />
-              <span className="truncate">{event.location ?? joinLink?.url}</span>
+              <span className="truncate">
+                {event.location ?? joinLink?.url}
+              </span>
             </p>
           )}
           {event.organizer && (
@@ -240,7 +255,9 @@ export function MeetingInviteCard({
               data-testid="meeting-card-organizer"
               className="truncate text-xs text-muted-foreground"
             >
-              Organizer: {describePerson(event.organizer)}
+              {t("reader.meeting.organizer", {
+                person: describePerson(event.organizer),
+              })}
             </p>
           )}
           {event.attendees.length > 0 && (
@@ -268,14 +285,18 @@ export function MeetingInviteCard({
           onClick={() => {
             if (!joinLink.url) return
             void Promise.resolve(
-              deps.openUrl ? deps.openUrl(joinLink.url) : openJoinLink(joinLink.url)
+              deps.openUrl
+                ? deps.openUrl(joinLink.url)
+                : openJoinLink(joinLink.url)
             ).catch((error) => {
               console.warn("[meeting-card] join-link open failed", error)
             })
           }}
         >
           <ExternalLink className="size-3.5" />
-          Join{joinLink.url ? ` — ${joinLink.label}` : ` (${joinLink.label})`}
+          {joinLink.url
+            ? t("reader.meeting.joinWith", { label: joinLink.label })
+            : t("reader.meeting.joinWithout", { label: joinLink.label })}
         </Button>
       )}
 
@@ -287,7 +308,7 @@ export function MeetingInviteCard({
           data-testid="meeting-card-scope"
           className="mt-2 flex items-center gap-1 text-xs text-muted-foreground"
         >
-          <span>Respond to:</span>
+          <span>{t("reader.meeting.respondTo")}</span>
           <Button
             variant={scope === "series" ? "secondary" : "ghost"}
             size="xs"
@@ -295,7 +316,7 @@ export function MeetingInviteCard({
             aria-pressed={scope === "series"}
             onClick={() => setScope("series")}
           >
-            Whole series
+            {t("reader.meeting.wholeSeries")}
           </Button>
           <Button
             variant={scope === "occurrence" ? "secondary" : "ghost"}
@@ -304,7 +325,7 @@ export function MeetingInviteCard({
             aria-pressed={scope === "occurrence"}
             onClick={() => setScope("occurrence")}
           >
-            This occurrence
+            {t("reader.meeting.thisOccurrence")}
           </Button>
         </div>
       )}
@@ -320,7 +341,7 @@ export function MeetingInviteCard({
             onClick={() => void handleRespond("yes")}
           >
             <CircleCheck className="size-3.5 text-emerald-600" />
-            Accept
+            {t("reader.meeting.accept")}
           </Button>
           <Button
             variant="outline"
@@ -331,7 +352,7 @@ export function MeetingInviteCard({
             onClick={() => void handleRespond("maybe")}
           >
             <CircleDashed className="size-3.5 text-amber-600" />
-            Tentative
+            {t("reader.meeting.tentative")}
           </Button>
           <Button
             variant="outline"
@@ -342,7 +363,7 @@ export function MeetingInviteCard({
             onClick={() => void handleRespond("no")}
           >
             <CircleX className="size-3.5" />
-            Decline
+            {t("reader.meeting.decline")}
           </Button>
         </div>
       )}
@@ -351,8 +372,7 @@ export function MeetingInviteCard({
           data-testid="meeting-card-no-calendar"
           className="mt-1.5 text-xs text-muted-foreground"
         >
-          No connected calendar for this event — your answer is sent to the
-          organizer by email.
+          {t("reader.meeting.noCalendar")}
         </p>
       )}
     </div>

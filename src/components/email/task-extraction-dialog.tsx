@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { format, fromUnixTime } from "date-fns"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import { getExecutor } from "@/services/db/executor"
 import {
   extractTasks,
@@ -50,9 +52,9 @@ import { createTaskFromSuggestion } from "@/services/tasks/create"
 
 /**
  * Defensive toast for the frozen "unavailable" result (frozen text) —
- * unreachable via the real seam since task 5.6 (see module doc).
+ * unreachable via the real seam since task 5.6 (see module doc). The text
+ * lives in reader.taskExtraction.tasksUnavailable.
  */
-const TASKS_UNAVAILABLE_TOAST = "The Tasks module arrives in a later update"
 
 /** What happened to a suggestion the user acted on. */
 type HandledState = "added" | "dismissed"
@@ -68,6 +70,7 @@ export function TaskExtractionDialog({
   open,
   onOpenChange,
 }: TaskExtractionDialogProps) {
+  const { t } = useTranslation()
   const [phase, setPhase] = useState<"extracting" | "ready" | "error">(
     "extracting"
   )
@@ -103,13 +106,15 @@ export function TaskExtractionDialog({
         })
         .catch((error: unknown) => {
           setErrorMessage(
-            error instanceof Error ? error.message : "Task extraction failed."
+            error instanceof Error
+              ? error.message
+              : i18next.t("reader.taskExtraction.failed")
           )
           setPhase("error")
         })
     } catch {
       // No executor (plain vite / early startup) — same inline-error path.
-      setErrorMessage("Task extraction is unavailable right now.")
+      setErrorMessage(i18next.t("reader.taskExtraction.unavailable"))
       setPhase("error")
     }
   }, [threadId])
@@ -139,7 +144,8 @@ export function TaskExtractionDialog({
     (ids: string[]) => {
       if (accepting || ids.length === 0) return
       const targets = suggestions.filter(
-        (item) => handled[item.messageId] === undefined && ids.includes(item.messageId)
+        (item) =>
+          handled[item.messageId] === undefined && ids.includes(item.messageId)
       )
       if (targets.length === 0) return
       setAccepting(true)
@@ -174,20 +180,20 @@ export function TaskExtractionDialog({
           setHandled((previous) => ({ ...previous, ...handledNext }))
           if (unavailableCount > 0) {
             // One toast per batch — N toasts for N items is noise.
-            toast.info(TASKS_UNAVAILABLE_TOAST)
+            toast.info(i18next.t("reader.taskExtraction.tasksUnavailable"))
           }
           if (failureCount > 0) {
             setAcceptError(
-              `${failureCount} suggestion${
-                failureCount === 1 ? "" : "s"
-              } could not be added. Try again.`
+              i18next.t("reader.taskExtraction.addFailed", {
+                count: failureCount,
+              })
             )
           }
           setAccepting(false)
         })()
       } catch {
         // getExecutor() unavailable — nothing was created; recover the UI.
-        setAcceptError("Tasks cannot be added right now. Try again.")
+        setAcceptError(i18next.t("reader.taskExtraction.addUnavailable"))
         setAccepting(false)
       }
     },
@@ -217,10 +223,9 @@ export function TaskExtractionDialog({
         className="sm:max-w-md"
       >
         <DialogHeader>
-          <DialogTitle>Suggested tasks</DialogTitle>
+          <DialogTitle>{t("reader.taskExtraction.title")}</DialogTitle>
           <DialogDescription>
-            AI-generated suggestions from this conversation — review each one
-            before adding. Nothing is created until you accept.
+            {t("reader.taskExtraction.description")}
           </DialogDescription>
         </DialogHeader>
         {phase === "extracting" && (
@@ -228,7 +233,7 @@ export function TaskExtractionDialog({
             data-testid="task-extraction-busy"
             className="py-6 text-center text-sm text-muted-foreground"
           >
-            Reviewing the conversation for tasks…
+            {t("reader.taskExtraction.busy")}
           </div>
         )}
         {phase === "error" && (
@@ -237,7 +242,7 @@ export function TaskExtractionDialog({
             className="flex flex-col items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm"
           >
             <span className="text-destructive">
-              {errorMessage ?? "Task extraction failed."}
+              {errorMessage ?? t("reader.taskExtraction.failed")}
             </span>
             <Button
               variant="outline"
@@ -245,7 +250,7 @@ export function TaskExtractionDialog({
               data-testid="task-extraction-retry"
               onClick={runExtraction}
             >
-              Retry
+              {t("reader.taskExtraction.retry")}
             </Button>
           </div>
         )}
@@ -272,7 +277,7 @@ export function TaskExtractionDialog({
                 data-testid="task-extraction-empty"
                 className="py-6 text-center text-sm text-muted-foreground"
               >
-                No task suggestions were found in this conversation.
+                {t("reader.taskExtraction.empty")}
               </div>
             ) : (
               <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
@@ -296,17 +301,18 @@ export function TaskExtractionDialog({
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                aria-label="Close task suggestions"
+                aria-label={t("reader.taskExtraction.closeLabel")}
               >
-                Close
+                {t("reader.taskExtraction.close")}
               </Button>
               <Button
                 data-testid="task-extraction-accept"
                 disabled={accepting || pendingCheckedIds.length === 0}
                 onClick={() => acceptSuggestions(pendingCheckedIds)}
               >
-                Add {pendingCheckedIds.length} task
-                {pendingCheckedIds.length === 1 ? "" : "s"}
+                {t("reader.taskExtraction.addCount", {
+                  count: pendingCheckedIds.length,
+                })}
               </Button>
             </DialogFooter>
           </>
@@ -335,6 +341,7 @@ function SuggestionRow({
   onToggle: (checked: boolean) => void
   onAccept: () => void
 }) {
+  const { t } = useTranslation()
   const isHandled = handled !== undefined
   return (
     <div
@@ -347,11 +354,13 @@ function SuggestionRow({
         checked={!isHandled && checked}
         disabled={isHandled || disabled}
         onCheckedChange={(next) => onToggle(next === true)}
-        aria-label={`Include "${suggestion.title}"`}
+        aria-label={t("reader.taskExtraction.include", {
+          title: suggestion.title,
+        })}
         className="mt-0.5"
       />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium leading-snug">{suggestion.title}</p>
+        <p className="text-sm leading-snug font-medium">{suggestion.title}</p>
         {suggestion.notes !== undefined && (
           <p className="mt-0.5 text-xs text-muted-foreground">
             {suggestion.notes}
@@ -360,12 +369,23 @@ function SuggestionRow({
         <p className="mt-1 text-xs text-muted-foreground">
           {suggestion.dueAt !== undefined && (
             <span data-testid={`task-suggestion-due-${index}`}>
-              Due {format(fromUnixTime(suggestion.dueAt), "MMM d, yyyy")} ·{" "}
+              {t("reader.taskExtraction.due", {
+                date: format(
+                  fromUnixTime(suggestion.dueAt),
+                  t("reader.dates.date")
+                ),
+              })}{" "}
+              ·{" "}
             </span>
           )}
           <span data-testid={`task-suggestion-source-${index}`}>
-            From {suggestion.messageFrom} ·{" "}
-            {format(fromUnixTime(suggestion.messageDate), "MMM d, yyyy")}
+            {t("reader.eventExtraction.source", {
+              from: suggestion.messageFrom,
+              date: format(
+                fromUnixTime(suggestion.messageDate),
+                t("reader.dates.date")
+              ),
+            })}
           </span>
         </p>
       </div>
@@ -374,7 +394,9 @@ function SuggestionRow({
           data-testid={`task-suggestion-state-${index}`}
           className="shrink-0 pt-1 text-xs text-muted-foreground"
         >
-          {handled === "added" ? "Added" : "Dismissed"}
+          {handled === "added"
+            ? t("reader.taskExtraction.added")
+            : t("reader.taskExtraction.dismissed")}
         </span>
       ) : (
         <Button
@@ -383,10 +405,12 @@ function SuggestionRow({
           className="shrink-0"
           data-testid={`task-suggestion-add-${index}`}
           disabled={disabled}
-          aria-label={`Add "${suggestion.title}"`}
+          aria-label={t("reader.taskExtraction.addOne", {
+            title: suggestion.title,
+          })}
           onClick={onAccept}
         >
-          Add
+          {t("reader.taskExtraction.add")}
         </Button>
       )}
     </div>

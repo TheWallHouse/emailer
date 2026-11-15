@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -41,6 +42,7 @@ export function SnippetVariableDialog({
   /** Cancelled: the insertion is abandoned entirely. */
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const [values, setValues] = useState<Record<string, string>>({})
 
   const setValue = (variable: string, value: string) =>
@@ -62,11 +64,9 @@ export function SnippetVariableDialog({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Fill in snippet values</DialogTitle>
+            <DialogTitle>{t("composer.snippetVariables.title")}</DialogTitle>
             <DialogDescription>
-              This snippet uses values the message context doesn't provide.
-              Each value replaces every occurrence of its variable; leave a
-              field empty to keep its placeholder as text.
+              {t("composer.snippetVariables.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3">
@@ -88,9 +88,11 @@ export function SnippetVariableDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              {t("composer.snippetVariables.cancel")}
             </Button>
-            <Button type="submit">Insert</Button>
+            <Button type="submit">
+              {t("composer.snippetVariables.insert")}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

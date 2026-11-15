@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { CirclePlus, Loader2, Pencil, Trash2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { DEFAULT_PROFILE_COLOR, PROFILE_COLORS } from "@/lib/profile-colors"
 import { useAccountStore } from "@/stores/account-store"
@@ -52,8 +53,7 @@ import { cn } from "@/lib/utils"
  */
 
 type DialogTarget =
-  | { mode: "add" }
-  | { mode: "edit"; profile: AccountProfileRow }
+  { mode: "add" } | { mode: "edit"; profile: AccountProfileRow }
 
 /**
  * One round swatch button (the accent-picker pattern): aria-pressed for
@@ -105,6 +105,7 @@ function ProfileDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const { t } = useTranslation()
   const accounts = useAccountStore((state) => state.accounts)
   const editing = target.mode === "edit" ? target.profile : null
   const [name, setName] = useState(editing?.name ?? "")
@@ -153,9 +154,8 @@ function ProfileDialog({
         })
         targetId = editing.id
       } else {
-        targetId = (
-          await createProfile(executor, { name: name.trim(), color })
-        ).id
+        targetId = (await createProfile(executor, { name: name.trim(), color }))
+          .id
       }
       // Apply the dialog's account edits. Membership: checked accounts
       // join this profile (moving from another one if needed), accounts
@@ -177,11 +177,7 @@ function ProfileDialog({
         if (isMember) {
           const desiredOverride = overrides[account.id] ?? null
           if ((current?.color_override ?? null) !== desiredOverride) {
-            await setAccountColorOverride(
-              executor,
-              account.id,
-              desiredOverride
-            )
+            await setAccountColorOverride(executor, account.id, desiredOverride)
           }
         }
       }
@@ -189,7 +185,9 @@ function ProfileDialog({
       onOpenChange(false)
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Could not save the profile."
+        error instanceof Error
+          ? error.message
+          : t("settingsMail.profiles.saveFailed")
       )
       setSaving(false)
     }
@@ -199,10 +197,13 @@ function ProfileDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{editing ? "Edit Profile" : "Add Profile"}</DialogTitle>
+          <DialogTitle>
+            {editing
+              ? t("settingsMail.profiles.editTitle")
+              : t("settingsMail.profiles.addTitle")}
+          </DialogTitle>
           <DialogDescription>
-            Profiles group accounts locally — renaming or deleting never
-            touches the mail servers.
+            {t("settingsMail.profiles.dialogDescription")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -213,26 +214,30 @@ function ProfileDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="profile-name">Name</Label>
+            <Label htmlFor="profile-name">
+              {t("settingsMail.profiles.name")}
+            </Label>
             <Input
               id="profile-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Work"
+              placeholder={t("settingsMail.profiles.namePlaceholder")}
               autoFocus
             />
           </div>
           <div className="grid gap-2">
-            <Label>Profile color</Label>
+            <Label>{t("settingsMail.profiles.color")}</Label>
             <div
               role="group"
-              aria-label="Profile color"
+              aria-label={t("settingsMail.profiles.color")}
               className="flex items-center gap-1.5"
             >
               {PROFILE_COLORS.map((entry) => (
                 <ColorSwatch
                   key={entry.id}
-                  label={`Profile color: ${entry.label}`}
+                  label={t("settingsMail.profiles.colorOption", {
+                    color: entry.label,
+                  })}
                   color={entry.value}
                   pressed={color === entry.value}
                   onPick={setColor}
@@ -248,7 +253,7 @@ function ProfileDialog({
           </div>
           {accounts.length > 0 && (
             <div className="grid gap-2">
-              <Label>Accounts</Label>
+              <Label>{t("settingsMail.profiles.accounts")}</Label>
               <div className="flex flex-col gap-2.5">
                 {accounts.map((account) => {
                   const isMember = checked[account.id] ?? false
@@ -284,11 +289,18 @@ function ProfileDialog({
                       {isMember && (
                         <div
                           role="group"
-                          aria-label={`Marker color for ${account.email}`}
+                          aria-label={t(
+                            "settingsMail.profiles.markerColorFor",
+                            {
+                              email: account.email,
+                            }
+                          )}
                           className="ms-6 flex flex-wrap items-center gap-1"
                         >
                           <ColorSwatch
-                            label={`${account.email} marker: profile color`}
+                            label={t("settingsMail.profiles.markerInherit", {
+                              email: account.email,
+                            })}
                             color="__inherit__"
                             pressed={override === null}
                             onPick={() =>
@@ -306,7 +318,10 @@ function ProfileDialog({
                           {PROFILE_COLORS.map((entry) => (
                             <ColorSwatch
                               key={entry.id}
-                              label={`${account.email} marker: ${entry.label}`}
+                              label={t("settingsMail.profiles.markerOption", {
+                                email: account.email,
+                                color: entry.label,
+                              })}
                               color={entry.value}
                               pressed={override === entry.value}
                               onPick={(picked) =>
@@ -343,13 +358,15 @@ function ProfileDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settingsMail.profiles.cancel")}
             </Button>
             <Button type="submit" disabled={!canSave}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              {editing ? "Save Changes" : "Create Profile"}
+              {editing
+                ? t("settingsMail.profiles.saveChanges")
+                : t("settingsMail.profiles.create")}
             </Button>
           </DialogFooter>
         </form>
@@ -367,6 +384,7 @@ function DeleteProfileDialog({
   onOpenChange: (open: boolean) => void
   onDeleted: () => void
 }) {
+  const { t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
 
   async function handleConfirm(): Promise<void> {
@@ -385,13 +403,15 @@ function DeleteProfileDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete profile</DialogTitle>
+          <DialogTitle>{t("settingsMail.profiles.deleteTitle")}</DialogTitle>
           <DialogDescription>
-            Delete{" "}
-            <span className="font-medium text-foreground">{profile.name}</span>
-            ? Its accounts keep working with their individual colors — only
-            the local grouping is removed. Nothing changes on the mail
-            servers. This cannot be undone.
+            <Trans
+              i18nKey="settingsMail.profiles.deleteConfirm"
+              values={{ name: profile.name }}
+              components={{
+                name: <span className="font-medium text-foreground" />,
+              }}
+            />
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -400,7 +420,7 @@ function DeleteProfileDialog({
             onClick={() => onOpenChange(false)}
             disabled={deleting}
           >
-            Cancel
+            {t("settingsMail.profiles.cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -412,7 +432,7 @@ function DeleteProfileDialog({
             {deleting && (
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
             )}
-            Delete profile
+            {t("settingsMail.profiles.deleteTitle")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -421,6 +441,7 @@ function DeleteProfileDialog({
 }
 
 export function ProfilesEditor() {
+  const { t } = useTranslation()
   const accounts = useAccountStore((state) => state.accounts)
   const [profiles, setProfiles] = useState<AccountProfileRow[]>([])
   const [assignments, setAssignments] = useState<AccountProfileAssignment[]>([])
@@ -462,14 +483,17 @@ export function ProfilesEditor() {
   )
 
   return (
-    <section aria-label="Account profiles" className="flex flex-col gap-3">
+    <section
+      aria-label={t("settingsMail.profiles.sectionAria")}
+      className="flex flex-col gap-3"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Profiles</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            {t("settingsMail.profiles.title")}
+          </h3>
           <p className="text-xs text-muted-foreground">
-            Group accounts (for example Work or Personal) and give each group
-            a color for the cross-account list markers. Local only — the mail
-            servers are never touched.
+            {t("settingsMail.profiles.subtitle")}
           </p>
         </div>
         <Button
@@ -479,12 +503,15 @@ export function ProfilesEditor() {
           onClick={() => setDialog({ mode: "add" })}
         >
           <CirclePlus />
-          Add Profile
+          {t("settingsMail.profiles.add")}
         </Button>
       </div>
       {profiles.length === 0 ? (
-        <p className="text-sm text-muted-foreground" data-testid="profiles-empty">
-          No profiles yet. Create one to color-code accounts across views.
+        <p
+          className="text-sm text-muted-foreground"
+          data-testid="profiles-empty"
+        >
+          {t("settingsMail.profiles.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">
@@ -493,7 +520,9 @@ export function ProfilesEditor() {
               (entry) => entry.profile_id === profile.id
             )
             const memberNames = members.map(
-              (entry) => accountEmailById.get(entry.account_id) ?? "unknown"
+              (entry) =>
+                accountEmailById.get(entry.account_id) ??
+                t("settingsMail.profiles.unknownAccount")
             )
             return (
               <div
@@ -517,26 +546,30 @@ export function ProfilesEditor() {
                   <p className="truncate text-xs text-muted-foreground">
                     {memberNames.length > 0
                       ? memberNames.join(", ")
-                      : "No accounts"}
+                      : t("settingsMail.profiles.noAccounts")}
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={`Edit ${profile.name}`}
+                  aria-label={t("settingsMail.profiles.editAria", {
+                    name: profile.name,
+                  })}
                   onClick={() => setDialog({ mode: "edit", profile })}
                 >
                   <Pencil />
-                  Edit
+                  {t("settingsMail.profiles.edit")}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={`Delete ${profile.name}`}
+                  aria-label={t("settingsMail.profiles.deleteAria", {
+                    name: profile.name,
+                  })}
                   onClick={() => setDeleteTarget(profile)}
                 >
                   <Trash2 />
-                  Delete
+                  {t("settingsMail.profiles.delete")}
                 </Button>
               </div>
             )

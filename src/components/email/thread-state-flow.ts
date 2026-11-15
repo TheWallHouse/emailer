@@ -1,5 +1,7 @@
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
+
 import { refreshThreadList } from "@/stores/thread-list-store"
 import { useAccountStore } from "@/stores/account-store"
 import { useFolderCountsStore } from "@/stores/folder-counts-store"
@@ -37,8 +39,8 @@ export type ThreadStateKind =
 
 interface StateAction {
   apply: (executor: SqlExecutor, threadId: string) => Promise<void>
-  /** Toast copy shown once for the whole run. */
-  toastLabel: string
+  /** Toast copy shown once for the whole run (localized at call time). */
+  toastLabel: (count: number) => string
   /** The change moves threads in/out of unread-derived badges. */
   refreshUnread: boolean
   /** The change moves threads in/out of folder-derived badges. */
@@ -48,37 +50,39 @@ interface StateAction {
 const STATE_ACTIONS: Record<ThreadStateKind, StateAction> = {
   mute: {
     apply: muteThread,
-    toastLabel: "Muted",
+    toastLabel: (count) => i18next.t("threadList.stateToasts.mute", { count }),
     refreshUnread: true,
     refreshFolders: true,
   },
   unmute: {
     apply: unmuteThread,
-    toastLabel: "Unmuted",
+    toastLabel: (count) =>
+      i18next.t("threadList.stateToasts.unmute", { count }),
     refreshUnread: true,
     refreshFolders: true,
   },
   pin: {
     apply: pinThread,
-    toastLabel: "Pinned",
+    toastLabel: (count) => i18next.t("threadList.stateToasts.pin", { count }),
     refreshUnread: false,
     refreshFolders: false,
   },
   unpin: {
     apply: unpinThread,
-    toastLabel: "Unpinned",
+    toastLabel: (count) => i18next.t("threadList.stateToasts.unpin", { count }),
     refreshUnread: false,
     refreshFolders: false,
   },
   done: {
     apply: markThreadDone,
-    toastLabel: "Marked done",
+    toastLabel: (count) => i18next.t("threadList.stateToasts.done", { count }),
     refreshUnread: false,
     refreshFolders: true,
   },
   undone: {
     apply: unmarkThreadDone,
-    toastLabel: "Marked not done",
+    toastLabel: (count) =>
+      i18next.t("threadList.stateToasts.undone", { count }),
     refreshUnread: false,
     refreshFolders: true,
   },
@@ -105,7 +109,7 @@ export async function applyThreadStatesWithRefresh(
     console.warn("[thread-state] failed", error)
     return false
   }
-  toast.success(action.toastLabel)
+  toast.success(action.toastLabel(threadIds.length))
   const refreshes: Promise<unknown>[] = [refreshThreadList()]
   if (action.refreshFolders) {
     refreshes.push(useFolderCountsStore.getState().refreshFolderCounts())

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +32,7 @@ import {
  */
 
 export function AttachmentSecuritySection() {
+  const { t } = useTranslation()
   const [enabled, setEnabled] = useState(false)
   const [apiKey, setApiKey] = useState("")
   const [loaded, setLoaded] = useState(false)
@@ -93,26 +95,25 @@ export function AttachmentSecuritySection() {
   }
 
   return (
-    <section aria-label="Attachment security" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.attachmentSecurity.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
         <h2 className="text-base font-semibold text-foreground">
-          Attachment security
+          {t("settings.attachmentSecurity.title")}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Known dangerous file types are always flagged and confirmed before
-          they open. Optionally, attachments can also be checked against a
-          malware lookup service before their first open.
+          {t("settings.attachmentSecurity.description")}
         </p>
       </div>
       <div className="flex items-center justify-between gap-6 py-1">
         <div className="grid gap-0.5">
           <Label htmlFor="malware-lookup-enabled">
-            Check attachments with a malware lookup
+            {t("settings.attachmentSecurity.lookup.label")}
           </Label>
           <p className="text-xs text-muted-foreground">
-            Before an attachment opens for the first time, its SHA-256 hash is
-            looked up. Malicious files are blocked with the detection report
-            (you can still override); suspicious ones warn.
+            {t("settings.attachmentSecurity.lookup.hint")}
           </p>
         </div>
         <Switch
@@ -124,7 +125,9 @@ export function AttachmentSecuritySection() {
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="malware-lookup-api-key">VirusTotal API key</Label>
+        <Label htmlFor="malware-lookup-api-key">
+          {t("settings.attachmentSecurity.apiKey.label")}
+        </Label>
         <Input
           id="malware-lookup-api-key"
           type="password"
@@ -133,7 +136,7 @@ export function AttachmentSecuritySection() {
           onBlur={() => {
             void commitApiKey()
           }}
-          placeholder="Paste your key (stored on this machine)"
+          placeholder={t("settings.attachmentSecurity.apiKey.placeholder")}
           autoComplete="off"
           className="font-mono"
         />
@@ -144,16 +147,12 @@ export function AttachmentSecuritySection() {
               aria-hidden
             />
           )}
-          Only the file&apos;s SHA-256 hash is ever sent — attachment contents
-          never leave this machine. Verdicts are cached locally per hash.
-          Offline, without a key, or when the service cannot be reached, the
-          built-in dangerous-file warnings above apply alone.
+          {t("settings.attachmentSecurity.apiKey.hint")}
         </p>
       </div>
       <Separator />
       <p className="text-xs text-muted-foreground">
-        Executables, scripts, installers and macro-enabled Office documents are
-        flagged by file type on every account, regardless of this setting.
+        {t("settings.attachmentSecurity.alwaysOn")}
       </p>
     </section>
   )

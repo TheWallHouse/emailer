@@ -9,6 +9,7 @@ import {
   Trash2,
   X,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { getExecutor } from "@/services/db/executor"
+import { i18next } from "@/i18n"
 import {
   createQuickStep,
   deleteQuickStep,
@@ -70,12 +72,20 @@ import {
 type DialogTarget = { mode: "add" } | { mode: "edit"; step: QuickStep }
 
 /** Human labels for the snooze preset ids (the run-time presets carry
- * the same names; here they are static builder copy). */
-const SNOOZE_PRESET_LABELS: Record<QuickStepSnoozePresetId, string> = {
-  later_today: "Later today",
-  tomorrow: "Tomorrow",
-  next_week: "Next week",
-}
+ * the same names; here they are static builder copy). Getters reuse the
+ * snooze menu's preset names, localized at read time. */
+const SNOOZE_PRESET_LABELS: Readonly<Record<QuickStepSnoozePresetId, string>> =
+  {
+    get later_today() {
+      return i18next.t("snooze.presets.laterToday")
+    },
+    get tomorrow() {
+      return i18next.t("settingsMail.quickSteps.snoozeTomorrow")
+    },
+    get next_week() {
+      return i18next.t("snooze.presets.nextWeek")
+    },
+  }
 
 /** The builder's kind vocabulary: mark_read splits into read/unread (a
  * "Mark unread" entry is friendlier than a toggle field). */
@@ -91,21 +101,42 @@ type BuilderKind =
   | "move_to_folder"
   | "snooze"
 
-const BUILDER_KIND_LABELS: Record<BuilderKind, string> = {
-  archive: "Archive",
-  add_label: "Add label",
-  remove_label: "Remove label",
-  star: "Star",
-  mark_read: "Mark read",
-  mark_unread: "Mark unread",
-  mark_done: "Mark done",
-  trash: "Move to Trash",
-  move_to_folder: "Move to folder",
-  snooze: "Snooze",
+const BUILDER_KIND_LABELS: Readonly<Record<BuilderKind, string>> = {
+  get archive() {
+    return i18next.t("settingsMail.quickSteps.kinds.archive")
+  },
+  get add_label() {
+    return i18next.t("settingsMail.quickSteps.kinds.addLabel")
+  },
+  get remove_label() {
+    return i18next.t("settingsMail.quickSteps.kinds.removeLabel")
+  },
+  get star() {
+    return i18next.t("settingsMail.quickSteps.kinds.star")
+  },
+  get mark_read() {
+    return i18next.t("settingsMail.quickSteps.kinds.markRead")
+  },
+  get mark_unread() {
+    return i18next.t("settingsMail.quickSteps.kinds.markUnread")
+  },
+  get mark_done() {
+    return i18next.t("settingsMail.quickSteps.kinds.markDone")
+  },
+  get trash() {
+    return i18next.t("settingsMail.quickSteps.kinds.trash")
+  },
+  get move_to_folder() {
+    return i18next.t("settingsMail.quickSteps.kinds.moveToFolder")
+  },
+  get snooze() {
+    return i18next.t("settingsMail.quickSteps.kinds.snooze")
+  },
 }
 
 function builderKindOf(action: QuickStepAction): BuilderKind {
-  if (action.kind === "mark_read") return action.read ? "mark_read" : "mark_unread"
+  if (action.kind === "mark_read")
+    return action.read ? "mark_read" : "mark_unread"
   return action.kind
 }
 
@@ -132,38 +163,57 @@ function defaultActionFor(kind: BuilderKind): QuickStepAction {
 function quickStepActionChip(action: QuickStepAction): string {
   switch (action.kind) {
     case "archive":
-      return "Archive"
+      return BUILDER_KIND_LABELS.archive
     case "star":
-      return "Star"
+      return BUILDER_KIND_LABELS.star
     case "mark_done":
-      return "Mark done"
+      return BUILDER_KIND_LABELS.mark_done
     case "trash":
-      return "Move to Trash"
+      return BUILDER_KIND_LABELS.trash
     case "mark_read":
-      return action.read ? "Mark read" : "Mark unread"
+      return action.read
+        ? BUILDER_KIND_LABELS.mark_read
+        : BUILDER_KIND_LABELS.mark_unread
     case "add_label":
-      return `+ Label “${action.label}”`
+      return i18next.t("settingsMail.quickSteps.chips.addLabel", {
+        label: action.label,
+      })
     case "remove_label":
-      return `− Label “${action.label}”`
+      return i18next.t("settingsMail.quickSteps.chips.removeLabel", {
+        label: action.label,
+      })
     case "move_to_folder":
       return `→ ${action.folderPath}`
     case "snooze":
-      return `Snooze · ${SNOOZE_PRESET_LABELS[action.presetId]}`
+      return i18next.t("settingsMail.quickSteps.chips.snooze", {
+        preset: SNOOZE_PRESET_LABELS[action.presetId],
+      })
   }
 }
 
 /** Typed mutation errors → dialog copy (the service owns the rules; the
  * dialog only renders them). */
-const RESULT_ERRORS: Record<
-  Exclude<QuickStepResult, { ok: true }>["error"],
-  string
+const RESULT_ERRORS: Readonly<
+  Record<Exclude<QuickStepResult, { ok: true }>["error"], string>
 > = {
-  "name-required": "Give the quick step a name.",
-  "name-taken": "A quick step with this name already exists.",
-  "min-two-actions": "A quick step needs at least two actions.",
-  "not-found": "This quick step no longer exists.",
-  "shortcut-invalid": "Shortcuts are the digits 1–9.",
-  "shortcut-taken": "That digit is already assigned to another quick step.",
+  get "name-required"() {
+    return i18next.t("settingsMail.quickSteps.errors.nameRequired")
+  },
+  get "name-taken"() {
+    return i18next.t("settingsMail.quickSteps.errors.nameTaken")
+  },
+  get "min-two-actions"() {
+    return i18next.t("settingsMail.quickSteps.errors.minTwoActions")
+  },
+  get "not-found"() {
+    return i18next.t("settingsMail.quickSteps.errors.notFound")
+  },
+  get "shortcut-invalid"() {
+    return i18next.t("settingsMail.quickSteps.errors.shortcutInvalid")
+  },
+  get "shortcut-taken"() {
+    return i18next.t("settingsMail.quickSteps.errors.shortcutTaken")
+  },
 }
 
 function QuickStepDialog({
@@ -179,6 +229,7 @@ function QuickStepDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const { t } = useTranslation()
   const editing = target.mode === "edit" ? target.step : null
   const [name, setName] = useState(editing?.name ?? "")
   const [actions, setActions] = useState<QuickStepAction[]>(
@@ -252,7 +303,7 @@ function QuickStepDialog({
       onOpenChange(false)
     } catch (error) {
       console.warn("[settings] failed to save quick step", error)
-      setErrorMessage("Could not save the quick step.")
+      setErrorMessage(t("settingsMail.quickSteps.saveFailed"))
       setSaving(false)
     }
   }
@@ -262,12 +313,12 @@ function QuickStepDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {editing ? "Edit Quick Step" : "Add Quick Step"}
+            {editing
+              ? t("settingsMail.quickSteps.editTitle")
+              : t("settingsMail.quickSteps.addTitle")}
           </DialogTitle>
           <DialogDescription>
-            Two or more actions applied together, in order, to a thread or
-            the whole selection — from the context menu, the command
-            palette, or its keyboard digit.
+            {t("settingsMail.quickSteps.dialogDescription")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -278,17 +329,19 @@ function QuickStepDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="quick-step-name">Name</Label>
+            <Label htmlFor="quick-step-name">
+              {t("settingsMail.quickSteps.name")}
+            </Label>
             <Input
               id="quick-step-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Cleanup"
+              placeholder={t("settingsMail.quickSteps.namePlaceholder")}
               autoFocus
             />
           </div>
           <div className="grid gap-2" data-testid="quick-step-action-builder">
-            <Label>Actions (run in order)</Label>
+            <Label>{t("settingsMail.quickSteps.actions")}</Label>
             {actions.map((action, index) => {
               const kind = builderKindOf(action)
               return (
@@ -301,30 +354,37 @@ function QuickStepDialog({
                     <Select
                       value={kind}
                       onValueChange={(value) => {
-                        patchAction(index, defaultActionFor(value as BuilderKind))
+                        patchAction(
+                          index,
+                          defaultActionFor(value as BuilderKind)
+                        )
                       }}
                     >
                       <SelectTrigger
                         className="min-w-36 flex-1"
-                        aria-label={`Action ${index + 1} type`}
+                        aria-label={t("settingsMail.quickSteps.actionType", {
+                          index: index + 1,
+                        })}
                       >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {(Object.keys(BUILDER_KIND_LABELS) as BuilderKind[]).map(
-                          (candidate) => (
-                            <SelectItem key={candidate} value={candidate}>
-                              {BUILDER_KIND_LABELS[candidate]}
-                            </SelectItem>
-                          )
-                        )}
+                        {(
+                          Object.keys(BUILDER_KIND_LABELS) as BuilderKind[]
+                        ).map((candidate) => (
+                          <SelectItem key={candidate} value={candidate}>
+                            {BUILDER_KIND_LABELS[candidate]}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Move action ${index + 1} up`}
+                      aria-label={t("settingsMail.quickSteps.moveActionUp", {
+                        index: index + 1,
+                      })}
                       disabled={index === 0}
                       onClick={() => moveAction(index, -1)}
                     >
@@ -334,7 +394,9 @@ function QuickStepDialog({
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Move action ${index + 1} down`}
+                      aria-label={t("settingsMail.quickSteps.moveActionDown", {
+                        index: index + 1,
+                      })}
                       disabled={index === actions.length - 1}
                       onClick={() => moveAction(index, 1)}
                     >
@@ -344,7 +406,9 @@ function QuickStepDialog({
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Remove action ${index + 1}`}
+                      aria-label={t("settingsMail.quickSteps.removeAction", {
+                        index: index + 1,
+                      })}
                       onClick={() =>
                         setActions((previous) =>
                           previous.filter((_, i) => i !== index)
@@ -359,10 +423,15 @@ function QuickStepDialog({
                     <Input
                       value={action.label}
                       onChange={(event) =>
-                        patchAction(index, { ...action, label: event.target.value })
+                        patchAction(index, {
+                          ...action,
+                          label: event.target.value,
+                        })
                       }
-                      placeholder="Label name"
-                      aria-label={`Action ${index + 1} label name`}
+                      placeholder={t("settingsMail.quickSteps.labelName")}
+                      aria-label={t("settingsMail.quickSteps.actionLabelName", {
+                        index: index + 1,
+                      })}
                     />
                   )}
                   {action.kind === "move_to_folder" && (
@@ -374,8 +443,13 @@ function QuickStepDialog({
                           folderPath: event.target.value,
                         })
                       }
-                      placeholder="Folder path"
-                      aria-label={`Action ${index + 1} folder path`}
+                      placeholder={t("settingsMail.quickSteps.folderPath")}
+                      aria-label={t(
+                        "settingsMail.quickSteps.actionFolderPath",
+                        {
+                          index: index + 1,
+                        }
+                      )}
                       className="font-mono"
                     />
                   )}
@@ -390,7 +464,12 @@ function QuickStepDialog({
                       }}
                     >
                       <SelectTrigger
-                        aria-label={`Action ${index + 1} snooze preset`}
+                        aria-label={t(
+                          "settingsMail.quickSteps.actionSnoozePreset",
+                          {
+                            index: index + 1,
+                          }
+                        )}
                       >
                         <SelectValue />
                       </SelectTrigger>
@@ -416,10 +495,13 @@ function QuickStepDialog({
                 setAddKey((key) => key + 1)
               }}
             >
-              <SelectTrigger aria-label="Add action" className="w-full">
+              <SelectTrigger
+                aria-label={t("settingsMail.quickSteps.addActionAria")}
+                className="w-full"
+              >
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Plus className="size-4" aria-hidden />
-                  Add action…
+                  {t("settingsMail.quickSteps.addAction")}
                 </span>
               </SelectTrigger>
               <SelectContent>
@@ -434,12 +516,14 @@ function QuickStepDialog({
             </Select>
             {actions.length < 2 && (
               <p className="text-xs text-muted-foreground">
-                A quick step needs at least two actions.
+                {t("settingsMail.quickSteps.errors.minTwoActions")}
               </p>
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="quick-step-shortcut">Keyboard shortcut</Label>
+            <Label htmlFor="quick-step-shortcut">
+              {t("settingsMail.quickSteps.shortcut")}
+            </Label>
             <Select
               value={shortcut === "" ? "none" : shortcut}
               onValueChange={(value) => {
@@ -447,24 +531,29 @@ function QuickStepDialog({
               }}
             >
               <SelectTrigger id="quick-step-shortcut" className="w-40">
-                <SelectValue placeholder="None" />
+                <SelectValue placeholder={t("settingsMail.quickSteps.none")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="none">
+                  {t("settingsMail.quickSteps.none")}
+                </SelectItem>
                 {QUICK_STEP_SHORTCUTS.map((digit) => {
                   const owner = takenShortcuts.get(digit)
                   return (
                     <SelectItem key={digit} value={digit} disabled={!!owner}>
-                      {digit}
-                      {owner ? ` — used by “${owner}”` : ""}
+                      {owner
+                        ? t("settingsMail.quickSteps.shortcutUsedBy", {
+                            digit,
+                            owner,
+                          })
+                        : digit}
                     </SelectItem>
                   )
                 })}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Press the digit outside a text field to run this step on the
-              current selection (or the open thread).
+              {t("settingsMail.quickSteps.shortcutHelp")}
             </p>
           </div>
           {errorMessage && (
@@ -479,13 +568,15 @@ function QuickStepDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settingsMail.quickSteps.cancel")}
             </Button>
             <Button type="submit" disabled={!canSave}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              {editing ? "Save Changes" : "Create Quick Step"}
+              {editing
+                ? t("settingsMail.quickSteps.saveChanges")
+                : t("settingsMail.quickSteps.create")}
             </Button>
           </DialogFooter>
         </form>
@@ -509,6 +600,7 @@ function QuickStepRowItem({
   onEdit: (step: QuickStep) => void
   onDelete: (step: QuickStep) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       data-testid="settings-quick-step-row"
@@ -543,7 +635,7 @@ function QuickStepRowItem({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Move ${step.name} up`}
+        aria-label={t("settingsMail.quickSteps.moveUp", { name: step.name })}
         disabled={isFirst}
         onClick={() => onMove(step, -1)}
       >
@@ -552,7 +644,7 @@ function QuickStepRowItem({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Move ${step.name} down`}
+        aria-label={t("settingsMail.quickSteps.moveDown", { name: step.name })}
         disabled={isLast}
         onClick={() => onMove(step, 1)}
       >
@@ -561,26 +653,29 @@ function QuickStepRowItem({
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Edit ${step.name}`}
+        aria-label={t("settingsMail.quickSteps.editAria", { name: step.name })}
         onClick={() => onEdit(step)}
       >
         <Pencil />
-        Edit
+        {t("settingsMail.quickSteps.edit")}
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Delete ${step.name}`}
+        aria-label={t("settingsMail.quickSteps.deleteAria", {
+          name: step.name,
+        })}
         onClick={() => onDelete(step)}
       >
         <Trash2 />
-        Delete
+        {t("settingsMail.quickSteps.delete")}
       </Button>
     </div>
   )
 }
 
 export function QuickStepsSection() {
+  const { t } = useTranslation()
   const [steps, setSteps] = useState<QuickStep[]>([])
   const [dialog, setDialog] = useState<DialogTarget | null>(null)
 
@@ -612,9 +707,7 @@ export function QuickStepsSection() {
     try {
       await reorderQuickSteps(
         getExecutor(),
-        direction === -1
-          ? [step.id, neighbor.id]
-          : [neighbor.id, step.id]
+        direction === -1 ? [step.id, neighbor.id] : [neighbor.id, step.id]
       )
       reload()
     } catch (error) {
@@ -632,32 +725,31 @@ export function QuickStepsSection() {
   }
 
   return (
-    <section aria-label="Quick steps" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.quickSteps.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-semibold text-foreground">
-            Quick steps
+            {t("settingsMail.quickSteps.title")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Two or more actions, applied together to a thread or the whole
-            selection — for every account.
+            {t("settingsMail.quickSteps.subtitle")}
           </p>
         </div>
         <Button size="sm" onClick={() => setDialog({ mode: "add" })}>
           <ListChecks />
-          Add Quick Step
+          {t("settingsMail.quickSteps.add")}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Actions run in order (label before archive, so the label lands
-        first). Label names resolve against each thread&apos;s own account
-        at run time. Steps appear in the thread context menu, the command
-        palette, and — when given a digit — on that key.
+        {t("settingsMail.quickSteps.help")}
       </p>
       <Separator />
       {steps.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No quick steps yet. Add one to run a chain of actions in one go.
+          {t("settingsMail.quickSteps.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">

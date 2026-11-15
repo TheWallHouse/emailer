@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { Check, ChevronDown, ChevronUp, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -36,6 +37,7 @@ import { TodoRowMenu } from "./todo-row-menu"
  * (./use-todos, the use-saved-searches.ts pattern).
  */
 export function TodosSection() {
+  const { t } = useTranslation()
   const todos = useTodos()
   const accounts = useAccountStore((state) => state.accounts)
   const accountById = useMemo(
@@ -47,12 +49,12 @@ export function TodosSection() {
     <>
       <Separator />
       <nav
-        aria-label="Todos"
+        aria-label={t("sidebar.todos.title")}
         data-testid="todos-section"
         className="grid items-start gap-0.5 p-2"
       >
         <p className="px-2 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Todos
+          {t("sidebar.todos.title")}
         </p>
         {todos.map((todo, index) => (
           <TodoRow
@@ -79,7 +81,8 @@ function TodoRow({
   isLast: boolean
   account: AccountInfo | null
 }) {
-  const subject = todo.subject || "(no subject)"
+  const { t } = useTranslation()
+  const subject = todo.subject || t("sidebar.noSubject")
   return (
     <div
       data-testid="todo-row"
@@ -89,7 +92,7 @@ function TodoRow({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Complete todo ${subject}`}
+        aria-label={t("sidebar.todos.complete", { subject })}
         onClick={() => {
           void completeTodoById(todo.id)
         }}
@@ -116,7 +119,7 @@ function TodoRow({
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={`Move ${subject} up`}
+          aria-label={t("sidebar.todos.moveUp", { subject })}
           disabled={isFirst}
           onClick={() => {
             void moveTodoById(todo.id, -1)
@@ -127,7 +130,7 @@ function TodoRow({
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={`Move ${subject} down`}
+          aria-label={t("sidebar.todos.moveDown", { subject })}
           disabled={isLast}
           onClick={() => {
             void moveTodoById(todo.id, 1)
@@ -148,7 +151,7 @@ function TodoRow({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Remove ${subject} from Todos`}
+        aria-label={t("sidebar.todos.remove", { subject })}
         onClick={() => {
           void removeTodoById(todo.id)
         }}

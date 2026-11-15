@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -49,6 +50,7 @@ export function CreateTaskDialog({
   open,
   onOpenChange,
 }: CreateTaskDialogProps) {
+  const { t } = useTranslation()
   const [title, setTitle] = useState(defaultTitle)
   const [notes, setNotes] = useState(defaultNotes ?? "")
   const [creating, setCreating] = useState(false)
@@ -75,15 +77,16 @@ export function CreateTaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="create-task-dialog">
         <DialogHeader>
-          <DialogTitle>Create task</DialogTitle>
+          <DialogTitle>{t("reader.createTask.title")}</DialogTitle>
           <DialogDescription>
-            Creates a task linked to this message. The conversation stays in
-            your inbox untouched.
+            {t("reader.createTask.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <div className="grid gap-1.5">
-            <Label htmlFor="create-task-title">Title</Label>
+            <Label htmlFor="create-task-title">
+              {t("reader.createTask.titleLabel")}
+            </Label>
             <Input
               id="create-task-title"
               data-testid="create-task-title"
@@ -92,13 +95,15 @@ export function CreateTaskDialog({
             />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="create-task-notes">Notes (optional)</Label>
+            <Label htmlFor="create-task-notes">
+              {t("reader.createTask.notesLabel")}
+            </Label>
             <Textarea
               id="create-task-notes"
               data-testid="create-task-notes"
               value={notes}
               rows={3}
-              placeholder="Add context from the message…"
+              placeholder={t("reader.createTask.notesPlaceholder")}
               className="resize-y"
               onChange={(event) => setNotes(event.target.value)}
             />
@@ -106,14 +111,14 @@ export function CreateTaskDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("reader.createTask.cancel")}
           </Button>
           <Button
             data-testid="create-task-confirm"
             disabled={title.trim() === "" || creating}
             onClick={create}
           >
-            Create task
+            {t("reader.createTask.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

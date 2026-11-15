@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Download, Loader2, Upload } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -54,6 +55,7 @@ interface Progress {
 }
 
 export function DataPortabilitySection() {
+  const { t } = useTranslation()
   const accounts = useAccountStore((state) => state.accounts)
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
   const [accountId, setAccountId] = useState(
@@ -190,19 +192,23 @@ export function DataPortabilitySection() {
     busy === null && destination === NEW_FOLDER && newFolderName.trim() === ""
 
   return (
-    <section aria-label="Import and export" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.dataPortability.ariaLabel")}
+      className="flex flex-col gap-4"
+    >
       <div>
         <h2 className="text-base font-semibold text-foreground">
-          Import &amp; export
+          {t("settings.dataPortability.title")}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Take mailbox data out in standard formats, or bring archives back in.
-          Exports never modify anything; imports never change existing messages.
+          {t("settings.dataPortability.description")}
         </p>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="data-portability-account">Account</Label>
+        <Label htmlFor="data-portability-account">
+          {t("settings.dataPortability.account")}
+        </Label>
         <Select
           value={accountId}
           items={accountItems}
@@ -227,7 +233,7 @@ export function DataPortabilitySection() {
         <div className="flex items-center gap-2">
           <Download className="size-4 text-muted-foreground" aria-hidden />
           <h3 className="text-sm font-semibold text-foreground">
-            Export folder as mbox
+            {t("settings.dataPortability.export.title")}
           </h3>
         </div>
         <div className="flex items-center gap-2">
@@ -237,7 +243,7 @@ export function DataPortabilitySection() {
             onValueChange={(value) => setExportLabelId(String(value))}
           >
             <SelectTrigger
-              aria-label="Folder to export"
+              aria-label={t("settings.dataPortability.export.folder")}
               disabled={busy !== null}
               className="w-56"
             >
@@ -262,30 +268,40 @@ export function DataPortabilitySection() {
             ) : (
               <Download aria-hidden />
             )}
-            Export…
+            {t("settings.dataPortability.export.button")}
           </Button>
           {busy === "export" && (
             <Button variant="ghost" onClick={() => abortRef.current?.abort()}>
-              Cancel
+              {t("settings.dataPortability.cancel")}
             </Button>
           )}
         </div>
         <p aria-live="polite" className="text-xs text-muted-foreground">
           {progress !== null && busy === "export"
-            ? `Exporting… ${progress.done} / ${progress.total}`
+            ? t("settings.dataPortability.export.progress", {
+                done: progress.done,
+                total: progress.total,
+              })
             : null}
           {exportResult?.status === "complete"
-            ? `Exported ${exportResult.messages} messages to ${exportResult.path}.`
+            ? t("settings.dataPortability.export.done", {
+                count: exportResult.messages,
+                path: exportResult.path,
+              })
             : null}
           {exportResult?.status === "cancelled"
-            ? `Export cancelled — the partial file was removed (${exportResult.messages} messages were written).`
+            ? t("settings.dataPortability.export.cancelled", {
+                count: exportResult.messages,
+              })
             : null}
-          {exportError ? `Export failed: ${exportError}` : null}
+          {exportError
+            ? t("settings.dataPortability.export.failed", {
+                error: exportError,
+              })
+            : null}
         </p>
         <p className="text-xs text-muted-foreground">
-          One RFC 4155 mbox per folder, importable by other mail clients.
-          Exports are read-only. To export a single conversation, use
-          &ldquo;Export as EML&rdquo; in the thread&apos;s context menu.
+          {t("settings.dataPortability.export.hint")}
         </p>
       </div>
 
@@ -295,7 +311,7 @@ export function DataPortabilitySection() {
         <div className="flex items-center gap-2">
           <Upload className="size-4 text-muted-foreground" aria-hidden />
           <h3 className="text-sm font-semibold text-foreground">
-            Import EML / mbox
+            {t("settings.dataPortability.import.title")}
           </h3>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -312,20 +328,27 @@ export function DataPortabilitySection() {
                 })
             }}
           >
-            Choose files…
+            {t("settings.dataPortability.import.chooseFiles")}
           </Button>
           {importPaths.length > 0 && (
             <span className="text-xs text-muted-foreground">
-              {importPaths.length} file{importPaths.length === 1 ? "" : "s"}:{" "}
-              {importPaths.map(basename).join(", ")}
+              {t("settings.dataPortability.import.files", {
+                count: importPaths.length,
+                names: importPaths.map(basename).join(", "),
+              })}
             </span>
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="import-destination">Destination folder</Label>
+          <Label htmlFor="import-destination">
+            {t("settings.dataPortability.import.destination")}
+          </Label>
           <Select
             value={destination}
-            items={{ [NEW_FOLDER]: "New folder…", ...folderItems }}
+            items={{
+              [NEW_FOLDER]: t("settings.dataPortability.import.newFolder"),
+              ...folderItems,
+            }}
             onValueChange={(value) => setDestination(String(value))}
           >
             <SelectTrigger
@@ -336,7 +359,9 @@ export function DataPortabilitySection() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={NEW_FOLDER}>New folder…</SelectItem>
+              <SelectItem value={NEW_FOLDER}>
+                {t("settings.dataPortability.import.newFolder")}
+              </SelectItem>
               {labels.map((label) => (
                 <SelectItem key={label.id} value={label.id}>
                   {label.name}
@@ -346,10 +371,12 @@ export function DataPortabilitySection() {
           </Select>
           {destination === NEW_FOLDER && (
             <Input
-              aria-label="New folder name"
+              aria-label={t("settings.dataPortability.import.newFolderName")}
               value={newFolderName}
               onChange={(event) => setNewFolderName(event.target.value)}
-              placeholder="Folder name"
+              placeholder={t(
+                "settings.dataPortability.import.folderNamePlaceholder"
+              )}
               disabled={busy !== null}
               className="w-72"
             />
@@ -357,11 +384,11 @@ export function DataPortabilitySection() {
         </div>
         <div className="flex items-center justify-between gap-6">
           <div className="grid gap-0.5">
-            <Label htmlFor="import-upload">Also upload to the server</Label>
+            <Label htmlFor="import-upload">
+              {t("settings.dataPortability.import.upload.label")}
+            </Label>
             <p className="text-xs text-muted-foreground">
-              Appends each imported message to the account (IMAP folder or Gmail
-              label). Offline, the import still completes locally and the
-              skipped uploads are reported.
+              {t("settings.dataPortability.import.upload.hint")}
             </p>
           </div>
           <Switch
@@ -388,25 +415,30 @@ export function DataPortabilitySection() {
             ) : (
               <Upload aria-hidden />
             )}
-            Import
+            {t("settings.dataPortability.import.button")}
           </Button>
           {busy === "import" && (
             <Button variant="ghost" onClick={() => abortRef.current?.abort()}>
-              Cancel
+              {t("settings.dataPortability.cancel")}
             </Button>
           )}
         </div>
         <p aria-live="polite" className="text-xs text-muted-foreground">
           {progress !== null && busy === "import"
-            ? `Importing… ${progress.done} / ${progress.total}`
+            ? t("settings.dataPortability.import.progress", {
+                done: progress.done,
+                total: progress.total,
+              })
             : null}
           {importSummary ? <ImportSummaryView summary={importSummary} /> : null}
-          {importError ? `Import failed: ${importError}` : null}
+          {importError
+            ? t("settings.dataPortability.import.failed", {
+                error: importError,
+              })
+            : null}
         </p>
         <p className="text-xs text-muted-foreground">
-          Messages already present in the destination folder (same Message-ID)
-          are skipped. Imported mail is marked read and never overwrites
-          existing messages.
+          {t("settings.dataPortability.import.hint")}
         </p>
       </div>
     </section>
@@ -415,17 +447,27 @@ export function DataPortabilitySection() {
 
 /** The batch outcome: totals plus one line per file with its failures. */
 function ImportSummaryView({ summary }: { summary: ImportSummary }) {
+  const { t } = useTranslation()
+  const k = "settings.dataPortability.import.summary"
+  const details = [
+    t(`${k}.counts`, {
+      imported: summary.imported,
+      count: summary.skippedDuplicates,
+      failed: summary.failed,
+    }),
+    ...(summary.uploadFailures > 0
+      ? [t(`${k}.uploadFailures`, { count: summary.uploadFailures })]
+      : []),
+    ...(summary.uploaded > 0
+      ? [t(`${k}.uploaded`, { count: summary.uploaded })]
+      : []),
+  ].join(", ")
   return (
     <span className="flex flex-col gap-1" data-testid="import-summary">
       <span>
-        {summary.status === "cancelled" ? "Import cancelled. " : ""}
-        Imported {summary.imported}, skipped {summary.skippedDuplicates}{" "}
-        duplicate{summary.skippedDuplicates === 1 ? "" : "s"}, failed{" "}
-        {summary.failed}
-        {summary.uploadFailures > 0
-          ? `, ${summary.uploadFailures} upload${summary.uploadFailures === 1 ? "" : "s"} failed (kept locally)`
-          : ""}
-        {summary.uploaded > 0 ? `, ${summary.uploaded} uploaded` : ""}.
+        {summary.status === "cancelled"
+          ? t(`${k}.cancelled`, { details })
+          : t(`${k}.complete`, { details })}
       </span>
       {summary.files.flatMap((file) => [
         ...file.failed.map((failure) => (
@@ -441,7 +483,10 @@ function ImportSummaryView({ summary }: { summary: ImportSummary }) {
             key={`${file.file}-u-${failure.index}`}
             className="text-destructive"
           >
-            {basename(file.file)}: upload failed — {failure.error}
+            {t(`${k}.uploadFailed`, {
+              file: basename(file.file),
+              error: failure.error,
+            })}
           </span>
         )),
       ])}

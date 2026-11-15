@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -32,6 +33,7 @@ import { useActiveAccount } from "@/stores/account-store"
  * the exemption should be visible, not a mystery.
  */
 export function JunkFilterSection() {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   const isImap = account?.type === "imap"
   /** The account the flag was last read/written for — scoping the
@@ -80,41 +82,35 @@ export function JunkFilterSection() {
   }
 
   return (
-    <section aria-label="Junk filter" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.junkFilter.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Junk filter</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settingsMail.junkFilter.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          A local, per-account filter that learns from how you mark spam — no
-          server, no cloud.
+          {t("settingsMail.junkFilter.subtitle")}
         </p>
       </div>
       {!account ? (
         <p className="text-sm text-muted-foreground">
-          Add an account to manage its junk filtering.
+          {t("settingsMail.junkFilter.noAccount")}
         </p>
       ) : (
         <div className="flex items-center justify-between gap-6 py-1">
           <div className="grid gap-0.5">
             <Label htmlFor="junk-filter-enabled">
-              Adaptively filter junk mail
+              {t("settingsMail.junkFilter.enable")}
             </Label>
             <p className="text-xs text-muted-foreground">
-              Per account: {account.email}.{" "}
-              {isImap ? (
-                <>
-                  Learns from your mark-spam and not-spam actions. Only mail
-                  classified as junk with high confidence — after you have
-                  trained it on enough spam — is moved to the Spam folder; every
-                  auto-moved conversation shows a &quot;Not spam&quot; button
-                  that returns it to the inbox and retrains the filter. Nothing
-                  is ever deleted automatically.
-                </>
-              ) : (
-                <>
-                  Gmail accounts are filtered by Google&apos;s own spam
-                  filtering and are exempt.
-                </>
-              )}
+              {t("settingsMail.junkFilter.perAccount", {
+                email: account.email,
+              })}{" "}
+              {isImap
+                ? t("settingsMail.junkFilter.imapHelp")
+                : t("settingsMail.junkFilter.gmailExempt")}
             </p>
           </div>
           <Switch

@@ -1,6 +1,8 @@
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { KeyRound, Server } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 
 import { Button } from "@/components/ui/button"
 import { ProviderIcon } from "@/components/providers/provider-icon"
@@ -35,39 +37,39 @@ interface AddAccountDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-const options: {
+function accountOptions(t: TFunction): {
   mode: Exclude<AddAccountMode, "choose">
   title: string
   description: string
   icon: ReactNode
-}[] = [
-  {
-    mode: "gmail",
-    title: "Gmail",
-    description:
-      "Sign in with your Google account in the browser. Needs a Google Client ID (free).",
-    icon: <ProviderIcon provider="gmail" className="size-4" />,
-  },
-  {
-    mode: "microsoft",
-    title: "Microsoft 365 / Outlook.com",
-    description:
-      "Sign in with your Microsoft account in the browser — work, school or personal (Outlook, Hotmail, Live). Needs a one-time app registration (free).",
-    icon: <ProviderIcon provider="outlook" className="size-4" />,
-  },
-  {
-    mode: "imap",
-    title: "Other email (IMAP/SMTP)",
-    description:
-      "Yahoo, iCloud, Fastmail, GMX, Zoho or any provider — with your email address and password.",
-    icon: <Server className="size-4 text-muted-foreground" />,
-  },
-]
+}[] {
+  return [
+    {
+      mode: "gmail",
+      title: "Gmail",
+      description: t("accounts.add.gmailDescription"),
+      icon: <ProviderIcon provider="gmail" className="size-4" />,
+    },
+    {
+      mode: "microsoft",
+      title: "Microsoft 365 / Outlook.com",
+      description: t("accounts.add.microsoftDescription"),
+      icon: <ProviderIcon provider="outlook" className="size-4" />,
+    },
+    {
+      mode: "imap",
+      title: t("accounts.add.imapTitle"),
+      description: t("accounts.add.imapDescription"),
+      icon: <Server className="size-4 text-muted-foreground" />,
+    },
+  ]
+}
 
 export function AddAccountDialog({
   open,
   onOpenChange,
 }: AddAccountDialogProps) {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<AddAccountMode>("choose")
 
   // A close — user-initiated (Esc, overlay, close button) via the Dialog's
@@ -93,20 +95,22 @@ export function AddAccountDialog({
         {mode === "gmail" ? (
           <AddGmailFlow onBack={() => setMode("choose")} onSuccess={close} />
         ) : mode === "microsoft" ? (
-          <AddMicrosoftFlow onBack={() => setMode("choose")} onSuccess={close} />
+          <AddMicrosoftFlow
+            onBack={() => setMode("choose")}
+            onSuccess={close}
+          />
         ) : mode === "imap" ? (
           <AddImapFlow onBack={() => setMode("choose")} onSuccess={close} />
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Add an account</DialogTitle>
+              <DialogTitle>{t("accounts.add.title")}</DialogTitle>
               <DialogDescription>
-                Accounts live on this machine; messages sync locally and work
-                offline.
+                {t("accounts.add.description")}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-2">
-              {options.map((option) => (
+              {accountOptions(t).map((option) => (
                 <Button
                   key={option.mode}
                   variant="outline"
@@ -120,7 +124,7 @@ export function AddAccountDialog({
                   {/* whitespace-normal: the button base style is nowrap, and
                       the long provider line's min-content width would blow
                       the grid track past the dialog's max-width */}
-                  <span className="whitespace-normal text-xs font-normal text-muted-foreground">
+                  <span className="text-xs font-normal whitespace-normal text-muted-foreground">
                     {option.description}
                   </span>
                 </Button>
@@ -134,7 +138,7 @@ export function AddAccountDialog({
                 className="inline-flex items-center gap-1 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
               >
                 <KeyRound className="size-3" aria-hidden />
-                What do I need?
+                {t("accounts.add.whatDoINeed")}
               </a>
             </DialogFooter>
           </>

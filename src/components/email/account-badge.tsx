@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+
 import { accountHue } from "./account-hue"
 import type { AccountInfo } from "@/stores/account-store"
 
@@ -11,6 +13,7 @@ import type { AccountInfo } from "@/stores/account-store"
  */
 
 export function AccountBadge({ account }: { account: AccountInfo }) {
+  const { t } = useTranslation()
   return (
     <span
       data-account-badge={account.id}
@@ -19,7 +22,7 @@ export function AccountBadge({ account }: { account: AccountInfo }) {
           ? `${account.displayName} · ${account.email}`
           : account.email
       }
-      aria-label={`Account ${account.email}`}
+      aria-label={t("threadList.accountBadge.label", { email: account.email })}
       className="size-2 shrink-0 rounded-full"
       // Data-derived color exception (mirrors the label chips): the hue is
       // identity content derived from the account row, not component

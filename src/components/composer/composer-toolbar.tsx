@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react"
+import { useTranslation } from "react-i18next"
 import type { Editor } from "@tiptap/react"
 import { useEditorState } from "@tiptap/react"
 import {
@@ -46,7 +47,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { COMPOSE_TRANSFORM_LABELS } from "./compose-transform"
+import {
+  COMPOSE_TRANSFORM_MODES,
+  composeTransformLabel,
+} from "./compose-transform"
 import { DictationButton } from "./dictation-button"
 import { SnippetPicker } from "./snippet-picker"
 
@@ -183,6 +187,7 @@ function ComposeTransformMenu({
   onDraftFromPrompt: () => void
   onGenerateReply: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -190,40 +195,38 @@ function ComposeTransformMenu({
           <Button
             variant="ghost"
             size="sm"
-            aria-label="AI transform"
+            aria-label={t("composer.toolbar.aiTransform")}
             disabled={disabled}
           >
             <Sparkles aria-hidden />
-            AI
+            {t("composer.toolbar.ai")}
           </Button>
         }
       />
       <DropdownMenuContent align="start" data-testid="compose-transform-menu">
-        {(Object.keys(COMPOSE_TRANSFORM_LABELS) as ComposeTransformMode[]).map(
-          (mode) => (
-            <DropdownMenuItem
-              key={mode}
-              onClick={() => onRun(mode)}
-              data-testid={`compose-transform-${mode}`}
-            >
-              {COMPOSE_TRANSFORM_LABELS[mode]}
-            </DropdownMenuItem>
-          )
-        )}
+        {COMPOSE_TRANSFORM_MODES.map((mode) => (
+          <DropdownMenuItem
+            key={mode}
+            onClick={() => onRun(mode)}
+            data-testid={`compose-transform-${mode}`}
+          >
+            {composeTransformLabel(mode)}
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={aiModeKind !== "new"}
           onClick={onDraftFromPrompt}
           data-testid="ai-draft-from-prompt"
         >
-          Draft from prompt…
+          {t("composer.toolbar.draftFromPrompt")}
         </DropdownMenuItem>
         {aiModeKind !== "new" && generateReplyThreadId !== null ? (
           <DropdownMenuItem
             onClick={onGenerateReply}
             data-testid="ai-generate-reply"
           >
-            Generate reply
+            {t("composer.toolbar.generateReply")}
           </DropdownMenuItem>
         ) : null}
       </DropdownMenuContent>
@@ -247,6 +250,7 @@ export function ComposerToolbar({
   onGenerateReply,
   onInsertImage,
 }: ComposerToolbarProps) {
+  const { t } = useTranslation()
   const [linkOpen, setLinkOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
 
@@ -301,13 +305,13 @@ export function ComposerToolbar({
   return (
     <div
       role="toolbar"
-      aria-label="Formatting"
+      aria-label={t("composer.toolbar.formatting")}
       className="flex flex-wrap items-center gap-0.5 px-3 py-1.5"
     >
       {/* Batch C3: editor history — StarterKit's undo-redo, gated by
           availability (nothing to undo/redo keeps the button dead). */}
       <ToolbarToggle
-        label="Undo (Cmd/Ctrl+Z)"
+        label={t("composer.toolbar.undo")}
         pressed={false}
         disabled={disabled || !(active?.canUndo ?? false)}
         onToggle={() => chain()?.undo().run()}
@@ -315,7 +319,7 @@ export function ComposerToolbar({
         <Undo2 />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Redo (Cmd/Ctrl+Shift+Z)"
+        label={t("composer.toolbar.redo")}
         pressed={false}
         disabled={disabled || !(active?.canRedo ?? false)}
         onToggle={() => chain()?.redo().run()}
@@ -326,7 +330,7 @@ export function ComposerToolbar({
       <Separator orientation="vertical" className="mx-1 h-5" />
 
       <ToolbarToggle
-        label="Bold"
+        label={t("composer.toolbar.bold")}
         pressed={active?.bold ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleBold().run()}
@@ -334,7 +338,7 @@ export function ComposerToolbar({
         <Bold />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Italic"
+        label={t("composer.toolbar.italic")}
         pressed={active?.italic ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleItalic().run()}
@@ -342,7 +346,7 @@ export function ComposerToolbar({
         <Italic />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Underline"
+        label={t("composer.toolbar.underline")}
         pressed={active?.underline ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleUnderline().run()}
@@ -352,7 +356,7 @@ export function ComposerToolbar({
       {/* Batch C3: the remaining StarterKit marks — strike's shortcut is
           TipTap v3's native Mod-Shift-s, inline code's is Mod-e. */}
       <ToolbarToggle
-        label="Strikethrough (Cmd/Ctrl+Shift+S)"
+        label={t("composer.toolbar.strikethrough")}
         pressed={active?.strike ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleStrike().run()}
@@ -360,7 +364,7 @@ export function ComposerToolbar({
         <Strikethrough />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Inline code (Cmd/Ctrl+E)"
+        label={t("composer.toolbar.inlineCode")}
         pressed={active?.code ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleCode().run()}
@@ -371,7 +375,7 @@ export function ComposerToolbar({
       <Separator orientation="vertical" className="mx-1 h-5" />
 
       <ToolbarToggle
-        label="Bullet list"
+        label={t("composer.toolbar.bulletList")}
         pressed={active?.bulletList ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleBulletList().run()}
@@ -379,7 +383,7 @@ export function ComposerToolbar({
         <List />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Numbered list"
+        label={t("composer.toolbar.numberedList")}
         pressed={active?.orderedList ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleOrderedList().run()}
@@ -389,7 +393,7 @@ export function ComposerToolbar({
       {/* Batch C3: blockquote lives with the other block-level toggles;
           shortcut is TipTap's native Mod-Shift-b. */}
       <ToolbarToggle
-        label="Blockquote (Cmd/Ctrl+Shift+B)"
+        label={t("composer.toolbar.blockquote")}
         pressed={active?.blockquote ?? false}
         disabled={disabled}
         onToggle={() => chain()?.toggleBlockquote().run()}
@@ -404,7 +408,7 @@ export function ComposerToolbar({
           render={
             <Toggle
               size="sm"
-              aria-label="Insert link"
+              aria-label={t("composer.toolbar.insertLink")}
               pressed={active?.link ?? false}
               disabled={disabled}
             >
@@ -418,7 +422,7 @@ export function ComposerToolbar({
               value={linkUrl}
               onChange={(event) => setLinkUrl(event.target.value)}
               placeholder="https://example.com"
-              aria-label="Link URL"
+              aria-label={t("composer.toolbar.linkUrl")}
               autoFocus
             />
             <div className="flex items-center justify-end gap-1.5">
@@ -429,11 +433,11 @@ export function ComposerToolbar({
                   size="sm"
                   onClick={removeLink}
                 >
-                  Remove link
+                  {t("composer.toolbar.removeLink")}
                 </Button>
               ) : null}
               <Button type="submit" size="sm" disabled={!linkUrl.trim()}>
-                Apply link
+                {t("composer.toolbar.applyLink")}
               </Button>
             </div>
           </form>
@@ -443,7 +447,7 @@ export function ComposerToolbar({
       <Separator orientation="vertical" className="mx-1 h-5" />
 
       <ToolbarToggle
-        label="Align left"
+        label={t("composer.toolbar.alignLeft")}
         pressed={active?.alignLeft ?? false}
         disabled={disabled}
         onToggle={() => chain()?.setTextAlign("left").run()}
@@ -451,7 +455,7 @@ export function ComposerToolbar({
         <AlignLeft />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Align center"
+        label={t("composer.toolbar.alignCenter")}
         pressed={active?.alignCenter ?? false}
         disabled={disabled}
         onToggle={() => chain()?.setTextAlign("center").run()}
@@ -459,7 +463,7 @@ export function ComposerToolbar({
         <AlignCenter />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Align right"
+        label={t("composer.toolbar.alignRight")}
         pressed={active?.alignRight ?? false}
         disabled={disabled}
         onToggle={() => chain()?.setTextAlign("right").run()}
@@ -477,8 +481,8 @@ export function ComposerToolbar({
             <Button
               variant="ghost"
               size="sm"
-              aria-label="Insert image"
-              title="Insert image"
+              aria-label={t("composer.toolbar.insertImage")}
+              title={t("composer.toolbar.insertImage")}
               disabled={disabled}
               onClick={onInsertImage}
             >
@@ -486,7 +490,9 @@ export function ComposerToolbar({
             </Button>
           }
         />
-        <TooltipContent side="bottom">Insert image</TooltipContent>
+        <TooltipContent side="bottom">
+          {t("composer.toolbar.insertImage")}
+        </TooltipContent>
       </Tooltip>
 
       <Separator orientation="vertical" className="mx-1 h-5" />
@@ -494,7 +500,7 @@ export function ComposerToolbar({
       {/* Task 18.5: per-message PGP intent. Editor-independent — the
           toggles write composer-store, the send flow applies them. */}
       <ToolbarToggle
-        label="Sign (PGP)"
+        label={t("composer.toolbar.pgpSign")}
         pressed={pgpSign}
         disabled={false}
         onToggle={onTogglePgpSign}
@@ -502,7 +508,7 @@ export function ComposerToolbar({
         <FileSignature />
       </ToolbarToggle>
       <ToolbarToggle
-        label="Encrypt (PGP)"
+        label={t("composer.toolbar.pgpEncrypt")}
         pressed={pgpEncrypt}
         disabled={false}
         onToggle={onTogglePgpEncrypt}

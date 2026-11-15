@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useSyncExternalStore } from "react"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import type { Category } from "@/services/categorization/classify"
 import { CATEGORIES } from "@/services/categorization/classify"
 import {
@@ -60,13 +61,24 @@ import { useUiStore } from "@/stores/ui-store"
  *   via useSyncExternalStore (the module docstring's intended consumer).
  */
 
-/** Tab/display order labels for the five categories (task 3.5). */
-export const CATEGORY_LABELS: Record<Category, string> = {
-  primary: "Primary",
-  updates: "Updates",
-  promotions: "Promotions",
-  social: "Social",
-  newsletters: "Newsletters",
+/** Tab/display order labels for the five categories (task 3.5).
+ * Localized at read time (getters), so they follow language changes. */
+export const CATEGORY_LABELS: Readonly<Record<Category, string>> = {
+  get primary() {
+    return i18next.t("sidebar.categories.primary")
+  },
+  get updates() {
+    return i18next.t("sidebar.categories.updates")
+  },
+  get promotions() {
+    return i18next.t("sidebar.categories.promotions")
+  },
+  get social() {
+    return i18next.t("sidebar.categories.social")
+  },
+  get newsletters() {
+    return i18next.t("sidebar.categories.newsletters")
+  },
 }
 
 let sectionExecutorOverride: SqlExecutor | null = null
@@ -350,7 +362,7 @@ export async function categorizeExistingMail(): Promise<void> {
     await startCategoryBackfill(resolveExecutor(), { fresh: true })
   } catch (error) {
     console.warn("[categories] backfill start failed", error)
-    toast.error("Could not start categorizing existing mail.")
+    toast.error(i18next.t("sidebar.categoryBackfill.startFailed"))
   }
 }
 

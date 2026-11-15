@@ -7,6 +7,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -68,6 +69,7 @@ function RuleRowItem({
   onEdit: (rule: RuleRow) => void
   onDelete: (rule: RuleRow) => void
 }) {
+  const { t } = useTranslation()
   const name = rule.name
   return (
     <div
@@ -97,12 +99,12 @@ function RuleRowItem({
         onCheckedChange={(checked) => {
           onToggleEnabled(rule, checked)
         }}
-        aria-label={`Toggle ${name}`}
+        aria-label={t("settingsMail.rules.toggle", { name })}
       />
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Move ${name} up`}
+        aria-label={t("settingsMail.rules.moveUp", { name })}
         disabled={isFirst}
         onClick={() => onMove(rule, -1)}
       >
@@ -111,7 +113,7 @@ function RuleRowItem({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Move ${name} down`}
+        aria-label={t("settingsMail.rules.moveDown", { name })}
         disabled={isLast}
         onClick={() => onMove(rule, 1)}
       >
@@ -125,26 +127,27 @@ function RuleRowItem({
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Edit ${name}`}
+        aria-label={t("settingsMail.rules.editAria", { name })}
         onClick={() => onEdit(rule)}
       >
         <Pencil />
-        Edit
+        {t("settingsMail.rules.edit")}
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Delete ${name}`}
+        aria-label={t("settingsMail.rules.deleteAria", { name })}
         onClick={() => onDelete(rule)}
       >
         <Trash2 />
-        Delete
+        {t("settingsMail.rules.delete")}
       </Button>
     </div>
   )
 }
 
 export function RulesSection() {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   const [rules, setRules] = useState<RuleRow[]>([])
   const [dialog, setDialog] = useState<RuleDialogTarget | null>(null)
@@ -255,14 +258,21 @@ export function RulesSection() {
   }
 
   return (
-    <section aria-label="Rules" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.rules.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Rules</h2>
+          <h2 className="text-base font-semibold text-foreground">
+            {t("settingsMail.rules.title")}
+          </h2>
           <p className="text-sm text-muted-foreground">
             {account
-              ? `Automatically file new mail for ${account.email}.`
-              : "Automatically file new mail as it arrives."}
+              ? t("settingsMail.rules.subtitleAccount", {
+                  email: account.email,
+                })
+              : t("settingsMail.rules.subtitle")}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -279,7 +289,7 @@ export function RulesSection() {
               onClick={() => setDescribeOpen(true)}
             >
               <Sparkles />
-              Describe a rule…
+              {t("settingsMail.rules.describe")}
             </Button>
           )}
           <Button
@@ -288,25 +298,21 @@ export function RulesSection() {
             onClick={() => setDialog({ mode: "add" })}
           >
             <Filter />
-            Add Rule
+            {t("settingsMail.rules.add")}
           </Button>
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        Rules run top to bottom on each new message, before the new-mail
-        notification: archive, trash, spam, move, and mark-read rules keep the
-        message out of the announcement. Criteria use the search-box operators —
-        including negation (a leading -), sizes (larger:/smaller:) and dates
-        (before:/after:).
+        {t("settingsMail.rules.help")}
       </p>
       <Separator />
       {!account ? (
         <p className="text-sm text-muted-foreground">
-          Add an account to manage its rules.
+          {t("settingsMail.rules.noAccount")}
         </p>
       ) : rules.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No rules yet. New mail arrives untouched.
+          {t("settingsMail.rules.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">

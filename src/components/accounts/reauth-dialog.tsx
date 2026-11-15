@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -45,18 +47,23 @@ import type { AccountInfo } from "@/stores/account-store"
  * local cancel is a quiet no-op.
  */
 
-const STEP_LABELS: Record<GmailFlowStep, string> = {
-  consent: "Waiting for you to finish in the browser…",
-  exchange: "Signing you in…",
-  profile: "Reading your Gmail profile…",
-  save: "Updating the account…",
-}
-
-const MICROSOFT_STEP_LABELS: Record<GmailFlowStep, string> = {
-  consent: "Waiting for you to finish in the browser…",
-  exchange: "Signing you in…",
-  profile: "Reading your Microsoft 365 profile…",
-  save: "Updating the account…",
+function stepLabel(
+  t: TFunction,
+  step: GmailFlowStep,
+  provider: "gmail" | "microsoft"
+): string {
+  switch (step) {
+    case "consent":
+      return t("accounts.oauth.steps.consent")
+    case "exchange":
+      return t("accounts.oauth.steps.exchange")
+    case "profile":
+      return provider === "microsoft"
+        ? t("accounts.oauth.steps.microsoftProfile")
+        : t("accounts.oauth.steps.gmailProfile")
+    case "save":
+      return t("accounts.oauth.steps.update")
+  }
 }
 
 interface ReauthDialogProps {
@@ -70,6 +77,7 @@ export function ReauthDialog({
   open,
   onOpenChange,
 }: ReauthDialogProps) {
+  const { t } = useTranslation()
   const [clientId, setClientId] = useState("")
   const [password, setPassword] = useState("")
   const [validationError, setValidationError] = useState<string | null>(null)
@@ -85,9 +93,6 @@ export function ReauthDialog({
   // The OAuth flows share one dialog shape; only the provider copy and
   // the submit handler differ.
   const oauthProvider = isMicrosoft ? "microsoft" : isGmail ? "gmail" : null
-  const stepLabels: Record<GmailFlowStep, string> = isMicrosoft
-    ? MICROSOFT_STEP_LABELS
-    : STEP_LABELS
 
   // Pre-fill the stored Client ID so OAuth re-authentication is usually a
   // single "Continue" — best-effort: before initDatabase() (plain vite,
@@ -133,7 +138,7 @@ export function ReauthDialog({
     if (!account) return
     const trimmed = clientId.trim()
     if (!trimmed) {
-      setValidationError("Enter your Google OAuth Client ID to continue.")
+      setValidationError(t("accounts.oauth.enterGoogleClientId"))
       return
     }
     setValidationError(null)
@@ -151,7 +156,7 @@ export function ReauthDialog({
         // Quiet: the user backed out; stay on the Client ID step.
         return
       }
-      handleError(error, "Sign-in failed. Please try again.")
+      handleError(error, t("accounts.oauth.signInFailed"))
     } finally {
       consentRef.current = false
       setWorking(false)
@@ -163,7 +168,7 @@ export function ReauthDialog({
     if (!account) return
     const trimmed = clientId.trim()
     if (!trimmed) {
-      setValidationError("Enter your Microsoft app registration's Client ID to continue.")
+      setValidationError(t("accounts.oauth.enterMicrosoftClientId"))
       return
     }
     setValidationError(null)
@@ -181,7 +186,7 @@ export function ReauthDialog({
         // Quiet: the user backed out; stay on the Client ID step.
         return
       }
-      handleError(error, "Sign-in failed. Please try again.")
+      handleError(error, t("accounts.oauth.signInFailed"))
     } finally {
       consentRef.current = false
       setWorking(false)
@@ -192,7 +197,7 @@ export function ReauthDialog({
     event.preventDefault()
     if (!account) return
     if (!password) {
-      setValidationError("Enter the new password (or app password).")
+      setValidationError(t("accounts.reauth.enterNewPassword"))
       return
     }
     setValidationError(null)
@@ -204,11 +209,15 @@ export function ReauthDialog({
       onOpenChange(false)
     } catch (error) {
       if (error instanceof ImapTestFailedError) {
-        setErrorMessage(`Incoming mail (IMAP): ${error.message}`)
+        setErrorMessage(
+          t("accounts.reauth.incomingFailed", { message: error.message })
+        )
       } else if (error instanceof SmtpTestFailedError) {
-        setErrorMessage(`Outgoing mail (SMTP): ${error.message}`)
+        setErrorMessage(
+          t("accounts.reauth.outgoingFailed", { message: error.message })
+        )
       } else {
-        handleError(error, "Could not update the password.")
+        handleError(error, t("accounts.reauth.updateFailed"))
       }
     } finally {
       setWorking(false)
@@ -223,11 +232,15 @@ export function ReauthDialog({
             working ? (
               <>
                 <DialogHeader>
-                  <DialogTitle>Sign in again</DialogTitle>
+                  <DialogTitle>{t("accounts.reauth.signInAgain")}</DialogTitle>
                   <DialogDescription>
-                    A {oauthProvider === "microsoft" ? "Microsoft" : "Google"}{" "}
-                    sign-in page opened in your browser for {account.email}.
-                    Finish there — this window continues automatically.
+                    {oauthProvider === "microsoft"
+                      ? t("accounts.reauth.waitingMicrosoft", {
+                          email: account.email,
+                        })
+                      : t("accounts.reauth.waitingGoogle", {
+                          email: account.email,
+                        })}
                   </DialogDescription>
                 </DialogHeader>
                 <div
@@ -239,7 +252,7 @@ export function ReauthDialog({
                     className="size-4 shrink-0 animate-spin"
                     aria-hidden
                   />
-                  {stepLabels[step]}
+                  {stepLabel(t, step, oauthProvider)}
                 </div>
                 <div className="flex justify-start">
                   <Button
@@ -250,20 +263,22 @@ export function ReauthDialog({
                       void cancelOauthWait().catch(() => {})
                     }}
                   >
-                    Cancel
+                    {t("accounts.oauth.cancel")}
                   </Button>
                 </div>
               </>
             ) : (
               <>
                 <DialogHeader>
-                  <DialogTitle>Sign in again</DialogTitle>
+                  <DialogTitle>{t("accounts.reauth.signInAgain")}</DialogTitle>
                   <DialogDescription>
                     {oauthProvider === "microsoft"
-                      ? "Microsoft reports this account's sign-in no longer works."
-                      : "Google reports this account's sign-in no longer works."}{" "}
-                    Re-authorize {account.email} in the browser — your local
-                    mail is kept.
+                      ? t("accounts.reauth.brokenMicrosoft", {
+                          email: account.email,
+                        })
+                      : t("accounts.reauth.brokenGoogle", {
+                          email: account.email,
+                        })}
                   </DialogDescription>
                 </DialogHeader>
                 <form
@@ -277,8 +292,8 @@ export function ReauthDialog({
                   <div className="grid gap-1.5">
                     <Label htmlFor="reauth-gmail-client-id">
                       {oauthProvider === "microsoft"
-                        ? "Application (client) ID"
-                        : "Client ID"}
+                        ? t("accounts.oauth.applicationClientId")
+                        : t("accounts.oauth.clientId")}
                     </Label>
                     <Input
                       id="reauth-gmail-client-id"
@@ -311,7 +326,9 @@ export function ReauthDialog({
                     </p>
                   )}
                   <div className="flex items-center justify-end">
-                    <Button type="submit">Continue in browser</Button>
+                    <Button type="submit">
+                      {t("accounts.oauth.continueInBrowser")}
+                    </Button>
                   </div>
                 </form>
               </>
@@ -319,11 +336,11 @@ export function ReauthDialog({
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle>Update password</DialogTitle>
+                <DialogTitle>{t("accounts.reauth.updatePassword")}</DialogTitle>
                 <DialogDescription>
-                  The server rejected {account.email}&apos;s password. Enter the
-                  new one — both the incoming and outgoing connections are
-                  tested before it is saved, and your local mail is kept.
+                  {t("accounts.reauth.passwordRejected", {
+                    email: account.email,
+                  })}
                 </DialogDescription>
               </DialogHeader>
               <form
@@ -333,13 +350,15 @@ export function ReauthDialog({
                 className="grid gap-3"
               >
                 <div className="grid gap-1.5">
-                  <Label htmlFor="reauth-imap-password">New password</Label>
+                  <Label htmlFor="reauth-imap-password">
+                    {t("accounts.reauth.newPassword")}
+                  </Label>
                   <Input
                     id="reauth-imap-password"
                     autoFocus
                     type="password"
                     autoComplete="off"
-                    placeholder="Password or app password"
+                    placeholder={t("accounts.imap.passwordPlaceholder")}
                     value={password}
                     onChange={(event) => {
                       setPassword(event.target.value)
@@ -367,7 +386,7 @@ export function ReauthDialog({
                     {working && (
                       <Loader2 className="size-3.5 animate-spin" aria-hidden />
                     )}
-                    Test and save
+                    {t("accounts.reauth.testAndSave")}
                   </Button>
                 </div>
               </form>

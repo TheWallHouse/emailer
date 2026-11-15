@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -69,6 +70,7 @@ type MicrosoftConnectState =
   | { status: "error"; message: string }
 
 export function CalendarSection() {
+  const { t } = useTranslation()
   const [sources, setSources] = useState<CalendarSource[]>([])
   const [listError, setListError] = useState<string | null>(null)
 
@@ -109,7 +111,7 @@ export function CalendarSection() {
       setSources(await listCalendarSources(getExecutor()))
       setListError(null)
     } catch {
-      setListError("Calendar sources could not be loaded.")
+      setListError(t("settingsMail.calendar.loadFailed"))
     }
   }
 
@@ -125,9 +127,9 @@ export function CalendarSection() {
         setListError(null)
       })
       .catch(() => {
-        setListError("Calendar sources could not be loaded.")
+        setListError(t("settingsMail.calendar.loadFailed"))
       })
-  }, [])
+  }, [t])
 
   function formCredentials() {
     return {
@@ -138,8 +140,11 @@ export function CalendarSection() {
   }
 
   function formComplete(): boolean {
-    const { serverUrl: url, username: user, appPassword: pass } =
-      formCredentials()
+    const {
+      serverUrl: url,
+      username: user,
+      appPassword: pass,
+    } = formCredentials()
     return url !== "" && user !== "" && pass !== ""
   }
 
@@ -149,13 +154,15 @@ export function CalendarSection() {
       await testCaldavConnection(formCredentials())
       setTestState({
         status: "ok",
-        message: "Connection test succeeded.",
+        message: t("settingsMail.calendar.testSucceeded"),
       })
     } catch (error) {
       setTestState({
         status: "error",
         message:
-          error instanceof Error ? error.message : "The connection test failed.",
+          error instanceof Error
+            ? error.message
+            : t("settingsMail.calendar.testFailed"),
       })
     }
   }
@@ -174,7 +181,7 @@ export function CalendarSection() {
         message:
           error instanceof Error
             ? error.message
-            : "Discovery failed on the server.",
+            : t("settingsMail.calendar.discoveryFailed"),
       })
     }
   }
@@ -185,7 +192,7 @@ export function CalendarSection() {
       (calendar) => selected[calendar.href]
     )
     if (calendars.length === 0) {
-      setConnectError("Select at least one calendar to show.")
+      setConnectError(t("settingsMail.calendar.selectOne"))
       return
     }
     setConnecting(true)
@@ -206,7 +213,9 @@ export function CalendarSection() {
       await refreshSources()
     } catch (error) {
       setConnectError(
-        error instanceof Error ? error.message : "Connecting failed."
+        error instanceof Error
+          ? error.message
+          : t("settingsMail.calendar.connectFailed")
       )
     } finally {
       setConnecting(false)
@@ -228,16 +237,16 @@ export function CalendarSection() {
     } catch (error) {
       // A cancelled consent is a quiet no-op (the add-account dialogs'
       // convention); every other failure shows its typed message.
-      if (
-        error instanceof MicrosoftCalendarConnectCancelledError
-      ) {
+      if (error instanceof MicrosoftCalendarConnectCancelledError) {
         setMicrosoftConnect({ status: "idle" })
         return
       }
       setMicrosoftConnect({
         status: "error",
         message:
-          error instanceof Error ? error.message : "Connecting failed.",
+          error instanceof Error
+            ? error.message
+            : t("settingsMail.calendar.connectFailed"),
       })
     }
   }
@@ -249,23 +258,29 @@ export function CalendarSection() {
       await removeCalendarSource(getExecutor(), source.id)
       await refreshSources()
     } catch {
-      setListError(`The source "${source.name}" could not be removed.`)
+      setListError(
+        t("settingsMail.calendar.removeFailed", { name: source.name })
+      )
     }
   }
 
   function calendarCount(source: CalendarSource): string {
     const count = Object.keys(source.syncState).length
-    if (count === 0) return "Not synced yet"
-    return `${count} ${count === 1 ? "calendar" : "calendars"}`
+    if (count === 0) return t("settingsMail.calendar.notSynced")
+    return t("settingsMail.calendar.calendarCount", { count })
   }
 
   return (
-    <section aria-label="Calendar" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.calendar.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Calendar</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settingsMail.calendar.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Connect calendars from your accounts. Removing a source never
-          affects its mail account.
+          {t("settingsMail.calendar.subtitle")}
         </p>
       </div>
 
@@ -277,7 +292,7 @@ export function CalendarSection() {
         )}
         {sources.length === 0 && listError === null && (
           <p className="text-sm text-muted-foreground">
-            No calendar sources connected yet.
+            {t("settingsMail.calendar.empty")}
           </p>
         )}
         {sources.map((source) => (
@@ -301,12 +316,14 @@ export function CalendarSection() {
             <Button
               variant="ghost"
               size="sm"
-              aria-label={`Remove ${source.name}`}
+              aria-label={t("settingsMail.calendar.removeAria", {
+                name: source.name,
+              })}
               onClick={() => {
                 void handleRemove(source)
               }}
             >
-              Remove
+              {t("settingsMail.calendar.remove")}
             </Button>
           </div>
         ))}
@@ -318,25 +335,25 @@ export function CalendarSection() {
         <div className="flex flex-col gap-3 rounded-md border border-border p-4">
           <div className="grid gap-0.5">
             <h3 className="text-sm font-semibold text-foreground">
-              Connect an Outlook calendar
+              {t("settingsMail.calendar.outlookTitle")}
             </h3>
             <p className="text-xs text-muted-foreground">
-              Shows the calendars of a connected Microsoft 365 account.
-              Microsoft asks you to sign in once more for calendar access:
-              refresh tokens are bound to the permissions they were granted,
-              so the calendar grant needs its own consent. Tokens are
-              encrypted at rest.
+              {t("settingsMail.calendar.outlookHelp")}
             </p>
           </div>
           {microsoftAccounts.length > 1 && (
             <div className="grid gap-1.5">
-              <Label htmlFor="microsoft-calendar-account">Account</Label>
+              <Label htmlFor="microsoft-calendar-account">
+                {t("settingsMail.calendar.account")}
+              </Label>
               <Select
                 value={selectedMicrosoftAccountId ?? undefined}
                 onValueChange={setMicrosoftAccountId}
               >
                 <SelectTrigger id="microsoft-calendar-account">
-                  <SelectValue placeholder="Choose an account" />
+                  <SelectValue
+                    placeholder={t("settingsMail.calendar.chooseAccount")}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {microsoftAccounts.map((account) => (
@@ -360,8 +377,8 @@ export function CalendarSection() {
               }}
             >
               {microsoftConnect.status === "connecting"
-                ? "Connecting…"
-                : "Add Outlook calendar"}
+                ? t("settingsMail.calendar.connecting")
+                : t("settingsMail.calendar.addOutlook")}
             </Button>
           </div>
           {microsoftConnect.status === "error" && (
@@ -375,15 +392,16 @@ export function CalendarSection() {
       <div className="flex flex-col gap-3 rounded-md border border-border p-4">
         <div className="grid gap-0.5">
           <h3 className="text-sm font-semibold text-foreground">
-            Connect a CalDAV server
+            {t("settingsMail.calendar.caldavTitle")}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Server URL, username and app password. Credentials are encrypted
-            at rest.
+            {t("settingsMail.calendar.caldavHelp")}
           </p>
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="caldav-server-url">Server URL</Label>
+          <Label htmlFor="caldav-server-url">
+            {t("settingsMail.calendar.serverUrl")}
+          </Label>
           <Input
             id="caldav-server-url"
             placeholder="https://dav.example.com/"
@@ -395,7 +413,9 @@ export function CalendarSection() {
           />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="caldav-username">Username</Label>
+          <Label htmlFor="caldav-username">
+            {t("settingsMail.calendar.username")}
+          </Label>
           <Input
             id="caldav-username"
             autoComplete="off"
@@ -407,7 +427,9 @@ export function CalendarSection() {
           />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="caldav-app-password">App password</Label>
+          <Label htmlFor="caldav-app-password">
+            {t("settingsMail.calendar.appPassword")}
+          </Label>
           <Input
             id="caldav-app-password"
             type="password"
@@ -428,7 +450,7 @@ export function CalendarSection() {
               void handleTestConnection()
             }}
           >
-            Test connection
+            {t("settingsMail.calendar.testConnection")}
           </Button>
           <Button
             variant="outline"
@@ -438,7 +460,7 @@ export function CalendarSection() {
               void handleDiscover()
             }}
           >
-            Discover calendars
+            {t("settingsMail.calendar.discover")}
           </Button>
         </div>
         {testState.status === "ok" && (
@@ -459,12 +481,12 @@ export function CalendarSection() {
         {discoverState.status === "ready" &&
           (discoverState.calendars.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              The server exposes no event calendars.
+              {t("settingsMail.calendar.noneFound")}
             </p>
           ) : (
             <fieldset className="flex flex-col gap-2">
               <legend className="text-sm font-medium text-foreground">
-                Calendars to show
+                {t("settingsMail.calendar.toShow")}
               </legend>
               {discoverState.calendars.map((calendar) => (
                 <label
@@ -496,14 +518,12 @@ export function CalendarSection() {
         <div>
           <Button
             size="sm"
-            disabled={
-              discoverState.status !== "ready" || connecting
-            }
+            disabled={discoverState.status !== "ready" || connecting}
             onClick={() => {
               void handleConnect()
             }}
           >
-            Connect
+            {t("settingsMail.calendar.connect")}
           </Button>
         </div>
       </div>

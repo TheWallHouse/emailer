@@ -1,0 +1,275 @@
+{
+  "header": {
+    "reply": "Responder",
+    "forward": "Reenviar",
+    "newMessage": "Mensaje nuevo",
+    "expand": "Expandir redacción",
+    "collapse": "Contraer redacción",
+    "expandTitle": "Ampliar a toda la ventana",
+    "collapseTitle": "Reducir a tarjeta centrada",
+    "popOut": "Abrir redacción en ventana aparte",
+    "popOutTitle": "Abrir en una ventana aparte",
+    "minimize": "Minimizar redacción",
+    "minimizeTitle": "Minimizar a la bandeja{{keys}}",
+    "closeAndSave": "Cerrar y guardar borrador",
+    "saveAndClose": "Guardar borrador y cerrar"
+  },
+  "fields": {
+    "from": "De",
+    "fromAddress": "Dirección del remitente",
+    "accountAddress": "Dirección de la cuenta",
+    "to": "Para",
+    "cc": "CC",
+    "bcc": "CCO",
+    "subject": "Asunto"
+  },
+  "body": {
+    "placeholder": "Escribe tu mensaje…",
+    "label": "Cuerpo del mensaje"
+  },
+  "notice": {
+    "dismiss": "Cerrar"
+  },
+  "signature": {
+    "label": "Firma",
+    "none": "Sin firma"
+  },
+  "footer": {
+    "attachFile": "Adjuntar archivo",
+    "discard": "Descartar"
+  },
+  "send": {
+    "send": "Enviar",
+    "sending": "Enviando…",
+    "sendTitle": "Enviar{{keys}}",
+    "moreOptions": "Más opciones de envío",
+    "sendAndArchive": "Enviar y archivar",
+    "retry": "Reintentar",
+    "queued": "Mensaje en cola",
+    "sent": "Mensaje enviado"
+  },
+  "undoSend": {
+    "sendingIn": "Enviando en {{seconds}} s",
+    "undo": "Deshacer",
+    "attachmentsRemoved": "Algunos adjuntos ya no estaban disponibles y se han quitado",
+    "failed": "No se ha podido enviar",
+    "failedRestored": "No se ha podido enviar — se ha restaurado el borrador"
+  },
+  "schedule": {
+    "scheduleSend": "Programar envío",
+    "pickDateTime": "Elegir fecha y hora…",
+    "scheduleFor": "Programar para",
+    "cancel": "Cancelar",
+    "schedule": "Programar",
+    "scheduledFor": "Programado para {{when}}",
+    "pgpUnsupported": "Los envíos programados aún no admiten PGP — desactiva Firmar/Cifrar o envíalo directamente"
+  },
+  "guards": {
+    "attachment": {
+      "title": "¿Falta un adjunto?",
+      "description": "Tu mensaje menciona un adjunto, pero no hay ningún archivo adjunto.",
+      "fix": "Adjuntar un archivo"
+    },
+    "emptySubject": {
+      "title": "¿Enviar sin asunto?",
+      "description": "El asunto está vacío. Aun así, puedes enviar el mensaje.",
+      "fix": "Añadir asunto"
+    },
+    "dontAskAgain": "No volver a preguntar para esta cuenta",
+    "sendAnyway": "Enviar de todos modos"
+  },
+  "pgp": {
+    "noPrivateKey": "Añade una clave privada PGP para esta cuenta antes de firmar mensajes",
+    "missingKeysTitle": "Faltan claves de cifrado",
+    "missingKeysDescription": "No se conoce ninguna clave pública PGP de: {{recipients}}. Importa sus claves en los ajustes, quita a esos destinatarios o envía sin cifrar.",
+    "keepEditing": "Seguir editando",
+    "disableEncryption": "Desactivar cifrado y enviar",
+    "passphraseTitle": "Frase de contraseña PGP",
+    "passphraseDescription": "Introduce la frase de contraseña de tu clave de firma para firmar este mensaje.",
+    "cancel": "Cancelar",
+    "signAndSend": "Firmar y enviar"
+  },
+  "discard": {
+    "title": "¿Descartar borrador?",
+    "description": "Se eliminará el mensaje.",
+    "cancel": "Cancelar",
+    "confirm": "Descartar"
+  },
+  "offers": {
+    "draftFromPrompt": "Redactar a partir de instrucciones",
+    "generatedReply": "Respuesta generada",
+    "applied": "{{label}}: aplicado",
+    "appliedDescription": "Se ha sustituido el texto original.",
+    "undo": "Deshacer"
+  },
+  "transform": {
+    "improve": "Mejorar redacción",
+    "shorten": "Acortar",
+    "formalize": "Hacer más formal"
+  },
+  "transformBar": {
+    "transforming": "{{label}} — transformando…",
+    "ready": "Sustitución lista. Tu texto no cambia hasta que la aceptes.",
+    "accept": "Aceptar",
+    "retry": "Reintentar",
+    "discard": "Descartar"
+  },
+  "aiPrompt": {
+    "title": "Redactar a partir de instrucciones",
+    "description": "Describe el mensaje que quieres escribir. El borrador se te mostrará para revisarlo antes de que nada entre en tu mensaje.",
+    "instruction": "Instrucciones para el borrador",
+    "placeholder": "p. ej., una nota breve y cordial preguntando si el informe puede retrasarse al viernes",
+    "cancel": "Cancelar",
+    "generate": "Generar"
+  },
+  "toolbar": {
+    "formatting": "Formato",
+    "undo": "Deshacer (Cmd/Ctrl+Z)",
+    "redo": "Rehacer (Cmd/Ctrl+Shift+Z)",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "underline": "Subrayado",
+    "strikethrough": "Tachado (Cmd/Ctrl+Shift+S)",
+    "inlineCode": "Código en línea (Cmd/Ctrl+E)",
+    "bulletList": "Lista con viñetas",
+    "numberedList": "Lista numerada",
+    "blockquote": "Cita (Cmd/Ctrl+Shift+B)",
+    "insertLink": "Insertar enlace",
+    "linkUrl": "URL del enlace",
+    "removeLink": "Quitar enlace",
+    "applyLink": "Aplicar enlace",
+    "alignLeft": "Alinear a la izquierda",
+    "alignCenter": "Centrar",
+    "alignRight": "Alinear a la derecha",
+    "insertImage": "Insertar imagen",
+    "pgpSign": "Firmar (PGP)",
+    "pgpEncrypt": "Cifrar (PGP)",
+    "aiTransform": "Transformación con IA",
+    "ai": "IA",
+    "draftFromPrompt": "Redactar a partir de instrucciones…",
+    "generateReply": "Generar respuesta"
+  },
+  "snippets": {
+    "insertSnippet": "Insertar fragmento",
+    "snippet": "Fragmento",
+    "empty": "Aún no hay fragmentos. Añádelos en Ajustes → Fragmentos.",
+    "list": "Fragmentos",
+    "insertNamed": "Insertar {{name}}",
+    "variableHint_one": "{{count}} variable — se te pedirá si no podemos rellenarla",
+    "variableHint_other": "{{count}} variables — se te pedirán las que no podamos rellenar"
+  },
+  "snippetVariables": {
+    "title": "Rellenar valores del fragmento",
+    "description": "Este fragmento usa valores que el contexto del mensaje no proporciona. Cada valor sustituye todas las apariciones de su variable; deja un campo vacío para mantener su marcador como texto.",
+    "cancel": "Cancelar",
+    "insert": "Insertar",
+    "vars": {
+      "firstName": {
+        "label": "Nombre",
+        "description": "El nombre del destinatario, tomado de su nombre visible o deducido de la parte local de la dirección (ana.lopez@… → Ana).",
+        "example": "Ana"
+      },
+      "lastName": {
+        "label": "Apellido",
+        "description": "El apellido del destinatario — solo si su nombre lo incluye; con un nombre de una sola palabra se te pregunta en lugar de adivinarlo.",
+        "example": "López"
+      },
+      "fullName": {
+        "label": "Nombre completo",
+        "description": "El nombre completo del destinatario, tal como se escribió o reconstruido a partir de la parte local de la dirección.",
+        "example": "Ana López"
+      },
+      "email": {
+        "label": "Correo del destinatario",
+        "description": "La dirección del primer destinatario de «Para», tal como está escrita en el borrador.",
+        "example": "ana.lopez@acme.com"
+      },
+      "myName": {
+        "label": "Tu nombre",
+        "description": "El nombre visible de la cuenta con la que redactas.",
+        "example": "Alex Chen"
+      },
+      "myEmail": {
+        "label": "Tu dirección de correo",
+        "description": "La dirección de correo de la cuenta con la que redactas.",
+        "example": "alex@chen.dev"
+      },
+      "date": {
+        "label": "Fecha de hoy",
+        "description": "El día de hoy, calculado al insertar el fragmento, en formato de fecha largo.",
+        "example": "viernes, 18 de septiembre de 2026"
+      }
+    }
+  },
+  "recipients": {
+    "invalidTitle": "{{address}} no es una dirección de correo válida",
+    "invalidSr": "(dirección no válida)",
+    "remove": "Quitar a {{name}}",
+    "suggestions": "Sugerencias de contactos"
+  },
+  "attachments": {
+    "remove": "Quitar {{name}}",
+    "summary_one": "{{count}} archivo · {{size}} / {{limit}}",
+    "summary_other": "{{count}} archivos · {{size}} / {{limit}}",
+    "tooLarge": "«{{name}}» ocupa {{size}} — los archivos pueden ocupar como máximo {{max}}",
+    "overTotal": "«{{name}}» haría que los adjuntos superaran el límite total de {{limit}}"
+  },
+  "inlineImage": {
+    "tooLarge": "«{{name}}» es demasiado grande para insertarla en el texto (más de {{mb}} MB) — se ha adjuntado como archivo",
+    "pickerFilter": "Imágenes"
+  },
+  "trayChip": {
+    "newMessage": "Mensaje nuevo",
+    "restore": "Restaurar borrador",
+    "draftPrefix": "Borrador · ",
+    "closeAndSave": "Cerrar y guardar borrador",
+    "saveAndClose": "Guardar borrador y cerrar"
+  },
+  "dictation": {
+    "dictate": "Dictar",
+    "stop": "Detener dictado",
+    "dictateTitle": "Dictar (voz a texto, en el dispositivo)",
+    "stopTitle": "Detener e insertar la transcripción",
+    "cancel": "Cancelar dictado",
+    "cancelTitle": "Cancelar dictado — descartar la grabación",
+    "consentTitle": "¿Activar el dictado?",
+    "consentBody": "El dictado funciona por completo en este equipo con un modelo de voz de {{size}}, que se descarga una sola vez de Hugging Face. Tu voz nunca se sube a ningún sitio.",
+    "downloading": "Descargando modelo… {{received}}",
+    "downloadingOf": "Descargando modelo… {{received}} de {{total}}",
+    "downloadingPercent": "Descargando modelo… {{received}} de {{total}} ({{percent}} %)",
+    "downloadError": "{{error}} Puedes volver a intentarlo.",
+    "notNow": "Ahora no",
+    "downloadAndDictate": "Descargar y dictar",
+    "startFailed": "No se ha podido iniciar el dictado.",
+    "transcriptionFailed": "No se ha podido transcribir.",
+    "downloadFailed": "No se ha podido descargar."
+  },
+  "popout": {
+    "draftMissing": "Este borrador ya no existe.",
+    "noContext": "No hay contexto de ventana de redacción.",
+    "loading": "Cargando…"
+  },
+  "validation": {
+    "missingRecipients": "Añade al menos un destinatario antes de enviar",
+    "invalidRecipients_one": "{{count}} dirección de destinatario no es válida",
+    "invalidRecipients_other": "{{count}} direcciones de destinatario no son válidas",
+    "emptyMessage": "Escribe un asunto o el cuerpo del mensaje antes de enviar",
+    "reauthRequired": "Tienes que volver a iniciar sesión en {{email}} antes de enviar — usa «Volver a autenticar…» en el selector de cuentas.",
+    "missingPgpKeys": "No hay clave pública PGP de: {{recipients}}",
+    "passphraseRequired": "Introduce tu frase de contraseña PGP para firmar este mensaje"
+  },
+  "sendAgain": {
+    "attachmentsNotRestored": "No se han podido restaurar los adjuntos originales",
+    "reopenFailed": "No se ha podido volver a abrir este mensaje"
+  },
+  "outgoing": {
+    "quoteHeader": "El {{date}}, {{writer}} escribió:",
+    "forwardedMessage": "---------- Mensaje reenviado ----------",
+    "from": "De: {{value}}",
+    "date": "Fecha: {{value}}",
+    "subject": "Asunto: {{value}}",
+    "to": "Para: {{value}}",
+    "cc": "CC: {{value}}",
+    "unsubscribeSubject": "Cancelar suscripción"
+  }
+}

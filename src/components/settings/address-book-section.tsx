@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -48,6 +49,7 @@ import { notifyContactsChanged } from "@/components/contacts/contacts-changed"
  * credentials in its sealed envelope; this component only orchestrates.
  */
 export function AddressBookSection() {
+  const { t } = useTranslation()
   const [books, setBooks] = useState<CarddavBook[]>([])
   const [listError, setListError] = useState<string | null>(null)
   const [busyBookId, setBusyBookId] = useState<string | null>(null)
@@ -85,7 +87,7 @@ export function AddressBookSection() {
       setBooks(await listCarddavBooks(getExecutor()))
       setListError(null)
     } catch {
-      setListError("Address books could not be loaded.")
+      setListError(t("settingsMail.addressBook.loadFailed"))
     }
   }
 
@@ -99,9 +101,9 @@ export function AddressBookSection() {
         setListError(null)
       })
       .catch(() => {
-        setListError("Address books could not be loaded.")
+        setListError(t("settingsMail.addressBook.loadFailed"))
       })
-  }, [])
+  }, [t])
 
   function formCredentials() {
     return {
@@ -112,8 +114,11 @@ export function AddressBookSection() {
   }
 
   function formComplete(): boolean {
-    const { serverUrl: url, username: user, appPassword: pass } =
-      formCredentials()
+    const {
+      serverUrl: url,
+      username: user,
+      appPassword: pass,
+    } = formCredentials()
     return url !== "" && user !== "" && pass !== ""
   }
 
@@ -129,7 +134,7 @@ export function AddressBookSection() {
         message:
           error instanceof Error
             ? error.message
-            : "Discovery failed on the server.",
+            : t("settingsMail.addressBook.discoveryFailed"),
       })
     }
   }
@@ -137,14 +142,14 @@ export function AddressBookSection() {
   async function handleConnect() {
     if (discoverState.status !== "ready") return
     if (!selectedAccountId) {
-      setConnectError("Connect a mail account first; synced contacts live in an account's address book.")
+      setConnectError(t("settingsMail.addressBook.needAccountError"))
       return
     }
     const book =
       discoverState.books.find((entry) => entry.href === selectedBookHref) ??
       null
     if (!book) {
-      setConnectError("Choose an address book to sync.")
+      setConnectError(t("settingsMail.addressBook.chooseBook"))
       return
     }
     setConnecting(true)
@@ -161,8 +166,12 @@ export function AddressBookSection() {
         ...previous,
         [stored.id]:
           result.skipped > 0
-            ? `Synced with ${result.skipped} card${result.skipped === 1 ? "" : "s"} skipped.`
-            : `Synced — ${result.stored} contact${result.stored === 1 ? "" : "s"}.`,
+            ? t("settingsMail.addressBook.syncedSkipped", {
+                count: result.skipped,
+              })
+            : t("settingsMail.addressBook.syncedContacts", {
+                count: result.stored,
+              }),
       }))
       notifyContactsChanged()
       // Connected: reset the form and show the new book.
@@ -176,7 +185,9 @@ export function AddressBookSection() {
       await refreshBooks()
     } catch (error) {
       setConnectError(
-        error instanceof Error ? error.message : "Connecting failed."
+        error instanceof Error
+          ? error.message
+          : t("settingsMail.addressBook.connectFailed")
       )
       // The stored book may exist with a failed initial pull — keep it
       // listed (its status line carries the error; "Sync now" retries).
@@ -198,10 +209,15 @@ export function AddressBookSection() {
         ...previous,
         [book.id]:
           result.mode === "unchanged"
-            ? "Already up to date."
+            ? t("settingsMail.addressBook.upToDate")
             : result.skipped > 0
-              ? `Synced with ${result.skipped} card${result.skipped === 1 ? "" : "s"} skipped.`
-              : `Synced — ${result.stored} new or changed, ${result.removed} removed.`,
+              ? t("settingsMail.addressBook.syncedSkipped", {
+                  count: result.skipped,
+                })
+              : t("settingsMail.addressBook.syncedChanges", {
+                  stored: result.stored,
+                  removed: result.removed,
+                }),
       }))
       notifyContactsChanged()
       await refreshBooks()
@@ -209,7 +225,9 @@ export function AddressBookSection() {
       setBookNotice((previous) => ({
         ...previous,
         [book.id]:
-          error instanceof Error ? error.message : "The sync failed.",
+          error instanceof Error
+            ? error.message
+            : t("settingsMail.addressBook.syncFailed"),
       }))
       await refreshBooks()
     } finally {
@@ -227,7 +245,9 @@ export function AddressBookSection() {
       await refreshBooks()
     } catch {
       setListError(
-        `The book "${pendingDisconnect.name}" could not be disconnected.`
+        t("settingsMail.addressBook.disconnectFailed", {
+          name: pendingDisconnect.name,
+        })
       )
     } finally {
       setBusyBookId(null)
@@ -242,24 +262,32 @@ export function AddressBookSection() {
   // store's formatter here would drag the composer send chain into the
   // settings page's static graph (the design D11 lazy-load guard).
   function statusLine(book: CarddavBook): string {
-    if (book.lastError) return `Last sync failed: ${book.lastError}`
-    if (book.lastSyncedAt === null) return "Not synced yet"
+    if (book.lastError) {
+      return t("settingsMail.addressBook.lastSyncFailed", {
+        error: book.lastError,
+      })
+    }
+    if (book.lastSyncedAt === null) {
+      return t("settingsMail.addressBook.notSynced")
+    }
     const formatted = new Date(book.lastSyncedAt * 1000).toLocaleString(
       undefined,
       { dateStyle: "medium", timeStyle: "short" }
     )
-    return `Last synced ${formatted}`
+    return t("settingsMail.addressBook.lastSynced", { when: formatted })
   }
 
   return (
-    <section aria-label="Address book" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.addressBook.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
         <h2 className="text-base font-semibold text-foreground">
-          Address book
+          {t("settingsMail.addressBook.title")}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Sync a CardDAV address book with your contacts. Synced contacts
-          appear, search, and edit exactly like local ones.
+          {t("settingsMail.addressBook.subtitle")}
         </p>
       </div>
 
@@ -271,7 +299,7 @@ export function AddressBookSection() {
         )}
         {books.length === 0 && listError === null && (
           <p className="text-sm text-muted-foreground">
-            No address books connected yet.
+            {t("settingsMail.addressBook.empty")}
           </p>
         )}
         {books.map((book) => (
@@ -287,7 +315,7 @@ export function AddressBookSection() {
                 </span>
                 {book.readOnly && (
                   <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                    Read-only
+                    {t("settingsMail.addressBook.readOnly")}
                   </span>
                 )}
               </div>
@@ -299,8 +327,9 @@ export function AddressBookSection() {
               </p>
               {(book.lastSkipped ?? 0) > 0 && (
                 <p role="status" className="text-xs text-amber-600">
-                  {book.lastSkipped} card{book.lastSkipped === 1 ? "" : "s"}{" "}
-                  could not be read and were skipped.
+                  {t("settingsMail.addressBook.lastSkipped", {
+                    count: book.lastSkipped ?? 0,
+                  })}
                 </p>
               )}
               {bookNotice[book.id] && (
@@ -314,7 +343,9 @@ export function AddressBookSection() {
                 variant="ghost"
                 size="sm"
                 disabled={busyBookId === book.id}
-                aria-label={`Sync ${book.name}`}
+                aria-label={t("settingsMail.addressBook.syncAria", {
+                  name: book.name,
+                })}
                 onClick={() => {
                   void handleSyncNow(book)
                 }}
@@ -322,15 +353,17 @@ export function AddressBookSection() {
                 {busyBookId === book.id && (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden />
                 )}
-                Sync now
+                {t("settingsMail.addressBook.syncNow")}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Disconnect ${book.name}`}
+                aria-label={t("settingsMail.addressBook.disconnectAria", {
+                  name: book.name,
+                })}
                 onClick={() => setPendingDisconnect(book)}
               >
-                Disconnect
+                {t("settingsMail.addressBook.disconnect")}
               </Button>
             </div>
           </div>
@@ -340,29 +373,31 @@ export function AddressBookSection() {
       <div className="flex flex-col gap-3 rounded-md border border-border p-4">
         <div className="grid gap-0.5">
           <h3 className="text-sm font-semibold text-foreground">
-            Connect a CardDAV server
+            {t("settingsMail.addressBook.connectTitle")}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Server URL, username and app password. The password is sealed
-            on this device and never leaves it.
+            {t("settingsMail.addressBook.connectHelp")}
           </p>
         </div>
         {accounts.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Connect a mail account first — synced contacts live in an
-            account&apos;s address book.
+            {t("settingsMail.addressBook.needAccount")}
           </p>
         ) : (
           <>
             {accounts.length > 1 && (
               <div className="grid gap-1.5">
-                <Label htmlFor="carddav-account">Account</Label>
+                <Label htmlFor="carddav-account">
+                  {t("settingsMail.addressBook.account")}
+                </Label>
                 <Select
                   value={selectedAccountId ?? undefined}
                   onValueChange={setAccountId}
                 >
                   <SelectTrigger id="carddav-account">
-                    <SelectValue placeholder="Choose an account" />
+                    <SelectValue
+                      placeholder={t("settingsMail.addressBook.chooseAccount")}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {accounts.map((account) => (
@@ -375,7 +410,9 @@ export function AddressBookSection() {
               </div>
             )}
             <div className="grid gap-1.5">
-              <Label htmlFor="carddav-server-url">Server URL</Label>
+              <Label htmlFor="carddav-server-url">
+                {t("settingsMail.addressBook.serverUrl")}
+              </Label>
               <Input
                 id="carddav-server-url"
                 placeholder="https://dav.example.com/"
@@ -387,7 +424,9 @@ export function AddressBookSection() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="carddav-username">Username</Label>
+              <Label htmlFor="carddav-username">
+                {t("settingsMail.addressBook.username")}
+              </Label>
               <Input
                 id="carddav-username"
                 autoComplete="off"
@@ -399,7 +438,9 @@ export function AddressBookSection() {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="carddav-app-password">App password</Label>
+              <Label htmlFor="carddav-app-password">
+                {t("settingsMail.addressBook.appPassword")}
+              </Label>
               <Input
                 id="carddav-app-password"
                 type="password"
@@ -415,14 +456,12 @@ export function AddressBookSection() {
               <Button
                 variant="outline"
                 size="sm"
-                disabled={
-                  !formComplete() || discoverState.status === "loading"
-                }
+                disabled={!formComplete() || discoverState.status === "loading"}
                 onClick={() => {
                   void handleDiscover()
                 }}
               >
-                Discover address books
+                {t("settingsMail.addressBook.discover")}
               </Button>
             </div>
             {discoverState.status === "error" && (
@@ -433,12 +472,12 @@ export function AddressBookSection() {
             {discoverState.status === "ready" &&
               (discoverState.books.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  The server exposes no address books.
+                  {t("settingsMail.addressBook.noneFound")}
                 </p>
               ) : (
                 <fieldset className="flex flex-col gap-2">
                   <legend className="text-sm font-medium text-foreground">
-                    Address book to sync
+                    {t("settingsMail.addressBook.bookToSync")}
                   </legend>
                   {discoverState.books.map((book) => (
                     <label
@@ -455,7 +494,7 @@ export function AddressBookSection() {
                       {book.displayName ?? book.href}
                       {book.readOnly === true && (
                         <span className="text-xs text-muted-foreground">
-                          (read-only)
+                          {t("settingsMail.addressBook.readOnlyParen")}
                         </span>
                       )}
                     </label>
@@ -478,7 +517,7 @@ export function AddressBookSection() {
                 {connecting && (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden />
                 )}
-                Connect
+                {t("settingsMail.addressBook.connect")}
               </Button>
             </div>
           </>
@@ -494,12 +533,15 @@ export function AddressBookSection() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Disconnect address book</DialogTitle>
+              <DialogTitle>
+                {t("settingsMail.addressBook.disconnectTitle")}
+              </DialogTitle>
               <DialogDescription>
-                Disconnect{" "}
-                <span className="font-medium">{pendingDisconnect.name}</span>?
-                Its synced contacts are removed from this device — the
-                contacts on the CardDAV server are not affected.
+                <Trans
+                  i18nKey="settingsMail.addressBook.disconnectConfirm"
+                  values={{ name: pendingDisconnect.name }}
+                  components={{ name: <span className="font-medium" /> }}
+                />
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -508,11 +550,16 @@ export function AddressBookSection() {
                 onClick={() => setPendingDisconnect(null)}
                 disabled={busyBookId === pendingDisconnect.id}
               >
-                Cancel
+                {t("settingsMail.addressBook.cancel")}
               </Button>
               <Button
                 variant="destructive"
-                aria-label={`Confirm disconnecting ${pendingDisconnect.name}`}
+                aria-label={t(
+                  "settingsMail.addressBook.confirmDisconnectAria",
+                  {
+                    name: pendingDisconnect.name,
+                  }
+                )}
                 onClick={() => {
                   void handleConfirmDisconnect()
                 }}
@@ -521,7 +568,7 @@ export function AddressBookSection() {
                 {busyBookId === pendingDisconnect.id && (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden />
                 )}
-                Disconnect
+                {t("settingsMail.addressBook.disconnect")}
               </Button>
             </DialogFooter>
           </DialogContent>

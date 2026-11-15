@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { SquareSplitHorizontal } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { createSplitWithToast } from "@/components/layout/use-splits"
 import { Button } from "@/components/ui/button"
@@ -25,14 +26,15 @@ import { Label } from "@/components/ui/label"
  * snippets-section pattern).
  */
 export function SaveAsSplitButton({ query }: { query: string }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   return (
     <>
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Save as Split"
-        title="Save as Split"
+        aria-label={t("search.saveAsSplit.label")}
+        title={t("search.saveAsSplit.label")}
         data-testid="save-as-split-button"
         onClick={() => setOpen(true)}
       >
@@ -50,6 +52,7 @@ function SaveAsSplitDialog({
   query: string
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState("")
   const [queryInput, setQueryInput] = useState(query)
   const [saving, setSaving] = useState(false)
@@ -71,8 +74,8 @@ function SaveAsSplitDialog({
     setSaving(false)
     setError(
       outcome.error === "name-taken"
-        ? `A split named “${name.trim()}” already exists.`
-        : "Could not create the split."
+        ? t("search.saveAsSplit.nameTaken", { name: name.trim() })
+        : t("search.saveAsSplit.createFailed")
     )
   }
 
@@ -80,10 +83,9 @@ function SaveAsSplitDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Save as Split</DialogTitle>
+          <DialogTitle>{t("search.saveAsSplit.label")}</DialogTitle>
           <DialogDescription>
-            The query becomes a named tab above the inbox; saving enters it
-            right away. Splits are stored locally.
+            {t("search.saveAsSplit.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -94,18 +96,22 @@ function SaveAsSplitDialog({
           }}
         >
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="split-from-search-name">Name</Label>
+            <Label htmlFor="split-from-search-name">
+              {t("search.saveAsSplit.name")}
+            </Label>
             <Input
               id="split-from-search-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Boss mail"
+              placeholder={t("search.saveAsSplit.namePlaceholder")}
               autoFocus
               disabled={saving}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="split-from-search-query">Query</Label>
+            <Label htmlFor="split-from-search-query">
+              {t("search.saveAsSplit.query")}
+            </Label>
             <Input
               id="split-from-search-query"
               value={queryInput}
@@ -125,10 +131,10 @@ function SaveAsSplitDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("search.saveAsSplit.cancel")}
             </Button>
             <Button type="submit" disabled={saving || !name.trim()}>
-              Create split
+              {t("search.saveAsSplit.create")}
             </Button>
           </DialogFooter>
         </form>

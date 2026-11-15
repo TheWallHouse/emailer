@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Clock, Pencil, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -44,12 +45,13 @@ import { formatSnoozedUntil } from "./use-snoozed-threads"
  */
 
 function RecipientSummary({ row }: { row: ScheduledSendRow }) {
+  const { t } = useTranslation()
   const summary = summarizeRecipients(
     parseScheduledRecipients(row.recipients_json)
   )
   return (
     <span className="truncate text-xs text-muted-foreground">
-      {summary === "" ? "(no recipients)" : summary}
+      {summary === "" ? t("sidebar.scheduled.noRecipients") : summary}
     </span>
   )
 }
@@ -72,7 +74,8 @@ function PendingRow({
   onEdit: (row: ScheduledSendRow) => void
   onCancel: (row: ScheduledSendRow) => void
 }) {
-  const title = row.subject || "(no subject)"
+  const { t } = useTranslation()
+  const title = row.subject || t("sidebar.noSubject")
   return (
     <div
       data-testid="scheduled-send-row"
@@ -86,14 +89,16 @@ function PendingRow({
           className="text-xs text-muted-foreground tabular-nums"
         >
           {row.due_at <= now
-            ? "Due — sends within a minute"
-            : `Will send ${formatSnoozedUntil(row.due_at)}`}
+            ? t("sidebar.scheduled.dueNow")
+            : t("sidebar.scheduled.willSend", {
+                when: formatSnoozedUntil(row.due_at),
+              })}
         </span>
       </div>
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Edit scheduled send ${title}`}
+        aria-label={t("sidebar.scheduled.edit", { title })}
         disabled={busy}
         onClick={() => onEdit(row)}
       >
@@ -102,7 +107,7 @@ function PendingRow({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Cancel scheduled send ${title}`}
+        aria-label={t("sidebar.scheduled.cancel", { title })}
         disabled={busy}
         onClick={() => onCancel(row)}
       >
@@ -127,7 +132,8 @@ function QueuedRow({
   busy: boolean
   onCancel: (row: ScheduledSendRow) => void
 }) {
-  const title = row.subject || "(no subject)"
+  const { t } = useTranslation()
+  const title = row.subject || t("sidebar.noSubject")
   return (
     <div
       data-testid="scheduled-send-queued-row"
@@ -140,13 +146,13 @@ function QueuedRow({
           data-testid="scheduled-queued-time"
           className="text-xs text-muted-foreground tabular-nums"
         >
-          Queued — will send when online
+          {t("sidebar.scheduled.queued")}
         </span>
       </div>
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Cancel scheduled send ${title}`}
+        aria-label={t("sidebar.scheduled.cancel", { title })}
         disabled={busy}
         onClick={() => onCancel(row)}
       >
@@ -157,7 +163,8 @@ function QueuedRow({
 }
 
 function HistoryRow({ row }: { row: ScheduledSendRow }) {
-  const title = row.subject || "(no subject)"
+  const { t } = useTranslation()
+  const title = row.subject || t("sidebar.noSubject")
   return (
     <div
       data-testid="scheduled-send-history-row"
@@ -168,15 +175,19 @@ function HistoryRow({ row }: { row: ScheduledSendRow }) {
         <span className="truncate text-xs text-muted-foreground">
           {row.status === "sent"
             ? row.sent_at !== null
-              ? `Sent ${formatSnoozedUntil(row.sent_at)}`
-              : "Sent"
+              ? t("sidebar.scheduled.sentAt", {
+                  when: formatSnoozedUntil(row.sent_at),
+                })
+              : t("sidebar.scheduled.sent")
             : row.last_error
-              ? `Failed — ${row.last_error}`
-              : "Failed"}
+              ? t("sidebar.scheduled.failedWith", { error: row.last_error })
+              : t("sidebar.scheduled.failed")}
         </span>
       </div>
       <span className="shrink-0 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {row.status === "sent" ? "Sent" : "Failed"}
+        {row.status === "sent"
+          ? t("sidebar.scheduled.sent")
+          : t("sidebar.scheduled.failed")}
       </span>
     </div>
   )
@@ -187,6 +198,7 @@ function ScheduledSendsDialog({
 }: {
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
   const rows = useScheduledSends(activeAccountId)
   const pending = rows.filter((row) => row.status === "scheduled")
@@ -211,9 +223,9 @@ function ScheduledSendsDialog({
     void (async () => {
       const cancelled = await cancelScheduledSendById(row.id)
       if (cancelled) {
-        toast.success("Scheduled send cancelled")
+        toast.success(t("sidebar.scheduled.cancelled"))
       } else {
-        toast.error("Could not cancel the scheduled send.")
+        toast.error(t("sidebar.scheduled.cancelFailed"))
         setBusyId(null)
       }
     })()
@@ -226,7 +238,7 @@ function ScheduledSendsDialog({
       if (restored) {
         onOpenChange(false)
       } else {
-        toast.error("Could not restore the scheduled message for editing.")
+        toast.error(t("sidebar.scheduled.editFailed"))
         setBusyId(null)
       }
     })()
@@ -236,16 +248,15 @@ function ScheduledSendsDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent data-testid="scheduled-sends-dialog">
         <DialogHeader>
-          <DialogTitle>Scheduled sends</DialogTitle>
+          <DialogTitle>{t("sidebar.scheduled.dialogTitle")}</DialogTitle>
           <DialogDescription>
-            Messages send while the app is running — one that comes due while
-            Emailer is closed will send at the next launch.
+            {t("sidebar.scheduled.dialogDescription")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex max-h-96 flex-col gap-1 overflow-y-auto">
           {pending.length === 0 && queued.length === 0 ? (
             <p className="px-2 py-3 text-sm text-muted-foreground">
-              No scheduled sends.
+              {t("sidebar.scheduled.empty")}
             </p>
           ) : (
             pending.map((row) => (
@@ -263,7 +274,7 @@ function ScheduledSendsDialog({
             <>
               <Separator className="my-1" />
               <p className="px-2 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                Queued — will send when online
+                {t("sidebar.scheduled.queued")}
               </p>
               {queued.map((row) => (
                 <QueuedRow
@@ -279,7 +290,7 @@ function ScheduledSendsDialog({
             <>
               <Separator className="my-1" />
               <p className="px-2 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                History
+                {t("sidebar.scheduled.history")}
               </p>
               {history.map((row) => (
                 <HistoryRow key={row.id} row={row} />
@@ -294,6 +305,7 @@ function ScheduledSendsDialog({
 
 /** The sidebar entry (expanded layout only, like the other sections). */
 export function ScheduledSendsSection() {
+  const { t } = useTranslation()
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
   const rows = useScheduledSends(activeAccountId)
   // Both cancellable states count as pending: a claimed row still waits
@@ -307,7 +319,7 @@ export function ScheduledSendsSection() {
     <>
       <Separator />
       <nav
-        aria-label="Scheduled"
+        aria-label={t("sidebar.scheduled.title")}
         data-testid="scheduled-section"
         className="grid items-start gap-0.5 p-2"
       >
@@ -317,7 +329,7 @@ export function ScheduledSendsSection() {
           onClick={() => setOpen(true)}
         >
           <Clock aria-hidden />
-          Scheduled
+          {t("sidebar.scheduled.title")}
           {pendingCount > 0 && (
             <span
               data-testid="scheduled-count"

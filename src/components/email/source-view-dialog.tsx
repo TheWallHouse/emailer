@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Copy } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { i18next } from "@/i18n"
 import { renderPlainTextAsHtml } from "@/services/renderer"
 import {
   getMessageSource,
@@ -65,6 +67,7 @@ export function SourceViewDialog({
   onOpenChange,
   deps,
 }: SourceViewDialogProps) {
+  const { t } = useTranslation()
   const [stage, setStage] = useState<SourceStage>({ stage: "loading" })
   const [copied, setCopied] = useState(false)
   // Monotonic request id: only the newest fetch may land (StrictMode's
@@ -86,7 +89,7 @@ export function SourceViewDialog({
     if (!account) {
       setStage({
         stage: "error",
-        message: "The message's account is unavailable.",
+        message: i18next.t("reader.sourceView.noAccount"),
       })
       return
     }
@@ -103,7 +106,7 @@ export function SourceViewDialog({
           message:
             error instanceof Error
               ? error.message
-              : "Could not load the source.",
+              : i18next.t("reader.sourceView.loadFailed"),
         })
       })
   }, [account, message])
@@ -126,10 +129,10 @@ export function SourceViewDialog({
     try {
       await navigator.clipboard.writeText(stage.source)
       setCopied(true)
-      toast.success("Message source copied")
+      toast.success(t("reader.sourceView.copiedToast"))
     } catch (error) {
       console.warn("[source-view] copy failed", error)
-      toast.error("Could not access the clipboard.")
+      toast.error(t("reader.sourceView.clipboardFailed"))
     }
   }
 
@@ -140,10 +143,11 @@ export function SourceViewDialog({
         className="flex max-h-[85vh] flex-col sm:max-w-3xl"
       >
         <DialogHeader>
-          <DialogTitle>Message source</DialogTitle>
+          <DialogTitle>{t("reader.sourceView.title")}</DialogTitle>
           <DialogDescription className="line-clamp-1">
-            Raw RFC 822 source of “{message.subject || "(no subject)"}” —
-            read-only, nothing executes.
+            {t("reader.sourceView.description", {
+              subject: message.subject || t("threadList.noSubject"),
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto rounded-md border border-border bg-muted/30">
@@ -152,7 +156,7 @@ export function SourceViewDialog({
               data-testid="source-view-loading"
               className="p-4 text-sm text-muted-foreground"
             >
-              Loading source…
+              {t("reader.sourceView.loading")}
             </p>
           )}
           {stage.stage === "error" && (
@@ -176,7 +180,11 @@ export function SourceViewDialog({
         <DialogFooter>
           <span className="mr-auto text-xs text-muted-foreground">
             {stage.stage === "shown" &&
-              (copied ? "Copied." : `${stage.source.length} characters`)}
+              (copied
+                ? t("reader.sourceView.copied")
+                : t("reader.sourceView.characters", {
+                    count: stage.source.length,
+                  }))}
           </span>
           <Button
             variant="outline"
@@ -185,14 +193,14 @@ export function SourceViewDialog({
             onClick={() => void handleCopy()}
           >
             <Copy className="size-3.5" />
-            Copy source
+            {t("reader.sourceView.copy")}
           </Button>
           <Button
             variant="ghost"
             data-testid="source-view-close"
             onClick={() => onOpenChange(false)}
           >
-            Close
+            {t("reader.sourceView.close")}
           </Button>
         </DialogFooter>
       </DialogContent>

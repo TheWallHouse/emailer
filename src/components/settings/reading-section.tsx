@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -34,18 +36,40 @@ import { useUiStore } from "@/stores/ui-store"
  */
 
 const PANE_OPTIONS: { value: ReadingPanePosition; label: string }[] = [
-  { value: "right", label: "Right" },
-  { value: "bottom", label: "Bottom" },
-  { value: "hidden", label: "Hidden" },
+  {
+    value: "right",
+    get label() {
+      return i18next.t("settings.reading.pane.right")
+    },
+  },
+  {
+    value: "bottom",
+    get label() {
+      return i18next.t("settings.reading.pane.bottom")
+    },
+  },
+  {
+    value: "hidden",
+    get label() {
+      return i18next.t("settings.reading.pane.hidden")
+    },
+  },
 ]
 
 const PANE_HINTS: Record<ReadingPanePosition, string> = {
-  right: "Classic three-pane layout",
-  bottom: "List stacked over the message",
-  hidden: "Two-pane; messages open full-width",
+  get right() {
+    return i18next.t("settings.reading.pane.hints.right")
+  },
+  get bottom() {
+    return i18next.t("settings.reading.pane.hints.bottom")
+  },
+  get hidden() {
+    return i18next.t("settings.reading.pane.hints.hidden")
+  },
 }
 
 export function ReadingSection() {
+  const { t } = useTranslation()
   const readingPane = useUiStore((state) => state.readingPane)
   const [notifications, setNotifications] = useState(true)
   const [markReadOnOpen, setMarkReadOnOpen] = useState(true)
@@ -116,17 +140,24 @@ export function ReadingSection() {
   }
 
   return (
-    <section aria-label="Reading" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.reading.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Reading</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settings.reading.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          How the mailbox is laid out and when you are notified about new mail.
+          {t("settings.reading.description")}
         </p>
       </div>
       <div className="divide-y divide-border">
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
-            <Label htmlFor="reading-pane-position">Reading pane</Label>
+            <Label htmlFor="reading-pane-position">
+              {t("settings.reading.pane.label")}
+            </Label>
             <p className="text-xs text-muted-foreground">
               {PANE_HINTS[readingPane]}.
             </p>
@@ -155,11 +186,10 @@ export function ReadingSection() {
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
             <Label htmlFor="reading-notifications">
-              New-mail notifications
+              {t("settings.reading.notifications.label")}
             </Label>
             <p className="text-xs text-muted-foreground">
-              Show a system notification when sync finds new messages. Unread
-              badges are always kept up to date.
+              {t("settings.reading.notifications.hint")}
             </p>
           </div>
           <Switch
@@ -173,11 +203,10 @@ export function ReadingSection() {
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
             <Label htmlFor="reading-mark-read-on-open">
-              Mark as read on open
+              {t("settings.reading.markReadOnOpen.label")}
             </Label>
             <p className="text-xs text-muted-foreground">
-              Opening a message marks it read. Manual mark read/unread and
-              rules always work as usual.
+              {t("settings.reading.markReadOnOpen.hint")}
             </p>
           </div>
           <Switch

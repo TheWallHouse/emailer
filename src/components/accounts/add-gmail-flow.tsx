@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ArrowLeft, Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -27,11 +29,17 @@ import { HistoryWindowField } from "./history-window-field"
  * consent wait is pending cancels the loopback server so nothing leaks.
  */
 
-const STEP_LABELS: Record<GmailFlowStep, string> = {
-  consent: "Waiting for you to finish in the browser…",
-  exchange: "Signing you in…",
-  profile: "Reading your Gmail profile…",
-  save: "Saving the account…",
+function stepLabel(t: TFunction, step: GmailFlowStep): string {
+  switch (step) {
+    case "consent":
+      return t("accounts.oauth.steps.consent")
+    case "exchange":
+      return t("accounts.oauth.steps.exchange")
+    case "profile":
+      return t("accounts.oauth.steps.gmailProfile")
+    case "save":
+      return t("accounts.oauth.steps.save")
+  }
 }
 
 interface AddGmailFlowProps {
@@ -41,10 +49,10 @@ interface AddGmailFlowProps {
 }
 
 export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
+  const { t } = useTranslation()
   const [clientId, setClientId] = useState("")
   const [validationError, setValidationError] = useState<string | null>(null)
-  const [historyWindow, setHistoryWindow] =
-    useState<HistoryWindowSetting>(null)
+  const [historyWindow, setHistoryWindow] = useState<HistoryWindowSetting>(null)
   const [working, setWorking] = useState(false)
   const [step, setStep] = useState<GmailFlowStep>("consent")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -69,7 +77,7 @@ export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
     event.preventDefault()
     const trimmed = clientId.trim()
     if (!trimmed) {
-      setValidationError("Enter your Google OAuth Client ID to continue.")
+      setValidationError(t("accounts.oauth.enterGoogleClientId"))
       return
     }
     setValidationError(null)
@@ -91,7 +99,7 @@ export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Sign-in failed. Please try again."
+          : t("accounts.oauth.signInFailed")
       )
     } finally {
       workingRef.current = false
@@ -103,11 +111,8 @@ export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
     return (
       <>
         <DialogHeader>
-          <DialogTitle>Connect Gmail</DialogTitle>
-          <DialogDescription>
-            A Google sign-in page opened in your browser. Finish there — this
-            window continues automatically.
-          </DialogDescription>
+          <DialogTitle>{t("accounts.gmail.title")}</DialogTitle>
+          <DialogDescription>{t("accounts.gmail.waiting")}</DialogDescription>
         </DialogHeader>
         <div
           role="status"
@@ -115,7 +120,7 @@ export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
           className="flex items-center gap-3 py-2 text-sm text-muted-foreground"
         >
           <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
-          {STEP_LABELS[step]}
+          {stepLabel(t, step)}
         </div>
         <div className="flex justify-start">
           <Button
@@ -126,7 +131,7 @@ export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
               void cancelOauthWait().catch(() => {})
             }}
           >
-            Cancel
+            {t("accounts.oauth.cancel")}
           </Button>
         </div>
       </>
@@ -136,15 +141,14 @@ export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Connect Gmail</DialogTitle>
-        <DialogDescription>
-          Paste your own Google OAuth Client ID (type “Desktop app”). It is
-          stored on this device only.
-        </DialogDescription>
+        <DialogTitle>{t("accounts.gmail.title")}</DialogTitle>
+        <DialogDescription>{t("accounts.gmail.description")}</DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="grid gap-3">
         <div className="grid gap-1.5">
-          <Label htmlFor="gmail-client-id">Client ID</Label>
+          <Label htmlFor="gmail-client-id">
+            {t("accounts.oauth.clientId")}
+          </Label>
           <Input
             id="gmail-client-id"
             autoFocus
@@ -186,9 +190,9 @@ export function AddGmailFlow({ onBack, onSuccess }: AddGmailFlowProps) {
             className="gap-1"
           >
             <ArrowLeft className="size-3.5" aria-hidden />
-            Back
+            {t("accounts.oauth.back")}
           </Button>
-          <Button type="submit">Continue in browser</Button>
+          <Button type="submit">{t("accounts.oauth.continueInBrowser")}</Button>
         </div>
       </form>
     </>

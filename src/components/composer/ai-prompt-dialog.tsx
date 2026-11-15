@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +31,7 @@ export function AiPromptDialog({
   onOpenChange: (open: boolean) => void
   onGenerate: (prompt: string) => void
 }) {
+  const { t } = useTranslation()
   const [value, setValue] = useState("")
 
   // Each open starts clean — the previous instruction must not leak into
@@ -57,17 +59,16 @@ export function AiPromptDialog({
           data-testid="ai-prompt-form"
         >
           <DialogHeader>
-            <DialogTitle>Draft from prompt</DialogTitle>
+            <DialogTitle>{t("composer.aiPrompt.title")}</DialogTitle>
             <DialogDescription>
-              Describe the message to write. The draft is offered for review
-              before anything enters your message.
+              {t("composer.aiPrompt.description")}
             </DialogDescription>
           </DialogHeader>
           <Textarea
             value={value}
             onChange={(event) => setValue(event.target.value)}
-            aria-label="Draft instruction"
-            placeholder="e.g. A short friendly note asking whether the report can slip to Friday"
+            aria-label={t("composer.aiPrompt.instruction")}
+            placeholder={t("composer.aiPrompt.placeholder")}
             rows={5}
             autoFocus
           />
@@ -77,10 +78,10 @@ export function AiPromptDialog({
               variant="outline"
               onClick={() => handleOpenChange(false)}
             >
-              Cancel
+              {t("composer.aiPrompt.cancel")}
             </Button>
             <Button type="submit" disabled={value.trim() === ""}>
-              Generate
+              {t("composer.aiPrompt.generate")}
             </Button>
           </DialogFooter>
         </form>

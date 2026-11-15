@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
 } from "react"
 import type { Editor } from "@tiptap/react"
+import { useTranslation } from "react-i18next"
 import { Loader2, Mic, Square, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -83,6 +84,7 @@ function dictationTextToHtml(text: string): string {
 }
 
 export function DictationButton({ editor }: { editor: Editor | null }) {
+  const { t } = useTranslation()
   const supported = useMemo(() => dictationSupported(), [])
   const [phase, setPhase] = useState<Phase>("idle")
   const [consentError, setConsentError] = useState<string | null>(null)
@@ -124,11 +126,13 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
       if (disposedRef.current) return
       console.warn("[composer] dictation start failed", error)
       toast.error(
-        error instanceof Error ? error.message : "Could not start dictation."
+        error instanceof Error
+          ? error.message
+          : t("composer.dictation.startFailed")
       )
       setPhase("idle")
     }
-  }, [])
+  }, [t])
 
   const stopAndInsert = useCallback(async () => {
     const session = sessionRef.current
@@ -150,13 +154,15 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
       if (error instanceof DictationCancelledError) return // silent discard
       console.warn("[composer] dictation failed", error)
       toast.error(
-        error instanceof Error ? error.message : "Transcription failed."
+        error instanceof Error
+          ? error.message
+          : t("composer.dictation.transcriptionFailed")
       )
     } finally {
       sessionRef.current = null
       setPhase("idle")
     }
-  }, [editor])
+  }, [editor, t])
 
   const cancel = useCallback(async () => {
     const session = sessionRef.current
@@ -204,10 +210,12 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
       await startRecording()
     } catch (error) {
       setConsentError(
-        error instanceof Error ? error.message : "The download failed."
+        error instanceof Error
+          ? error.message
+          : t("composer.dictation.downloadFailed")
       )
     }
-  }, [startRecording])
+  }, [startRecording, t])
 
   if (!supported) return null
 
@@ -241,12 +249,14 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
                 variant="ghost"
                 size="sm"
                 aria-label={
-                  phase === "recording" ? "Stop dictation" : "Dictate"
+                  phase === "recording"
+                    ? t("composer.dictation.stop")
+                    : t("composer.dictation.dictate")
                 }
                 title={
                   phase === "recording"
-                    ? "Stop and insert the transcript"
-                    : "Dictate (speech to text, on-device)"
+                    ? t("composer.dictation.stopTitle")
+                    : t("composer.dictation.dictateTitle")
                 }
                 data-testid="dictation-button"
                 aria-pressed={phase === "recording"}
@@ -272,19 +282,21 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
           />
           {phase !== "consent" ? (
             <TooltipContent side="bottom">
-              {phase === "recording" ? "Stop dictation" : "Dictate"}
+              {phase === "recording"
+                ? t("composer.dictation.stop")
+                : t("composer.dictation.dictate")}
             </TooltipContent>
           ) : null}
         </Tooltip>
         <PopoverContent className="w-80" data-testid="dictation-consent">
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium text-foreground">
-              Enable dictation?
+              {t("composer.dictation.consentTitle")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Dictation runs entirely on this machine with a{" "}
-              {formatBytes(WHISPER_TOTAL_BYTES)} speech model, downloaded
-              once from Hugging Face. Your voice is never uploaded.
+              {t("composer.dictation.consentBody", {
+                size: formatBytes(WHISPER_TOTAL_BYTES),
+              })}
             </p>
             {downloading ? (
               <>
@@ -293,11 +305,20 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
                   role="status"
                   className="text-xs text-muted-foreground"
                 >
-                  Downloading model… {formatBytes(download.received)}
-                  {download.total !== null
-                    ? ` of ${formatBytes(download.total)}`
-                    : ""}
-                  {downloadPercent !== null ? ` (${downloadPercent}%)` : ""}
+                  {download.total === null
+                    ? t("composer.dictation.downloading", {
+                        received: formatBytes(download.received),
+                      })
+                    : downloadPercent === null
+                      ? t("composer.dictation.downloadingOf", {
+                          received: formatBytes(download.received),
+                          total: formatBytes(download.total),
+                        })
+                      : t("composer.dictation.downloadingPercent", {
+                          received: formatBytes(download.received),
+                          total: formatBytes(download.total),
+                          percent: downloadPercent,
+                        })}
                 </p>
                 {downloadPercent !== null && (
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -316,7 +337,9 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
                     role="alert"
                     className="text-xs text-destructive"
                   >
-                    {consentError} You can retry.
+                    {t("composer.dictation.downloadError", {
+                      error: consentError,
+                    })}
                   </p>
                 ) : null}
                 <div className="flex items-center justify-end gap-1.5">
@@ -326,7 +349,7 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
                     data-testid="dictation-consent-cancel"
                     onClick={() => setPhase("idle")}
                   >
-                    Not now
+                    {t("composer.dictation.notNow")}
                   </Button>
                   <Button
                     size="sm"
@@ -335,7 +358,7 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
                       void startDownloadAndRecord()
                     }}
                   >
-                    Download and dictate
+                    {t("composer.dictation.downloadAndDictate")}
                   </Button>
                 </div>
               </>
@@ -347,8 +370,8 @@ export function DictationButton({ editor }: { editor: Editor | null }) {
         <Button
           variant="ghost"
           size="sm"
-          aria-label="Cancel dictation"
-          title="Cancel dictation — discard the recording"
+          aria-label={t("composer.dictation.cancel")}
+          title={t("composer.dictation.cancelTitle")}
           data-testid="dictation-cancel"
           onClick={() => {
             void cancel()

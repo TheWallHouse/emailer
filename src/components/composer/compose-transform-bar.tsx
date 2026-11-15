@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+
 import { Button } from "@/components/ui/button"
 
 /**
@@ -36,6 +38,7 @@ export function ComposeTransformBar({
   onDiscard,
   onRetry,
 }: ComposeTransformBarProps) {
+  const { t } = useTranslation()
   return (
     <div
       role="status"
@@ -43,25 +46,30 @@ export function ComposeTransformBar({
       className="flex flex-wrap items-center gap-2 bg-muted/60 px-4 py-1.5 text-sm text-foreground"
     >
       {status === "transforming" ? (
-        <span className="text-muted-foreground">{label} — transforming…</span>
+        <span className="text-muted-foreground">
+          {t("composer.transformBar.transforming", { label })}
+        </span>
       ) : null}
       {status === "ready" ? (
         <>
           <span className="min-w-0 truncate text-muted-foreground">
-            Replacement ready. Your text is unchanged until you accept.
+            {t("composer.transformBar.ready")}
           </span>
           <Button size="xs" onClick={onAccept}>
-            Accept
+            {t("composer.transformBar.accept")}
           </Button>
         </>
       ) : null}
       {status === "error" ? (
         <>
-          <span role="alert" className="min-w-0 flex-1 truncate text-destructive">
+          <span
+            role="alert"
+            className="min-w-0 flex-1 truncate text-destructive"
+          >
             {error}
           </span>
           <Button size="xs" variant="outline" onClick={onRetry}>
-            Retry
+            {t("composer.transformBar.retry")}
           </Button>
         </>
       ) : null}
@@ -71,7 +79,7 @@ export function ComposeTransformBar({
         className="ms-auto"
         onClick={onDiscard}
       >
-        Discard
+        {t("composer.transformBar.discard")}
       </Button>
     </div>
   )

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -37,6 +38,7 @@ export function PgpPassphraseDialog({
   onSubmit: (passphrase: string) => void
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const [passphrase, setPassphrase] = useState("")
 
   return (
@@ -63,11 +65,8 @@ export function PgpPassphraseDialog({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Unlock your private key</DialogTitle>
-            <DialogDescription>
-              Enter the passphrase of your private key to decrypt this message.
-              The passphrase is used once and never stored.
-            </DialogDescription>
+            <DialogTitle>{t("reader.pgp.title")}</DialogTitle>
+            <DialogDescription>{t("reader.pgp.description")}</DialogDescription>
           </DialogHeader>
           {error && (
             <p
@@ -82,7 +81,7 @@ export function PgpPassphraseDialog({
             type="password"
             value={passphrase}
             onChange={(event) => setPassphrase(event.target.value)}
-            aria-label="PGP passphrase"
+            aria-label={t("reader.pgp.passphrase")}
             autoComplete="off"
             autoFocus
             data-testid="pgp-passphrase-input"
@@ -94,10 +93,12 @@ export function PgpPassphraseDialog({
               onClick={onCancel}
               data-testid="pgp-passphrase-cancel"
             >
-              Cancel
+              {t("reader.pgp.cancel")}
             </Button>
             <Button type="submit" disabled={passphrase === "" || submitting}>
-              {submitting ? "Decrypting…" : "Decrypt"}
+              {submitting
+                ? t("reader.pgp.decrypting")
+                : t("reader.pgp.decrypt")}
             </Button>
           </DialogFooter>
         </form>

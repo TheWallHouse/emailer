@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Paperclip, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { useComposerStore } from "@/stores/composer-store"
@@ -123,6 +124,7 @@ function AttachmentChip({
   attachment: ComposerAttachment
   onRemove: () => void
 }) {
+  const { t } = useTranslation()
   const bytes = getAttachmentBytes(attachment.id)
   const previewKind = bytes
     ? attachmentPreviewKind(attachment)
@@ -154,7 +156,7 @@ function AttachmentChip({
       <Button
         variant="ghost"
         size="icon-xs"
-        aria-label={`Remove ${attachment.name}`}
+        aria-label={t("composer.attachments.remove", { name: attachment.name })}
         onClick={onRemove}
       >
         <X aria-hidden />
@@ -164,6 +166,7 @@ function AttachmentChip({
 }
 
 export function AttachmentStrip() {
+  const { t } = useTranslation()
   const attachments = useComposerStore((state) => state.attachments)
   const removeAttachment = useComposerStore((state) => state.removeAttachment)
 
@@ -186,9 +189,11 @@ export function AttachmentStrip() {
         ))}
       </div>
       <span className="text-xs text-muted-foreground" aria-live="polite">
-        {attachments.length === 1 ? "1 file" : `${attachments.length} files`} ·{" "}
-        {formatAttachmentSize(totalBytes)} /{" "}
-        {formatAttachmentSize(MAX_TOTAL_ATTACHMENT_BYTES)}
+        {t("composer.attachments.summary", {
+          count: attachments.length,
+          size: formatAttachmentSize(totalBytes),
+          limit: formatAttachmentSize(MAX_TOTAL_ATTACHMENT_BYTES),
+        })}
       </span>
     </div>
   )

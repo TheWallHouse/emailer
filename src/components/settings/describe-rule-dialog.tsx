@@ -1,5 +1,8 @@
 import { useState } from "react"
 import { Loader2, Sparkles } from "lucide-react"
+import { useTranslation } from "react-i18next"
+
+import { i18next } from "@/i18n"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -58,15 +61,15 @@ type Flow =
 function failureCopy(reason: RuleAssistFailureReason): string {
   switch (reason) {
     case "not-configured":
-      return "AI assistance is not configured."
+      return i18next.t("settingsMail.describeRule.failures.notConfigured")
     case "surface-disabled":
-      return "Natural-language rules are turned off in the AI settings."
+      return i18next.t("settingsMail.describeRule.failures.surfaceDisabled")
     case "empty-description":
-      return "Describe the rule first."
+      return i18next.t("settingsMail.describeRule.failures.emptyDescription")
     case "not-mappable":
-      return "No rule could be derived from that description."
+      return i18next.t("settingsMail.describeRule.failures.notMappable")
     case "provider":
-      return "The provider request failed."
+      return i18next.t("settingsMail.describeRule.failures.provider")
   }
 }
 
@@ -75,6 +78,7 @@ export function DescribeRuleDialog({
   onOpenChange,
   onDerived,
 }: DescribeRuleDialogProps) {
+  const { t } = useTranslation()
   const [flow, setFlow] = useState<Flow>({ stage: "input" })
   const [description, setDescription] = useState("")
 
@@ -135,13 +139,10 @@ export function DescribeRuleDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="size-4" aria-hidden />
-            Describe a rule
+            {t("settingsMail.describeRule.title")}
           </DialogTitle>
           <DialogDescription>
-            Describe in plain language what should happen to matching new
-            mail. Only your description is sent to the AI provider — never
-            your messages. You review the translated rule before anything is
-            created.
+            {t("settingsMail.describeRule.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -149,9 +150,9 @@ export function DescribeRuleDialog({
           data-testid="describe-rule-input"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder='e.g. "File everything from shopping sites into Receipts"'
+          placeholder={t("settingsMail.describeRule.placeholder")}
           rows={3}
-          className="w-full resize-none rounded-lg border border-border bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="w-full resize-none rounded-lg border border-border bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         />
 
         {flow.stage === "translating" && (
@@ -160,7 +161,7 @@ export function DescribeRuleDialog({
             className="flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground"
           >
             <Loader2 className="size-4 animate-spin" aria-hidden />
-            Translating the description…
+            {t("settingsMail.describeRule.translating")}
           </div>
         )}
 
@@ -170,9 +171,8 @@ export function DescribeRuleDialog({
             role="status"
             className="rounded-lg border border-border bg-muted/30 p-3 text-sm"
           >
-            {failureCopy("not-mappable")} Try rephrasing it with conditions
-            the rule engine supports — senders, subjects, labels, sizes,
-            dates — and actions like archiving, labeling or moving.
+            {failureCopy("not-mappable")}{" "}
+            {t("settingsMail.describeRule.tryRephrasing")}
           </div>
         )}
 
@@ -189,7 +189,7 @@ export function DescribeRuleDialog({
               data-testid="describe-rule-retry"
               onClick={translate}
             >
-              Retry
+              {t("settingsMail.describeRule.retry")}
             </Button>
           </div>
         )}
@@ -198,19 +198,17 @@ export function DescribeRuleDialog({
           <Button
             variant="ghost"
             onClick={() => handleOpenChange(false)}
-            aria-label="Close describe a rule"
+            aria-label={t("settingsMail.describeRule.closeAria")}
           >
-            Cancel
+            {t("settingsMail.describeRule.cancel")}
           </Button>
           <Button
             data-testid="describe-rule-translate"
-            disabled={
-              description.trim() === "" || flow.stage === "translating"
-            }
+            disabled={description.trim() === "" || flow.stage === "translating"}
             onClick={translate}
           >
             <Sparkles aria-hidden />
-            Translate description
+            {t("settingsMail.describeRule.translate")}
           </Button>
         </DialogFooter>
       </DialogContent>

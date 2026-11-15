@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react"
 import { ChevronDown, ChevronUp, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
+
+import { i18next } from "@/i18n"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,6 +42,7 @@ export function FindBar({
   onPrevious,
   onClose,
 }: FindBarProps) {
+  const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Focus on open (the reference's find-input.focus()); repeat Ctrl/Cmd+F
@@ -55,14 +59,14 @@ export function FindBar({
       data-testid="find-bar"
       className="absolute top-2 right-4 z-20 flex items-center gap-1 rounded-lg border border-border bg-background p-1 shadow-md"
       role="search"
-      aria-label="Find in message"
+      aria-label={t("reader.findBar.find")}
     >
       <Input
         ref={inputRef}
         data-testid="find-input"
         value={snapshot.term}
-        placeholder="Find in message"
-        aria-label="Find in message"
+        placeholder={t("reader.findBar.find")}
+        aria-label={t("reader.findBar.find")}
         className="h-7 w-48 text-sm md:w-60"
         onChange={(event) => onTermChange(event.target.value)}
         onKeyDown={(event) => {
@@ -88,38 +92,38 @@ export function FindBar({
         size="icon"
         data-testid="find-previous"
         className="size-7"
-        title="Previous match"
-        aria-label="Previous match"
+        title={t("reader.findBar.previous")}
+        aria-label={t("reader.findBar.previous")}
         disabled={noMatches}
         onClick={onPrevious}
       >
         <ChevronUp className="size-4" />
-        <span className="sr-only">Previous match</span>
+        <span className="sr-only">{t("reader.findBar.previous")}</span>
       </Button>
       <Button
         variant="ghost"
         size="icon"
         data-testid="find-next"
         className="size-7"
-        title="Next match"
-        aria-label="Next match"
+        title={t("reader.findBar.next")}
+        aria-label={t("reader.findBar.next")}
         disabled={noMatches}
         onClick={onNext}
       >
         <ChevronDown className="size-4" />
-        <span className="sr-only">Next match</span>
+        <span className="sr-only">{t("reader.findBar.next")}</span>
       </Button>
       <Button
         variant="ghost"
         size="icon"
         data-testid="find-close"
         className="size-7"
-        title="Close find"
-        aria-label="Close find"
+        title={t("reader.findBar.close")}
+        aria-label={t("reader.findBar.close")}
         onClick={onClose}
       >
         <X className="size-4" />
-        <span className="sr-only">Close find</span>
+        <span className="sr-only">{t("reader.findBar.close")}</span>
       </Button>
     </div>
   )
@@ -132,10 +136,13 @@ export function FindBar({
  */
 function formatCount(snapshot: FindSnapshot): string {
   if (snapshot.term === "") return ""
-  const collapsed =
-    snapshot.collapsed > 0
-      ? ` · ${snapshot.collapsed} in collapsed messages`
-      : ""
-  if (snapshot.total === 0) return `0 matches${collapsed}`
-  return `${snapshot.active + 1} of ${snapshot.total}${collapsed}`
+  const position =
+    snapshot.total === 0
+      ? i18next.t("reader.findBar.noMatches")
+      : i18next.t("reader.findBar.position", {
+          current: snapshot.active + 1,
+          total: snapshot.total,
+        })
+  if (snapshot.collapsed === 0) return position
+  return `${position} · ${i18next.t("reader.findBar.collapsed", { count: snapshot.collapsed })}`
 }

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { BookmarkPlus } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { saveSearchWithToast } from "@/components/layout/use-saved-searches"
 import { Button } from "@/components/ui/button"
@@ -23,14 +24,15 @@ import { Label } from "@/components/ui/label"
  * and notifies the sidebar's Saved Searches section via its notify seam.
  */
 export function SaveSearchButton({ query }: { query: string }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   return (
     <>
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Save search"
-        title="Save search"
+        aria-label={t("search.saveSearch.label")}
+        title={t("search.saveSearch.label")}
         data-testid="save-search-button"
         onClick={() => setOpen(true)}
       >
@@ -48,6 +50,7 @@ function SaveSearchDialog({
   query: string
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState("")
   const [saving, setSaving] = useState(false)
 
@@ -65,10 +68,13 @@ function SaveSearchDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Save search</DialogTitle>
+          <DialogTitle>{t("search.saveSearch.label")}</DialogTitle>
           <DialogDescription>
-            The query <span className="font-medium">{query}</span> is stored
-            locally and re-runs from the sidebar's Saved searches section.
+            <Trans
+              i18nKey="search.saveSearch.description"
+              values={{ query }}
+              components={{ query: <span className="font-medium" /> }}
+            />
           </DialogDescription>
         </DialogHeader>
         <form
@@ -79,12 +85,14 @@ function SaveSearchDialog({
           }}
         >
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="saved-search-name">Name</Label>
+            <Label htmlFor="saved-search-name">
+              {t("search.saveSearch.name")}
+            </Label>
             <Input
               id="saved-search-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Unread from client"
+              placeholder={t("search.saveSearch.namePlaceholder")}
               autoFocus
               disabled={saving}
             />
@@ -96,10 +104,10 @@ function SaveSearchDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("search.saveSearch.cancel")}
             </Button>
             <Button type="submit" disabled={saving || !name.trim()}>
-              Save
+              {t("search.saveSearch.save")}
             </Button>
           </DialogFooter>
         </form>

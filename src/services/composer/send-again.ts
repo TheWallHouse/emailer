@@ -4,6 +4,7 @@ import { setAttachmentBytes } from "@/components/composer/attachment-bytes"
 import { useComposerStore } from "@/stores/composer-store"
 import { useUiStore } from "@/stores/ui-store"
 import { toast } from "sonner"
+import { i18next } from "@/i18n"
 
 import { getAccount, toEmailAccount } from "../db/accounts"
 import type { SqlExecutor } from "../db/executor"
@@ -51,9 +52,11 @@ import { renderPlainTextAsHtml, sanitizeEmailHtml } from "../renderer"
  * like the draft-resume path.
  */
 
-/** The dismissible composer notice when attachments could not be restored. */
-export const SEND_AGAIN_ATTACHMENT_NOTICE =
-  "Original attachments couldn't be restored"
+/** The dismissible composer notice when attachments could not be restored
+ * (resolved in the active interface language when the notice is set). */
+export function sendAgainAttachmentNotice(): string {
+  return i18next.t("composer.sendAgain.attachmentsNotRestored")
+}
 
 export interface OpenSendAgainOptions {
   /** Defaults to the shared app executor (getExecutor()); tests inject. */
@@ -195,13 +198,13 @@ export async function openSendAgainForMessage(
       )
     }
     if (failed > 0) {
-      composer.setAttachmentNotice(SEND_AGAIN_ATTACHMENT_NOTICE)
+      composer.setAttachmentNotice(sendAgainAttachmentNotice())
     }
     useUiStore.getState().setComposerOpen(true)
     return true
   } catch (error) {
     console.warn("[send-again] failed to open send-again", error)
-    toast.error("Could not reopen this message")
+    toast.error(i18next.t("composer.sendAgain.reopenFailed"))
     return false
   }
 }

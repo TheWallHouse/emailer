@@ -1,5 +1,7 @@
 import { format } from "date-fns"
 
+import { i18next } from "@/i18n"
+
 /**
  * Snippet `{{variable}}` substitution (task 2.3, design D11): a pure,
  * storage-free pass over snippet text performed at insertion time
@@ -28,7 +30,9 @@ export interface SnippetVariableMeta {
  * The variable registry with its per-variable UI metadata (task 2.4,
  * design D11) — the ONE source of truth for the id list: the picker hint,
  * the Settings → Snippets "Template variables" legend and the prompt
- * dialog labels all render from these rows, and the substitution switch
+ * dialog labels all render from these rows (their copy is resolved in
+ * the active interface language on every read — getters, never frozen at
+ * import time), and the substitution switch
  * below resolves exactly these ids. Anything outside this list is a
  * user-invented id: it can never resolve from context and always lands in
  * the prompt list.
@@ -36,51 +40,89 @@ export interface SnippetVariableMeta {
 export const SNIPPET_VARIABLES = [
   {
     id: "first_name",
-    label: "First name",
-    description:
-      "The recipient's first name, from the display name or derived from the email local-part (jane.doe@… → Jane).",
-    example: "Jane",
+    get label() {
+      return i18next.t("composer.snippetVariables.vars.firstName.label")
+    },
+    get description() {
+      return i18next.t("composer.snippetVariables.vars.firstName.description")
+    },
+    get example() {
+      return i18next.t("composer.snippetVariables.vars.firstName.example")
+    },
   },
   {
     id: "last_name",
-    label: "Last name",
-    description:
-      "The recipient's last name — only when their name has one; a single-word name prompts instead of guessing.",
-    example: "Doe",
+    get label() {
+      return i18next.t("composer.snippetVariables.vars.lastName.label")
+    },
+    get description() {
+      return i18next.t("composer.snippetVariables.vars.lastName.description")
+    },
+    get example() {
+      return i18next.t("composer.snippetVariables.vars.lastName.example")
+    },
   },
   {
     id: "full_name",
-    label: "Full name",
-    description:
-      "The recipient's full name, as typed or rebuilt from the email local-part.",
-    example: "Jane Doe",
+    get label() {
+      return i18next.t("composer.snippetVariables.vars.fullName.label")
+    },
+    get description() {
+      return i18next.t("composer.snippetVariables.vars.fullName.description")
+    },
+    get example() {
+      return i18next.t("composer.snippetVariables.vars.fullName.example")
+    },
   },
   {
     id: "email",
-    label: "Recipient email",
-    description:
-      "The first To recipient's address, exactly as typed in the draft.",
-    example: "jane.doe@acme.com",
+    get label() {
+      return i18next.t("composer.snippetVariables.vars.email.label")
+    },
+    get description() {
+      return i18next.t("composer.snippetVariables.vars.email.description")
+    },
+    get example() {
+      return i18next.t("composer.snippetVariables.vars.email.example")
+    },
   },
   {
     id: "my_name",
-    label: "Your name",
-    description: "The composing account's display name.",
-    example: "Alex Chen",
+    get label() {
+      return i18next.t("composer.snippetVariables.vars.myName.label")
+    },
+    get description() {
+      return i18next.t("composer.snippetVariables.vars.myName.description")
+    },
+    get example() {
+      return i18next.t("composer.snippetVariables.vars.myName.example")
+    },
   },
   {
     id: "my_email",
-    label: "Your email address",
-    description: "The composing account's email address.",
-    example: "alex@chen.dev",
+    get label() {
+      return i18next.t("composer.snippetVariables.vars.myEmail.label")
+    },
+    get description() {
+      return i18next.t("composer.snippetVariables.vars.myEmail.description")
+    },
+    get example() {
+      return i18next.t("composer.snippetVariables.vars.myEmail.example")
+    },
   },
   {
     id: "date",
-    label: "Today's date",
-    description: "Today, resolved at insertion time, in the long date format.",
-    example: "Friday, September 18th, 2026",
+    get label() {
+      return i18next.t("composer.snippetVariables.vars.date.label")
+    },
+    get description() {
+      return i18next.t("composer.snippetVariables.vars.date.description")
+    },
+    get example() {
+      return i18next.t("composer.snippetVariables.vars.date.example")
+    },
   },
-] as const
+] as const satisfies readonly SnippetVariableMeta[]
 
 export type SnippetVariableId = (typeof SNIPPET_VARIABLES)[number]["id"]
 
@@ -93,8 +135,15 @@ export const SNIPPET_VARIABLE_IDS: readonly SnippetVariableId[] =
  * with these (user-invented ids fall back to their raw text). Derived
  * from SNIPPET_VARIABLES for the same single-source reason. */
 export const SNIPPET_VARIABLE_LABELS: Record<SnippetVariableId, string> =
-  Object.fromEntries(
-    SNIPPET_VARIABLES.map((variable) => [variable.id, variable.label])
+  Object.defineProperties(
+    {},
+    Object.fromEntries(
+      SNIPPET_VARIABLES.map((variable) => [
+        variable.id,
+        // A live getter: the label follows the interface language.
+        { get: () => variable.label, enumerable: true },
+      ])
+    )
   ) as Record<SnippetVariableId, string>
 
 /**

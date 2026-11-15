@@ -1,0 +1,22 @@
+{
+  "system": "Sistema",
+  "folders": {
+    "inbox": "Recibidos",
+    "starred": "Destacados",
+    "sent": "Enviados",
+    "drafts": "Borradores",
+    "archive": "Archivo",
+    "spam": "Spam",
+    "trash": "Papelera",
+    "all": "Todos",
+    "flagged": "Marcados"
+  },
+  "views": {
+    "search": "Búsqueda: {{query}}",
+    "contacts": "Contactos",
+    "attachments": "Adjuntos",
+    "calendar": "Calendario",
+    "settings": "Ajustes"
+  },
+  "notifications": "Notificaciones"
+}

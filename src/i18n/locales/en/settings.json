@@ -1,0 +1,519 @@
+{
+  "appearance": {
+    "title": "Appearance",
+    "description": "Theme, accent color, language and content sizing. Changes apply immediately and are remembered.",
+    "language": {
+      "label": "Language",
+      "hint": "Interface language. \"System\" follows your operating system."
+    },
+    "themeMode": {
+      "label": "Theme mode",
+      "hint": "Light, dark, or follow the system setting.",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "accent": {
+      "label": "Accent color",
+      "hint": "Used for buttons, links and highlights.",
+      "item": "Accent: {{name}}",
+      "names": {
+        "default": "Neutral",
+        "blue": "Blue",
+        "violet": "Violet",
+        "green": "Green",
+        "amber": "Amber",
+        "orange": "Orange",
+        "rose": "Rose",
+        "teal": "Teal",
+        "cyan": "Cyan"
+      }
+    },
+    "density": {
+      "label": "List density",
+      "hint": "Spacing of list rows.",
+      "compact": "Compact",
+      "default": "Default",
+      "relaxed": "Relaxed"
+    },
+    "fontScale": {
+      "label": "Font size",
+      "hint": "Scales the entire interface."
+    },
+    "avatars": {
+      "label": "Contact avatars",
+      "hint": "Off by default — enabling sends a one-way hash of each contact's email address to gravatar.com. Avatars are cached locally; turning this off hides them again."
+    },
+    "profileMarkers": {
+      "label": "Profile color markers",
+      "hint": "Show a colored bar at the start of each thread in cross-account lists, colored by the account's profile or account color."
+    }
+  },
+  "page": {
+    "title": "Settings",
+    "back": "Back",
+    "backToMailbox": "Back to mailbox",
+    "sectionsNav": "Settings sections",
+    "sections": {
+      "accounts": "Accounts",
+      "addressBook": "Address book",
+      "calendar": "Calendar",
+      "pgp": "Encryption",
+      "attachmentSecurity": "Attachment security",
+      "junkFilter": "Junk filter",
+      "dataPortability": "Import & export",
+      "backup": "Backup & restore",
+      "storage": "Storage",
+      "updates": "Updates",
+      "desktop": "Desktop",
+      "appearance": "Appearance",
+      "reading": "Reading",
+      "ai": "AI",
+      "notifications": "Notifications",
+      "rules": "Rules",
+      "categories": "Categories",
+      "quickSteps": "Quick steps",
+      "blockedSenders": "Blocked senders",
+      "subscriptions": "Subscriptions",
+      "deliverySchedules": "Delivery schedules",
+      "autoArchive": "Auto-archive",
+      "shortcuts": "Shortcuts",
+      "snippets": "Snippets",
+      "help": "Help"
+    }
+  },
+  "accounts": {
+    "title": "Accounts",
+    "description": "Accounts live on this machine; messages sync locally and work offline.",
+    "add": "Add Account",
+    "empty": "No accounts yet. Add one to start syncing mail.",
+    "noDisplayName": "No display name",
+    "firstSync": "First sync",
+    "firstSyncAria": "First sync download window for {{email}}",
+    "reminders": "Reminders",
+    "remindersAria": "Meeting reminder lead for {{email}}",
+    "signInError": "Sign-in error",
+    "unread": "{{count}} unread",
+    "reauthenticate": "Re-authenticate",
+    "remove": "Remove",
+    "window": {
+      "1m": "1 month",
+      "3m": "3 months",
+      "6m": "6 months",
+      "1y": "1 year",
+      "all": "All"
+    },
+    "reminderLead": {
+      "off": "Off",
+      "minutes": "{{minutes}} min before"
+    },
+    "backfill": {
+      "title": "Download the older mail too?",
+      "description": "The first-sync window for <email>{{email}}</email> widened ({{range}}). Messages that were skipped before can be fetched now — only the newly covered range is downloaded, online or at the next launch. Cancel to keep the wider window without downloading older mail.",
+      "notNow": "Not now",
+      "confirm": "Download older mail",
+      "queueFailed": "Could not queue the download of older mail."
+    }
+  },
+  "reading": {
+    "title": "Reading",
+    "description": "How the mailbox is laid out and when you are notified about new mail.",
+    "pane": {
+      "label": "Reading pane",
+      "right": "Right",
+      "bottom": "Bottom",
+      "hidden": "Hidden",
+      "hints": {
+        "right": "Classic three-pane layout",
+        "bottom": "List stacked over the message",
+        "hidden": "Two-pane; messages open full-width"
+      }
+    },
+    "notifications": {
+      "label": "New-mail notifications",
+      "hint": "Show a system notification when sync finds new messages. Unread badges are always kept up to date."
+    },
+    "markReadOnOpen": {
+      "label": "Mark as read on open",
+      "hint": "Opening a message marks it read. Manual mark read/unread and rules always work as usual."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Per-sender and per-label notification overrides.",
+    "descriptionFor": "Per-sender and per-label overrides for {{email}}.",
+    "addRule": "Add Rule",
+    "newMailSound": {
+      "label": "New-mail sound",
+      "hint": "Play a chime with new-mail notifications. Senders and threads that are silenced stay silent — no banner, no sound."
+    },
+    "sentSound": {
+      "label": "Sent-message sound",
+      "hint": "Play a chime when a message is sent. Off for messages that are only queued while offline."
+    },
+    "rulesNote": "Rules apply when sync finds new mail. A \"never\" rule wins over an \"always\" rule when both match, and muted threads stay silent either way. Suppressed messages are still delivered and unread — including in the unread badge — so the badge can show mail you were not notified about.",
+    "noAccount": "Add an account to manage its notification rules.",
+    "empty": "No rules yet. New mail notifies as usual.",
+    "matchType": {
+      "sender": "Sender",
+      "label": "Label"
+    },
+    "action": {
+      "always": "Always notify",
+      "never": "Never notify"
+    },
+    "bySender": "By sender",
+    "byLabel": "By label",
+    "delete": "Delete",
+    "deleteRule": "Delete {{value}}",
+    "addDialog": {
+      "title": "Add Notification Rule",
+      "description": "Always or never show new-mail notifications for one sender or label of this account.",
+      "matchBy": "Match by",
+      "senderAddress": "Sender address",
+      "labelName": "Label name",
+      "senderPlaceholder": "e.g. news@x.com",
+      "labelPlaceholder": "e.g. Receipts",
+      "then": "Then",
+      "cancel": "Cancel",
+      "saveFailed": "Could not save the rule — an identical rule may already exist."
+    }
+  },
+  "desktop": {
+    "title": "Desktop",
+    "description": "How Emailer behaves in your operating system.",
+    "mailto": {
+      "label": "Default mail client",
+      "hint": "Handle mailto: links from your browser and other apps in Emailer. Unsetting restores the previous default mail client."
+    },
+    "autostart": {
+      "label": "Launch at login",
+      "hint": "Start Emailer automatically when you log in, hidden in the tray — syncing and notifying from the start."
+    },
+    "composeShortcut": {
+      "label": "Global compose shortcut",
+      "placeholder": "e.g. CmdOrCtrl+Shift+E",
+      "save": "Save",
+      "clear": "Clear",
+      "registered": "Registered — pressing it in any application surfaces Emailer with a fresh composer.",
+      "none": "No global shortcut registered. Use modifier prefixes like CmdOrCtrl+Shift+…"
+    },
+    "closeAction": {
+      "label": "When closing the window",
+      "quit": "Quit Emailer",
+      "hide": "Hide to tray",
+      "hideHint": "Emailer keeps running in the system tray — mail keeps syncing and notifications keep arriving. Restore it from the tray icon.",
+      "quitHint": "Closing the window quits Emailer and stops background syncing."
+    },
+    "noTray": "Tray integration is not available on this platform; Emailer behaves as a regular windowed application."
+  },
+  "updates": {
+    "title": "Updates",
+    "running": "You are running emailer v{{version}}.",
+    "runningBeta": "You are running emailer v{{version}} on the beta channel.",
+    "channel": {
+      "label": "Release channel",
+      "stable": "Stable",
+      "beta": "Beta",
+      "stableOption": "Stable — tagged releases only",
+      "betaOption": "Beta — prereleases as soon as they build",
+      "hint": "The channel decides which manifest update checks ask; switching takes effect on the next check."
+    },
+    "channelName": {
+      "stable": "stable",
+      "beta": "beta"
+    },
+    "check": "Check for updates",
+    "desktopOnly": "Update checks are only available in the installed desktop app.",
+    "checking": "Checking the {{channel}} channel…",
+    "upToDate": "Emailer is up to date.",
+    "available": "Version {{version}} is available on the {{channel}} channel (you are on {{current}}).",
+    "install": "Download and install",
+    "downloading": "Downloading…",
+    "downloadingPercent": "Downloading — {{percent}}%",
+    "ready": "Update installed — restart to apply it.",
+    "restart": "Restart",
+    "checkFailed": "Could not check for updates.",
+    "downloadFailed": "The update could not be downloaded."
+  },
+  "storage": {
+    "title": "Storage",
+    "description": "What Emailer keeps on this device.",
+    "refresh": "Refresh",
+    "calculating": "Calculating…",
+    "total": "Total",
+    "approximate": "Some files could not be read, so these sizes are a lower bound.",
+    "loadFailed": "Could not measure local storage. Check that the app was started from its desktop build and try again.",
+    "kinds": {
+      "attachments": {
+        "label": "Attachments",
+        "description": "Downloaded attachment copies, cached by hash"
+      },
+      "databases": {
+        "label": "Databases & indexes",
+        "description": "The local mail database — message bodies, AI cache, calendar and task data, contacts, preferences"
+      },
+      "keys": {
+        "label": "Sealed credentials",
+        "description": "The key file that seals account credentials on this device"
+      },
+      "other": {
+        "label": "Other files",
+        "description": "Support files, such as logs"
+      }
+    },
+    "deleteAll": {
+      "title": "Delete all local data",
+      "hint": "Remove everything Emailer keeps on this device and start over. Your mail servers are not touched.",
+      "button": "Delete all…"
+    },
+    "deleteFailed": {
+      "title": "Could not finish deleting local data",
+      "description": "Some local data may already be gone. Your mail servers are untouched — restart Emailer and try again."
+    },
+    "deleteDialog": {
+      "title": "Delete all local data?",
+      "description": "This removes from THIS device, for every account:",
+      "items": {
+        "mail": "every account's local mail — message bodies and their read states",
+        "attachments": "downloaded attachments",
+        "aiCache": "the AI cache",
+        "calendar": "calendar and task data",
+        "contacts": "contacts",
+        "preferences": "preferences and settings",
+        "credentials": "sealed credential slots — you will be signed out of every account"
+      },
+      "serversNote": "Your mail servers are not touched — every message stays on the server. After the reset Emailer restarts in its first-run state, and your mail syncs back down once you add your accounts again.",
+      "cancel": "Cancel",
+      "continue": "Continue",
+      "confirmTitle": "Are you absolutely sure?",
+      "confirmDescription": "This cannot be undone. Everything listed will be removed from this device and Emailer will restart as if freshly installed. Your mail servers keep every message.",
+      "back": "Back",
+      "deleteEverything": "Delete everything"
+    }
+  },
+  "backup": {
+    "title": "Backup & restore",
+    "description": "Move your Emailer setup between machines with a single, checksummed archive file.",
+    "exportFailed": "Could not write the backup",
+    "export": {
+      "title": "Export",
+      "hint": "Writes your accounts' settings, profiles, rules, snippets, quick steps, signatures, saved searches, categories and a verified database snapshot — with synced mail — into one file. No passwords or tokens are ever included; each restored account signs in again.",
+      "done": "Backed up to {{path}} ({{size}}).",
+      "button": "Export backup…"
+    },
+    "restore": {
+      "title": "Restore",
+      "hint": "Restore a backup file. Every checksum is verified before anything changes, and a failed or cancelled restore leaves your current data intact.",
+      "button": "Restore backup…",
+      "replaceDone_one": "{{count}} account was restored. Sign in to each one to start syncing again — your restored mail is readable right now.",
+      "replaceDone_other": "{{count}} accounts were restored. Sign in to each one to start syncing again — your restored mail is readable right now.",
+      "mergeDone": "Restored: {{items}}.",
+      "mergeNote": "Message bodies are not part of a merge — each account downloads its mail again on first sync."
+    },
+    "mergeSummary": {
+      "accountsAdded_one": "{{count}} account added",
+      "accountsAdded_other": "{{count}} accounts added",
+      "accountsKept_one": "{{count}} existing account left as-is",
+      "accountsKept_other": "{{count}} existing accounts left as-is",
+      "profiles_one": "{{count}} profile(s)",
+      "profiles_other": "{{count}} profile(s)",
+      "rules_one": "{{count}} rule(s)",
+      "rules_other": "{{count}} rule(s)",
+      "snippets_one": "{{count}} snippet(s)",
+      "snippets_other": "{{count}} snippet(s)",
+      "savedSearches_one": "{{count}} saved search(es)",
+      "savedSearches_other": "{{count}} saved search(es)",
+      "categoryOverrides_one": "{{count}} category override(s)",
+      "categoryOverrides_other": "{{count}} category override(s)",
+      "settings_one": "{{count}} setting(s)",
+      "settings_other": "{{count}} setting(s)"
+    },
+    "restoreDialog": {
+      "title": "Restore from backup",
+      "verified": "Verified archive — every checksum matched.",
+      "format": "Format",
+      "exported": "Exported",
+      "madeWith": "Made with",
+      "modeLabel": "What should happen?",
+      "replace": "Replace everything on this device",
+      "merge": "Merge into my current data",
+      "replaceWarning": "Replacing deletes everything Emailer keeps on this device first — every account, message body, setting, profile and rule — and restores the backup in its place. Accounts from the backup carry no passwords or tokens: you will sign in to each one again before it syncs or sends. Your mail servers are not touched.",
+      "mergeWarning": "Merging adds what your current setup is missing — accounts are matched by email address, and existing entries stay as they are. Message bodies are NOT restored by a merge: they sync fresh from the server on each account's first sync. Restored accounts sign in again before syncing.",
+      "restoring": "Restoring…",
+      "cancelRestore": "Cancel restore",
+      "cancel": "Cancel",
+      "start": "Restore {{file}}"
+    },
+    "errors": {
+      "newerVersion": "This backup was made by a newer version of Emailer (format v{{version}}). Update this app and try again.",
+      "unreadableVersion": "This file is not a readable Emailer backup (format v{{version}}).",
+      "cancelled": "Restore cancelled",
+      "cancelledDetail": "Restore cancelled — your existing data is unchanged.",
+      "unreadable": "This file is not a readable Emailer backup.",
+      "unreadableDetail": "It may be damaged, incomplete or tampered with. Your existing data was not touched.",
+      "io": "Emailer could not access that file.",
+      "generic": "The backup failed."
+    }
+  },
+  "dataPortability": {
+    "title": "Import & export",
+    "ariaLabel": "Import and export",
+    "description": "Take mailbox data out in standard formats, or bring archives back in. Exports never modify anything; imports never change existing messages.",
+    "account": "Account",
+    "cancel": "Cancel",
+    "export": {
+      "title": "Export folder as mbox",
+      "folder": "Folder to export",
+      "button": "Export…",
+      "progress": "Exporting… {{done}} / {{total}}",
+      "done_one": "Exported {{count}} message to {{path}}.",
+      "done_other": "Exported {{count}} messages to {{path}}.",
+      "cancelled_one": "Export cancelled — the partial file was removed ({{count}} message was written).",
+      "cancelled_other": "Export cancelled — the partial file was removed ({{count}} messages were written).",
+      "failed": "Export failed: {{error}}",
+      "hint": "One RFC 4155 mbox per folder, importable by other mail clients. Exports are read-only. To export a single conversation, use “Export as EML” in the thread's context menu."
+    },
+    "import": {
+      "title": "Import EML / mbox",
+      "chooseFiles": "Choose files…",
+      "files_one": "{{count}} file: {{names}}",
+      "files_other": "{{count}} files: {{names}}",
+      "destination": "Destination folder",
+      "newFolder": "New folder…",
+      "newFolderName": "New folder name",
+      "folderNamePlaceholder": "Folder name",
+      "upload": {
+        "label": "Also upload to the server",
+        "hint": "Appends each imported message to the account (IMAP folder or Gmail label). Offline, the import still completes locally and the skipped uploads are reported."
+      },
+      "button": "Import",
+      "progress": "Importing… {{done}} / {{total}}",
+      "failed": "Import failed: {{error}}",
+      "hint": "Messages already present in the destination folder (same Message-ID) are skipped. Imported mail is marked read and never overwrites existing messages.",
+      "summary": {
+        "complete": "{{details}}.",
+        "cancelled": "Import cancelled. {{details}}.",
+        "counts_one": "Imported {{imported}}, skipped {{count}} duplicate, failed {{failed}}",
+        "counts_other": "Imported {{imported}}, skipped {{count}} duplicates, failed {{failed}}",
+        "uploadFailures_one": "{{count}} upload failed (kept locally)",
+        "uploadFailures_other": "{{count}} uploads failed (kept locally)",
+        "uploaded_one": "{{count}} uploaded",
+        "uploaded_other": "{{count}} uploaded",
+        "uploadFailed": "{{file}}: upload failed — {{error}}"
+      }
+    }
+  },
+  "attachmentSecurity": {
+    "title": "Attachment security",
+    "description": "Known dangerous file types are always flagged and confirmed before they open. Optionally, attachments can also be checked against a malware lookup service before their first open.",
+    "lookup": {
+      "label": "Check attachments with a malware lookup",
+      "hint": "Before an attachment opens for the first time, its SHA-256 hash is looked up. Malicious files are blocked with the detection report (you can still override); suspicious ones warn."
+    },
+    "apiKey": {
+      "label": "VirusTotal API key",
+      "placeholder": "Paste your key (stored on this machine)",
+      "hint": "Only the file's SHA-256 hash is ever sent — attachment contents never leave this machine. Verdicts are cached locally per hash. Offline, without a key, or when the service cannot be reached, the built-in dangerous-file warnings above apply alone."
+    },
+    "alwaysOn": "Executables, scripts, installers and macro-enabled Office documents are flagged by file type on every account, regardless of this setting."
+  },
+  "voice": {
+    "ariaLabel": "Voice",
+    "loading": "Loading…",
+    "learned_one": "Writing voice learned from {{count}} sent message.",
+    "learned_other": "Writing voice learned from {{count}} sent messages.",
+    "learnFailed": "Learning the writing voice failed.",
+    "deleted": "Writing-voice profile deleted.",
+    "learnFailure": {
+      "notConfigured": "AI assistance is not configured.",
+      "noSentMail": "No sent messages were found to analyze.",
+      "notEnoughMail": "Not enough sent mail yet — at least {{min}} sent messages are needed.",
+      "parse": "The writing voice could not be read from the model's reply. Try again.",
+      "provider": "The provider request failed."
+    },
+    "learnDisabled": {
+      "noProvider": "Connect and activate an AI provider first.",
+      "notEnoughMail": "Needs at least {{min}} sent messages to learn from."
+    },
+    "dictation": {
+      "label": "Dictation",
+      "hint": "The composer's mic turns speech into text entirely on this machine — a {{size}} speech model is downloaded once from Hugging Face and your voice is never uploaded.",
+      "modelReady": "Speech model downloaded ({{size}}).",
+      "downloading": "Downloading model… {{received}}",
+      "downloadingOf": "Downloading model… {{received}} of {{total}}",
+      "downloadingPercent": "Downloading model… {{received}} of {{total}} ({{percent}}%)",
+      "cancelDownload": "Cancel download",
+      "downloadFailed": "The model download failed ({{error}}). You can retry.",
+      "unknownError": "unknown",
+      "downloadCancelled": "Download cancelled — dictation stays unavailable until the model is downloaded.",
+      "download": "Download speech model ({{size}})"
+    },
+    "language": {
+      "label": "Dictation language",
+      "hint": "Auto-detect lets the model recognize the spoken language; a fixed language pins transcription to it."
+    },
+    "languages": {
+      "auto": "Auto-detect",
+      "en": "English",
+      "es": "Spanish",
+      "de": "German",
+      "fr": "French",
+      "tr": "Turkish",
+      "zh": "Chinese",
+      "it": "Italian",
+      "pt": "Portuguese",
+      "nl": "Dutch",
+      "pl": "Polish",
+      "ru": "Russian",
+      "ja": "Japanese",
+      "ko": "Korean",
+      "ar": "Arabic",
+      "hi": "Hindi"
+    },
+    "writing": {
+      "title": "Writing voice",
+      "hint": "Learn how you typically write from your recent sent messages (up to 30) with one AI call — voiced drafts, proofreads and smart replies then follow your voice. Learning runs only when you click, and nothing about the messages is stored — only the distilled style.",
+      "refresh": "Refresh",
+      "learn": "Learn my writing voice",
+      "delete": "Delete writing-voice profile",
+      "status_one": "Learned {{when}} · {{count}} message",
+      "status_other": "Learned {{when}} · {{count}} messages",
+      "vocabulary": "Vocabulary: {{value}}",
+      "opens": "Opens: {{value}}",
+      "closes": "Closes: {{value}}",
+      "noneWithSent_one": "No writing voice learned yet — {{count}} sent message available.",
+      "noneWithSent_other": "No writing voice learned yet — {{count}} sent messages available.",
+      "none": "No writing voice learned yet."
+    }
+  },
+  "shortcuts": {
+    "title": "Shortcuts",
+    "description": "Every keyboard binding. Press ? anytime for the quick reference.",
+    "resetAll": "Reset all to defaults",
+    "filter": "Filter shortcuts",
+    "filterPlaceholder": "Filter shortcuts…",
+    "noMatches": "No matching shortcuts",
+    "pressKey": "Press a key…",
+    "conflict": "{{action}} would collide with {{others}} — press another key or cancel.",
+    "and": " and ",
+    "cancel": "Cancel",
+    "change": "Change",
+    "changeAria": "Change shortcut for: {{action}}",
+    "reset": "Reset",
+    "resetAria": "Reset to default: {{action}}"
+  },
+  "categories": {
+    "title": "Categories",
+    "description": "Automatic inbox categories ({{names}}) shown as tabs above the thread list.",
+    "tabs": {
+      "label": "Category tabs",
+      "hint": "Show the category tabs above the inbox, with unread counts per category. Your folders and split tabs are unaffected."
+    },
+    "existing": {
+      "label": "Categorize existing mail",
+      "hint": "Classify messages already in your mailbox with the same local engine new mail uses. Already-categorized threads are left alone.",
+      "button": "Categorize existing mail"
+    }
+  }
+}

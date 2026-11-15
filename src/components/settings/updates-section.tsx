@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react"
 import { listen } from "@tauri-apps/api/event"
 import { relaunch } from "@tauri-apps/plugin-process"
 import { CircleCheck, Download, Loader2, RefreshCw } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
@@ -48,6 +50,7 @@ type CheckState =
   | { kind: "error"; message: string }
 
 export function UpdatesSection() {
+  const { t } = useTranslation()
   const [channel, setChannel] = useState<UpdateChannel>("stable")
   const [state, setState] = useState<CheckState>({ kind: "idle" })
   // Set as soon as the user changes the channel: the async initial load
@@ -92,7 +95,9 @@ export function UpdatesSection() {
       setState({
         kind: "error",
         message:
-          error instanceof Error ? error.message : "Could not check for updates.",
+          error instanceof Error
+            ? error.message
+            : i18next.t("settings.updates.checkFailed"),
       })
     }
   }
@@ -118,7 +123,7 @@ export function UpdatesSection() {
         message:
           error instanceof Error
             ? error.message
-            : "The update could not be downloaded.",
+            : i18next.t("settings.updates.downloadFailed"),
       })
     } finally {
       unlisten()
@@ -126,19 +131,30 @@ export function UpdatesSection() {
   }
 
   return (
-    <section aria-label="Updates" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.updates.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Updates</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settings.updates.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          You are running emailer v{__APP_VERSION__}
-          {channel === "beta" ? " on the beta channel" : ""}.
+          {channel === "beta"
+            ? t("settings.updates.runningBeta", { version: __APP_VERSION__ })
+            : t("settings.updates.running", { version: __APP_VERSION__ })}
         </p>
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="update-channel">Release channel</Label>
+        <Label htmlFor="update-channel">
+          {t("settings.updates.channel.label")}
+        </Label>
         <Select
-          items={{ stable: "Stable", beta: "Beta" }}
+          items={{
+            stable: t("settings.updates.channel.stable"),
+            beta: t("settings.updates.channel.beta"),
+          }}
           value={channel}
           onValueChange={(value) => {
             if (value === "stable" || value === "beta") changeChannel(value)
@@ -149,16 +165,15 @@ export function UpdatesSection() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="stable">
-              Stable — tagged releases only
+              {t("settings.updates.channel.stableOption")}
             </SelectItem>
             <SelectItem value="beta">
-              Beta — prereleases as soon as they build
+              {t("settings.updates.channel.betaOption")}
             </SelectItem>
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          The channel decides which manifest update checks ask; switching
-          takes effect on the next check.
+          {t("settings.updates.channel.hint")}
         </p>
       </div>
 
@@ -174,7 +189,7 @@ export function UpdatesSection() {
             ) : (
               <RefreshCw />
             )}
-            Check for updates
+            {t("settings.updates.check")}
           </Button>
           <CheckStatus
             state={state}
@@ -185,7 +200,7 @@ export function UpdatesSection() {
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Update checks are only available in the installed desktop app.
+          {t("settings.updates.desktopOnly")}
         </p>
       )}
     </section>
@@ -203,11 +218,17 @@ function CheckStatus({
   onInstall: () => void
   onRestart: () => void
 }) {
+  const { t } = useTranslation()
+  const channelName = t(`settings.updates.channelName.${channel}`)
   switch (state.kind) {
     case "idle":
       return null
     case "checking":
-      return <p className="text-sm text-muted-foreground">Checking the {channel} channel…</p>
+      return (
+        <p className="text-sm text-muted-foreground">
+          {t("settings.updates.checking", { channel: channelName })}
+        </p>
+      )
     case "up-to-date":
       return (
         <p
@@ -215,19 +236,22 @@ function CheckStatus({
           className="flex items-center gap-1.5 text-sm text-muted-foreground"
         >
           <CircleCheck className="size-4" aria-hidden />
-          Emailer is up to date.
+          {t("settings.updates.upToDate")}
         </p>
       )
     case "available":
       return (
         <div className="flex flex-col items-start gap-2">
           <p role="status" className="text-sm text-foreground">
-            Version {state.update.version} is available on the {channel}{" "}
-            channel (you are on {state.update.currentVersion}).
+            {t("settings.updates.available", {
+              version: state.update.version,
+              channel: channelName,
+              current: state.update.currentVersion,
+            })}
           </p>
           <Button size="sm" onClick={() => onInstall()}>
             <Download />
-            Download and install
+            {t("settings.updates.install")}
           </Button>
         </div>
       )
@@ -237,9 +261,14 @@ function CheckStatus({
           ? Math.min(100, Math.round((state.received / state.total) * 100))
           : null
       return (
-        <p role="status" className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <p
+          role="status"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground"
+        >
           <Loader2 className="size-4 animate-spin" aria-hidden />
-          Downloading{percent !== null ? ` — ${percent}%` : "…"}
+          {percent !== null
+            ? t("settings.updates.downloadingPercent", { percent })
+            : t("settings.updates.downloading")}
         </p>
       )
     }
@@ -247,11 +276,11 @@ function CheckStatus({
       return (
         <div className="flex flex-col items-start gap-2">
           <p role="status" className="text-sm text-foreground">
-            Update installed — restart to apply it.
+            {t("settings.updates.ready")}
           </p>
           <Button size="sm" onClick={onRestart}>
             <RefreshCw />
-            Restart
+            {t("settings.updates.restart")}
           </Button>
         </div>
       )

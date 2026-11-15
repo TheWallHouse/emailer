@@ -1,4 +1,5 @@
 import { X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { getComposerKeyActions } from "./composer-key-actions"
@@ -18,6 +19,7 @@ import { useComposerStore } from "@/stores/composer-store"
  * window and every transient composer state survive minimization.
  */
 export function ComposerTrayChip() {
+  const { t } = useTranslation()
   const open = useComposerStore((state) => state.open)
   const minimized = useComposerStore((state) => state.minimized)
   const subject = useComposerStore((state) => state.subject)
@@ -34,7 +36,7 @@ export function ComposerTrayChip() {
   const detail =
     subject.trim() !== ""
       ? subject.trim()
-      : (firstRecipient?.email.trim() ?? "New message")
+      : (firstRecipient?.email.trim() ?? t("composer.trayChip.newMessage"))
 
   return (
     <div
@@ -44,20 +46,22 @@ export function ComposerTrayChip() {
       <button
         type="button"
         data-testid="composer-tray-restore"
-        aria-label="Restore draft"
-        title="Restore draft"
+        aria-label={t("composer.trayChip.restore")}
+        title={t("composer.trayChip.restore")}
         className="max-w-72 cursor-pointer truncate text-sm text-foreground"
         onClick={() => getComposerKeyActions()?.restore()}
       >
-        <span className="font-medium text-muted-foreground">Draft · </span>
+        <span className="font-medium text-muted-foreground">
+          {t("composer.trayChip.draftPrefix")}
+        </span>
         {detail}
       </button>
       <Button
         variant="ghost"
         size="icon"
         className="size-6"
-        aria-label="Close and save draft"
-        title="Save draft and close"
+        aria-label={t("composer.trayChip.closeAndSave")}
+        title={t("composer.trayChip.saveAndClose")}
         onClick={() => getComposerKeyActions()?.keepDraftAndClose()}
       >
         <X aria-hidden className="size-3.5" />

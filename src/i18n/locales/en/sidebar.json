@@ -1,0 +1,184 @@
+{
+  "compose": "Compose",
+  "unifiedInbox": "Unified inbox",
+  "priority": "Priority",
+  "nudges": "Nudges",
+  "contacts": "Contacts",
+  "attachments": "Attachments",
+  "calendar": "Calendar",
+  "foldersNav": "Folders",
+  "settings": "Settings",
+  "expandSidebar": "Expand sidebar",
+  "collapseSidebar": "Collapse sidebar",
+  "noSubject": "(no subject)",
+  "labels": {
+    "title": "Labels",
+    "newLabel": "New label"
+  },
+  "accountSwitcher": {
+    "selectAccount": "Select account",
+    "noAccounts": "No accounts",
+    "signInError": "Account sign-in error",
+    "reauthenticate": "Re-authenticate…",
+    "addAccount": "Add account…"
+  },
+  "categoryBackfill": {
+    "done_one": "Categorized {{count}} message",
+    "done_other": "Categorized {{count}} messages",
+    "progressThreads_one": "Categorizing… {{count}} thread",
+    "progressThreads_other": "Categorizing… {{count}} threads",
+    "progress": "Categorizing… {{scanned}} of {{total}}",
+    "cancel": "Cancel",
+    "startFailed": "Could not start categorizing existing mail."
+  },
+  "categories": {
+    "primary": "Primary",
+    "updates": "Updates",
+    "promotions": "Promotions",
+    "social": "Social",
+    "newsletters": "Newsletters"
+  },
+  "offline": {
+    "banner": "You're offline — changes will sync when you reconnect"
+  },
+  "pendingOps": {
+    "count_one": "{{count}} pending change",
+    "count_other": "{{count}} pending changes"
+  },
+  "snoozed": {
+    "title": "Snoozed",
+    "cancel": "Cancel snooze for {{subject}}"
+  },
+  "sync": {
+    "synced": "Synced {{when}}",
+    "notSynced": "Not synced yet",
+    "failed": "Last sync failed",
+    "syncing": "Syncing now",
+    "upToDate": "Up to date"
+  },
+  "titlebar": {
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "close": "Close"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "description": "Press ? anytime to reopen this reference; Esc dismisses it."
+  },
+  "tasks": {
+    "title": "Tasks",
+    "sortedByDue": "Sorted by due date — switch to creation order",
+    "sortedByCreated": "Sorted by creation order — switch to due date",
+    "todayOverdue": "Today & overdue",
+    "nothingDueToday": "Nothing due today",
+    "noOpenTasks": "No open tasks",
+    "completedToggle": "Completed ({{count}})",
+    "complete": "Complete task {{title}}",
+    "openSourceTitle": "Open the source message",
+    "openSource": "Open source message for {{title}}",
+    "overdueDue": "Overdue · {{date}}",
+    "created": "Task created",
+    "open": "Open",
+    "createFailed": "Could not create the task",
+    "fromEmail": "Task from email"
+  },
+  "todos": {
+    "title": "Todos",
+    "complete": "Complete todo {{subject}}",
+    "moveUp": "Move {{subject}} up",
+    "moveDown": "Move {{subject}} down",
+    "remove": "Remove {{subject}} from Todos",
+    "added": "Added to Todos",
+    "menu": {
+      "moreActions": "More actions for {{subject}}",
+      "completeMarkDone": "Complete and mark thread done",
+      "remove": "Remove from Todos"
+    }
+  },
+  "savedSearches": {
+    "title": "Saved searches",
+    "rename": "Rename saved search {{name}}",
+    "delete": "Delete saved search {{name}}",
+    "saved": "Saved search “{{name}}”",
+    "saveFailed": "Could not save the search.",
+    "renameDialog": {
+      "title": "Rename saved search",
+      "description": "The stored query stays unchanged — only the sidebar entry name is updated.",
+      "nameLabel": "Saved search name",
+      "cancel": "Cancel",
+      "save": "Save"
+    }
+  },
+  "splits": {
+    "tabBar": "Mailbox tabs",
+    "categoryTitle_one": "{{label}} — {{count}} thread",
+    "categoryTitle_other": "{{label}} — {{count}} threads",
+    "categoryOptions": "Category options",
+    "categorizeExisting": "Categorize existing mail…",
+    "hideCategoryTabs": "Hide category tabs",
+    "splitOptionsFor": "Options for split {{name}}",
+    "moveLeft": "Move left",
+    "moveRight": "Move right",
+    "hide": "Hide",
+    "delete": "Delete",
+    "splitOptions": "Split options",
+    "newSplit": "New split",
+    "newSplitMenu": "New split…",
+    "manageMenu": "Manage splits…",
+    "created": "Split “{{name}}” created",
+    "createFailed": "Could not create the split.",
+    "create": {
+      "title": "New split",
+      "description": "A split is a named operator query shown as a tab above the inbox. The same language as the search field.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Unread from boss",
+      "query": "Query",
+      "queryPlaceholder": "e.g. is:unread from:boss@work.com",
+      "account": "Account",
+      "allAccounts": "All accounts",
+      "nameTaken": "A split named “{{name}}” already exists.",
+      "failed": "Could not create the split.",
+      "cancel": "Cancel",
+      "submit": "Create split"
+    },
+    "manage": {
+      "title": "Manage splits",
+      "description": "Hidden splits stay configured but drop out of the tab bar.",
+      "empty": "No hidden splits.",
+      "unhideAria": "Unhide split {{name}}",
+      "unhide": "Unhide",
+      "deleteAria": "Delete split {{name}}",
+      "close": "Close"
+    }
+  },
+  "scheduled": {
+    "title": "Scheduled",
+    "noRecipients": "(no recipients)",
+    "dueNow": "Due — sends within a minute",
+    "willSend": "Will send {{when}}",
+    "edit": "Edit scheduled send {{title}}",
+    "cancel": "Cancel scheduled send {{title}}",
+    "queued": "Queued — will send when online",
+    "sentAt": "Sent {{when}}",
+    "sent": "Sent",
+    "failedWith": "Failed — {{error}}",
+    "failed": "Failed",
+    "cancelled": "Scheduled send cancelled",
+    "cancelFailed": "Could not cancel the scheduled send.",
+    "editFailed": "Could not restore the scheduled message for editing.",
+    "dialogTitle": "Scheduled sends",
+    "dialogDescription": "Messages send while the app is running — one that comes due while Emailer is closed will send at the next launch.",
+    "empty": "No scheduled sends.",
+    "history": "History",
+    "accountMissing": "the account for this message no longer exists"
+  },
+  "dates": {
+    "time": "h:mm a",
+    "todayAt": "Today {{time}}",
+    "tomorrowAt": "Tomorrow {{time}}",
+    "mondayAt": "Monday {{time}}",
+    "dayDateTime": "EEE, MMM d, h:mm a",
+    "dayDate": "EEE, MMM d",
+    "shortDate": "MMM d"
+  }
+}

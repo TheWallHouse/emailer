@@ -1,0 +1,105 @@
+{
+  "add": {
+    "title": "Añadir una cuenta",
+    "description": "Las cuentas se guardan en este equipo; los mensajes se sincronizan en local y funcionan sin conexión.",
+    "whatDoINeed": "¿Qué necesito?",
+    "gmailDescription": "Inicia sesión con tu cuenta de Google en el navegador. Necesitas un ID de cliente de Google (gratuito).",
+    "microsoftDescription": "Inicia sesión con tu cuenta de Microsoft en el navegador: del trabajo, del centro educativo o personal (Outlook, Hotmail, Live). Necesitas registrar una aplicación una sola vez (gratuito).",
+    "imapTitle": "Otro correo (IMAP/SMTP)",
+    "imapDescription": "Yahoo, iCloud, Fastmail, GMX, Zoho o cualquier proveedor, con tu dirección de correo y tu contraseña."
+  },
+  "oauth": {
+    "steps": {
+      "consent": "Esperando a que termines en el navegador…",
+      "exchange": "Iniciando sesión…",
+      "gmailProfile": "Leyendo tu perfil de Gmail…",
+      "microsoftProfile": "Leyendo tu perfil de Microsoft 365…",
+      "save": "Guardando la cuenta…",
+      "update": "Actualizando la cuenta…"
+    },
+    "clientId": "ID de cliente",
+    "applicationClientId": "ID de aplicación (cliente)",
+    "enterGoogleClientId": "Introduce tu ID de cliente OAuth de Google para continuar.",
+    "enterMicrosoftClientId": "Introduce el ID de cliente del registro de tu aplicación de Microsoft para continuar.",
+    "signInFailed": "No se ha podido iniciar sesión. Vuelve a intentarlo.",
+    "continueInBrowser": "Continuar en el navegador",
+    "cancel": "Cancelar",
+    "back": "Atrás"
+  },
+  "gmail": {
+    "title": "Conectar Gmail",
+    "waiting": "Se ha abierto una página de inicio de sesión de Google en tu navegador. Termina allí: esta ventana continuará automáticamente.",
+    "description": "Pega tu propio ID de cliente OAuth de Google (de tipo «Aplicación de escritorio»). Solo se guarda en este dispositivo."
+  },
+  "microsoft": {
+    "title": "Conectar Microsoft 365",
+    "waiting": "Se ha abierto una página de inicio de sesión de Microsoft en tu navegador. Termina allí: esta ventana continuará automáticamente.",
+    "description": "Emailer no incluye ninguna aplicación de Microsoft, así que necesitas registrar una propia una sola vez. El registro solo se guarda en este dispositivo.",
+    "registerHelp": "En el <link>portal de Azure</link>, registra una aplicación (de tipo «Cuentas en cualquier directorio organizativo y cuentas personales de Microsoft») y añade el URI de redirección<code>http://localhost:{{port}}</code>como plataforma <em>móvil y de escritorio</em>. No hace falta ningún secreto de cliente.",
+    "adminHelp": "¿Cuenta del trabajo o del centro educativo? Puede que tu organización exija la aprobación de un administrador para registrar la aplicación: si al iniciar sesión se indica que hace falta, pide a tu administrador de TI que la conceda."
+  },
+  "imap": {
+    "identityTitle": "Añadir una cuenta de correo",
+    "identityDescription": "Tu dirección y tu contraseña se quedan en este dispositivo; los proveedores conocidos se configuran automáticamente.",
+    "emailAddress": "Dirección de correo",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Contraseña o contraseña de aplicación",
+    "brandDetected": "Se ha detectado {{brand}}: los ajustes del servidor se rellenarán automáticamente.",
+    "microsoftHint": "Las direcciones de Outlook, Hotmail y Live funcionan mejor con «Microsoft 365 / Outlook.com» en la pantalla anterior (inicio de sesión OAuth moderno en lugar de contraseña).",
+    "invalidEmail": "Introduce una dirección de correo válida.",
+    "enterPassword": "Introduce la contraseña de la cuenta (o una contraseña de aplicación).",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "serversTitle": "Ajustes del servidor",
+    "autoFilledBrand": "Rellenado con los ajustes conocidos de {{brand}}; modifícalos si no coinciden.",
+    "autoFilled": "Rellenado con los ajustes conocidos de este proveedor; modifícalos si no coinciden.",
+    "unknownProvider": "Este proveedor no está en la lista de conocidos: introduce los datos del servidor que te indique tu proveedor.",
+    "incoming": "Correo entrante (IMAP)",
+    "outgoing": "Correo saliente (SMTP)",
+    "server": "Servidor {{side}}",
+    "port": "Puerto {{side}}",
+    "security": "Seguridad {{side}}",
+    "securityNone": "Ninguna",
+    "test": "Probar",
+    "connected": "Conectado",
+    "connectedFolders_one": "Conectado: {{count}} carpeta",
+    "connectedFolders_other": "Conectado: {{count}} carpetas",
+    "smtpAccepted": "Conectado; inicio de sesión aceptado",
+    "enterHost": "Introduce el servidor.",
+    "enterPort": "Introduce un puerto entre 1 y 65535.",
+    "saveFailed": "No se ha podido guardar la cuenta.",
+    "saveAccount": "Guardar cuenta",
+    "testAndSave": "Probar y guardar"
+  },
+  "reauth": {
+    "signInAgain": "Volver a iniciar sesión",
+    "waitingMicrosoft": "Se ha abierto en tu navegador una página de inicio de sesión de Microsoft para {{email}}. Termina allí: esta ventana continuará automáticamente.",
+    "waitingGoogle": "Se ha abierto en tu navegador una página de inicio de sesión de Google para {{email}}. Termina allí: esta ventana continuará automáticamente.",
+    "brokenMicrosoft": "Microsoft indica que el inicio de sesión de esta cuenta ya no funciona. Vuelve a autorizar {{email}} en el navegador; tu correo local se conserva.",
+    "brokenGoogle": "Google indica que el inicio de sesión de esta cuenta ya no funciona. Vuelve a autorizar {{email}} en el navegador; tu correo local se conserva.",
+    "updatePassword": "Actualizar contraseña",
+    "passwordRejected": "El servidor ha rechazado la contraseña de {{email}}. Introduce la nueva: se prueban las conexiones entrante y saliente antes de guardarla, y tu correo local se conserva.",
+    "newPassword": "Nueva contraseña",
+    "enterNewPassword": "Introduce la nueva contraseña (o una contraseña de aplicación).",
+    "incomingFailed": "Correo entrante (IMAP): {{message}}",
+    "outgoingFailed": "Correo saliente (SMTP): {{message}}",
+    "updateFailed": "No se ha podido actualizar la contraseña.",
+    "testAndSave": "Probar y guardar"
+  },
+  "remove": {
+    "title": "Quitar cuenta",
+    "description": "¿Quitar <email>{{email}}</email> de este dispositivo? Se eliminarán todos los mensajes, conversaciones y etiquetas de esta cuenta guardados en local. La cuenta en sí no se elimina del proveedor: si vuelves a añadirla, se sincronizará de nuevo desde el servidor.",
+    "failed": "No se ha podido quitar la cuenta.",
+    "cancel": "Cancelar",
+    "confirm": "Quitar cuenta"
+  },
+  "historyWindow": {
+    "lastMonth": "Último mes",
+    "last3Months": "Últimos 3 meses",
+    "last6Months": "Últimos 6 meses",
+    "lastYear": "Último año",
+    "all": "Todo el historial",
+    "fieldLabel": "Descarga en la primera sincronización",
+    "fieldHint": "Solo se aplica a la primera sincronización: los mensajes anteriores se quedan en el servidor. El correo nuevo siempre se sincroniza."
+  }
+}

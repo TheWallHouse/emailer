@@ -25,8 +25,10 @@ import {
   TriangleAlert,
   type LucideIcon,
 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -258,8 +260,11 @@ export function MailDisplay({
   unsubscribeDeps,
   sourceDeps,
 }: MailDisplayProps) {
+  const { t } = useTranslation()
   const senderName =
-    message.from_name || message.from_address || "Unknown sender"
+    message.from_name ||
+    message.from_address ||
+    t("threadList.row.unknownSender")
   const initials = getInitials(message.from_name, message.from_address)
   const avatarClass = avatarTokenClass(message.from_address)
   /** Raw-source dialog (task 1.2): mounted fresh per open below. */
@@ -320,7 +325,7 @@ export function MailDisplay({
             {senderName}
           </span>
           <span className="line-clamp-1 min-w-0 flex-1 text-muted-foreground">
-            {message.snippet || threadSubject || "(no content)"}
+            {message.snippet || threadSubject || t("reader.message.noContent")}
           </span>
           <span className="shrink-0 text-xs text-muted-foreground">
             {formatRowTimestamp(message.date)}
@@ -344,7 +349,7 @@ export function MailDisplay({
             {initiallyUnread && (
               <span
                 data-testid="unread-dot"
-                aria-label="Unread"
+                aria-label={t("threadList.row.unread")}
                 className="size-2 shrink-0 rounded-full bg-primary"
               />
             )}
@@ -362,8 +367,8 @@ export function MailDisplay({
               </span>
             )}
           </div>
-          <RecipientLine label="To" contacts={parseContacts(message.to_json)} />
-          <RecipientLine label="Cc" contacts={parseContacts(message.cc_json)} />
+          <RecipientLine kind="to" contacts={parseContacts(message.to_json)} />
+          <RecipientLine kind="cc" contacts={parseContacts(message.cc_json)} />
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="text-xs text-muted-foreground">
@@ -385,7 +390,7 @@ export function MailDisplay({
               onClick={handleSendAgain}
             >
               <SendHorizontal className="size-3.5" />
-              Send again
+              {t("reader.message.sendAgain")}
             </Button>
           )}
           {/* Raw message source (task 1.2, design D6): fetches through the
@@ -400,7 +405,7 @@ export function MailDisplay({
             onClick={() => setSourceOpen(true)}
           >
             <FileCodeIcon className="size-3.5" />
-            View source
+            {t("reader.message.viewSource")}
           </Button>
           <Button
             variant="ghost"
@@ -411,7 +416,7 @@ export function MailDisplay({
             onClick={onToggleExpanded}
           >
             <ChevronDown className="size-3.5" />
-            Collapse
+            {t("reader.message.collapse")}
           </Button>
         </div>
       </div>
@@ -471,16 +476,21 @@ export function MailDisplay({
 // ---------------------------------------------------------------------------
 
 function RecipientLine({
-  label,
+  kind,
   contacts,
 }: {
-  label: string
+  kind: "to" | "cc"
   contacts: { name?: string; email: string }[]
 }) {
+  const { t } = useTranslation()
   if (!contacts.length) return null
   return (
-    <div data-testid={`recipients-${label.toLowerCase()}`} className="text-xs">
-      <span className="font-medium text-muted-foreground">{label}:</span>{" "}
+    <div data-testid={`recipients-${kind}`} className="text-xs">
+      <span className="font-medium text-muted-foreground">
+        {kind === "to"
+          ? t("reader.inlineReply.to")
+          : t("reader.inlineReply.cc")}
+      </span>{" "}
       <span className="text-muted-foreground">
         {contacts.map((contact) => contact.name || contact.email).join(", ")}
       </span>
@@ -531,7 +541,7 @@ const pgpEntryCache = new Map<string, PgpEntry>()
 function pgpErrorMessage(error: unknown): string {
   return error instanceof PgpReceiveError
     ? error.message
-    : "the message could not be decrypted"
+    : i18next.t("reader.pgp.errors.generic")
 }
 
 /**
@@ -635,27 +645,37 @@ async function decryptInlineBlocks(
 
 /** The trust banner's copy/icon/tint per signature state ("none" never
  * renders a banner). */
+type SignatureBannerKey =
+  | "reader.pgp.signature.valid"
+  | "reader.pgp.signature.invalid"
+  | "reader.pgp.signature.unknownSigner"
+
 const SIGNATURE_BANNER: Record<
   SignatureTrust,
-  { text: string; Icon: LucideIcon; className: string }
+  {
+    /** Catalog key of the banner copy (null: "none" never renders). */
+    textKey: SignatureBannerKey | null
+    Icon: LucideIcon
+    className: string
+  }
 > = {
   valid: {
-    text: "Signed by a known key — the signature is valid.",
+    textKey: "reader.pgp.signature.valid",
     Icon: ShieldCheck,
     className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
   },
   invalid: {
-    text: "Signature check FAILED — the content was modified after signing or does not match the signer's key.",
+    textKey: "reader.pgp.signature.invalid",
     Icon: ShieldAlert,
     className: "border-destructive/30 bg-destructive/10 text-destructive",
   },
   "unknown-signer": {
-    text: "Signed by an unknown key — import the signer's public key to verify this signature.",
+    textKey: "reader.pgp.signature.unknownSigner",
     Icon: ShieldAlert,
     className: "border-border bg-muted/50 text-muted-foreground",
   },
   none: {
-    text: "",
+    textKey: null,
     Icon: ShieldAlert,
     className: "border-border bg-muted/50 text-muted-foreground",
   },
@@ -682,6 +702,7 @@ function MessageBody({
   pgpDeps: PgpReceiveUiDeps | undefined
   unsubscribeDeps: UnsubscribeDeps | undefined
 }) {
+  const { t } = useTranslation()
   // The PGP seams: the module-level default is stable, so tests that do
   // not inject anything never re-trigger the effects below.
   const pgpDeps = pgpDepsOverride ?? defaultPgpReceiveUiDeps
@@ -840,7 +861,10 @@ function MessageBody({
         const source =
           pgpDetection.source === "html" ? message.body_html : message.body_text
         if (!source) {
-          throw new PgpReceiveError("bad-armor", "the message body is missing")
+          throw new PgpReceiveError(
+            "bad-armor",
+            i18next.t("reader.pgp.errors.bodyMissing")
+          )
         }
         const outcome = await decryptInlineBlocks(
           source,
@@ -886,7 +910,7 @@ function MessageBody({
         if (!payload) {
           throw new PgpReceiveError(
             "bad-armor",
-            "the encrypted payload part is missing from this message"
+            i18next.t("reader.pgp.errors.payloadMissing")
           )
         }
         // The EXISTING attachment-cache seam (D15) fetches the armored
@@ -902,7 +926,7 @@ function MessageBody({
         if (!armored) {
           throw new PgpReceiveError(
             "bad-armor",
-            "the encrypted payload part does not carry armored PGP data"
+            i18next.t("reader.pgp.errors.payloadNotArmored")
           )
         }
         const result = await pgpDeps.decryptArmored({
@@ -914,7 +938,7 @@ function MessageBody({
         if (!result.html && !result.text) {
           throw new PgpReceiveError(
             "bad-armor",
-            "the decrypted message is empty"
+            i18next.t("reader.pgp.errors.decryptedEmpty")
           )
         }
         const entry: PgpEntry = {
@@ -1177,15 +1201,20 @@ function MessageBody({
     pgpChecking === true
       ? {
           trust: "checking" as const,
-          text: "Checking signature…",
+          text: t("reader.pgp.signature.checking"),
           Icon: ShieldAlert,
           className: "border-border bg-muted/50 text-muted-foreground",
         }
       : pgpEntry !== null && pgpEntry.signature.trust !== "none"
-        ? {
-            trust: pgpEntry.signature.trust,
-            ...SIGNATURE_BANNER[pgpEntry.signature.trust],
-          }
+        ? (() => {
+            const { textKey, ...banner } =
+              SIGNATURE_BANNER[pgpEntry.signature.trust]
+            return {
+              trust: pgpEntry.signature.trust,
+              text: textKey === null ? "" : t(textKey),
+              ...banner,
+            }
+          })()
         : null
 
   const pgpBanners = (
@@ -1195,8 +1224,7 @@ function MessageBody({
           data-testid="pgp-mime-signed-banner"
           className="mb-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground"
         >
-          This message is PGP/MIME-signed. Its signature cannot be verified from
-          the stored copy.
+          {t("reader.pgp.mimeSigned")}
         </div>
       )}
       {(pgpDetection.kind === "inline-encrypted" ||
@@ -1208,7 +1236,7 @@ function MessageBody({
             className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground"
           >
             <Lock className="size-3.5 shrink-0" />
-            <span>This message is encrypted.</span>
+            <span>{t("reader.pgp.encrypted")}</span>
             {account !== null && (
               <Button
                 variant="outline"
@@ -1217,7 +1245,7 @@ function MessageBody({
                 data-testid="pgp-decrypt-button"
                 onClick={() => setPgp({ stage: "prompt", error: null })}
               >
-                Decrypt
+                {t("reader.pgp.decrypt")}
               </Button>
             )}
           </div>
@@ -1271,9 +1299,7 @@ function MessageBody({
         className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground"
       >
         <ShieldAlert className="size-3.5 shrink-0" />
-        <span className="min-w-0 flex-1">
-          Your junk filter placed this conversation in Spam.
-        </span>
+        <span className="min-w-0 flex-1">{t("reader.message.junk")}</span>
         {account !== null && (
           <Button
             variant="outline"
@@ -1282,7 +1308,7 @@ function MessageBody({
             data-testid="junk-not-spam"
             onClick={handleJunkNotSpam}
           >
-            Not spam
+            {t("reader.message.notSpam")}
           </Button>
         )}
       </div>
@@ -1294,7 +1320,9 @@ function MessageBody({
         {junkBanner}
         {unsubscribeBanner}
         {pgpBanners}
-        <p className="text-sm text-muted-foreground">(no content)</p>
+        <p className="text-sm text-muted-foreground">
+          {t("reader.message.noContent")}
+        </p>
       </div>
     )
   }
@@ -1308,7 +1336,7 @@ function MessageBody({
           data-testid="email-body-loading"
           className="text-sm text-muted-foreground"
         >
-          Loading message…
+          {t("reader.message.loading")}
         </p>
       </div>
     )
@@ -1327,7 +1355,7 @@ function MessageBody({
           <div className="flex items-start gap-2">
             <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="font-medium">Suspicious message</p>
+              <p className="font-medium">{t("reader.message.phishingTitle")}</p>
               <ul className="mt-1 grid gap-0.5">
                 {displayFindings.map((finding) => (
                   <li key={finding.kind}>{finding.detail}</li>
@@ -1341,7 +1369,7 @@ function MessageBody({
               data-testid="dismiss-phishing"
               onClick={() => setPhishingDismissed(true)}
             >
-              Dismiss
+              {t("reader.message.dismiss")}
             </Button>
           </div>
         </div>
@@ -1353,7 +1381,7 @@ function MessageBody({
           className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-xs text-muted-foreground"
         >
           <ImageOff className="size-3.5 shrink-0" />
-          <span>Images are hidden</span>
+          <span>{t("reader.message.imagesHidden")}</span>
           <Button
             variant="outline"
             size="sm"
@@ -1361,7 +1389,7 @@ function MessageBody({
             data-testid="show-images"
             onClick={() => setShowImagesOnce(true)}
           >
-            Show images
+            {t("reader.message.showImages")}
           </Button>
           {message.from_address && (
             <Button
@@ -1374,7 +1402,7 @@ function MessageBody({
                 if (message.from_address) onAllowSender(message.from_address)
               }}
             >
-              Always allow from sender
+              {t("reader.message.alwaysAllow")}
             </Button>
           )}
         </div>
@@ -1415,6 +1443,7 @@ function UnsubscribeBanner({
   account: EmailAccount | null
   deps: UnsubscribeDeps | undefined
 }): ReactElement | null {
+  const { t } = useTranslation()
   const targets = useMemo(
     () => unsubscribeTargetsFromHeaders(message.headers),
     [message.headers]
@@ -1450,8 +1479,8 @@ function UnsubscribeBanner({
       )
       toast.success(
         outcome.kind === "queued"
-          ? "Unsubscribe queued — it will send when you are back online"
-          : "Unsubscribed"
+          ? t("reader.unsubscribe.queuedToast")
+          : t("reader.unsubscribe.doneToast")
       )
       setStage({ stage: "done" })
     } catch (error) {
@@ -1459,7 +1488,7 @@ function UnsubscribeBanner({
       toast.error(
         error instanceof UnsubscribeError
           ? error.message
-          : "The unsubscribe request failed"
+          : t("reader.unsubscribe.failed")
       )
       setStage({ stage: "idle" })
     }
@@ -1475,10 +1504,14 @@ function UnsubscribeBanner({
         await createAutoArchiveRule(executor, account.id, message.from_address)
       }
       setAutoArchived(true)
-      toast.success(`Future mail from ${message.from_address} will be archived`)
+      toast.success(
+        t("reader.unsubscribe.autoArchiveToast", {
+          sender: message.from_address,
+        })
+      )
     } catch (error) {
       console.warn("[mail-display] auto-archive rule failed", error)
-      toast.error("Could not create the auto-archive rule")
+      toast.error(t("reader.unsubscribe.autoArchiveFailed"))
     }
   }
 
@@ -1491,7 +1524,7 @@ function UnsubscribeBanner({
       {stage.stage === "idle" && (
         <>
           <span className="min-w-0 flex-1">
-            This sender offers an unsubscribe option.
+            {t("reader.unsubscribe.offer")}
           </span>
           <Button
             variant="outline"
@@ -1500,18 +1533,20 @@ function UnsubscribeBanner({
             data-testid="unsubscribe-button"
             onClick={handleUnsubscribe}
           >
-            Unsubscribe
+            {t("reader.unsubscribe.unsubscribe")}
           </Button>
         </>
       )}
       {stage.stage === "confirm" && (
         <>
           <span className="min-w-0 flex-1">
-            Send the unsubscribe request to{" "}
-            <span className="font-medium break-all text-foreground">
-              {stage.url}
-            </span>
-            ?
+            <Trans
+              i18nKey="reader.unsubscribe.confirmPrompt"
+              values={{ url: stage.url }}
+              components={{
+                url: <span className="font-medium break-all text-foreground" />,
+              }}
+            />
           </span>
           <Button
             variant="outline"
@@ -1520,7 +1555,7 @@ function UnsubscribeBanner({
             data-testid="unsubscribe-confirm"
             onClick={() => void handleConfirm()}
           >
-            Confirm
+            {t("reader.unsubscribe.confirm")}
           </Button>
           <Button
             variant="ghost"
@@ -1529,7 +1564,7 @@ function UnsubscribeBanner({
             data-testid="unsubscribe-cancel"
             onClick={() => setStage({ stage: "idle" })}
           >
-            Cancel
+            {t("reader.unsubscribe.cancel")}
           </Button>
         </>
       )}
@@ -1537,8 +1572,8 @@ function UnsubscribeBanner({
         <>
           <span className="min-w-0 flex-1">
             {autoArchived
-              ? "Unsubscribed — future mail from this sender will be archived."
-              : "Unsubscribed."}
+              ? t("reader.unsubscribe.doneArchived")
+              : t("reader.unsubscribe.done")}
           </span>
           {!autoArchived && message.from_address && (
             <Button
@@ -1548,7 +1583,7 @@ function UnsubscribeBanner({
               data-testid="unsubscribe-auto-archive"
               onClick={() => void handleAutoArchive()}
             >
-              Auto-archive future mail from this sender
+              {t("reader.unsubscribe.autoArchive")}
             </Button>
           )}
         </>
@@ -1572,7 +1607,9 @@ function openUnsubscribeComposer(
   const composer = useComposerStore.getState()
   composer.openNew(account.id)
   composer.setTo([{ email: target.address }])
-  composer.setSubject(target.subject ?? "Unsubscribe")
+  composer.setSubject(
+    target.subject ?? i18next.t("composer.outgoing.unsubscribeSubject")
+  )
   useUiStore.getState().setComposerOpen(true)
 }
 
@@ -1625,8 +1662,9 @@ const phishingCache = new Map<string, PhishingEntry>()
  */
 const DMARC_FAIL_FINDING: PhishingFinding = {
   kind: "dmarc-fail",
-  detail:
-    "DMARC authentication FAILED — this message may be impersonating the sender it claims to be from.",
+  get detail() {
+    return i18next.t("reader.message.dmarcFail")
+  },
 }
 
 /**
@@ -1779,6 +1817,7 @@ function AttachmentList({
   account: EmailAccount | null
   attachmentDeps: FileActionDeps | undefined
 }) {
+  const { t } = useTranslation()
   const [attachments, setAttachments] = useState<AttachmentRow[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
 
@@ -1794,7 +1833,7 @@ function AttachmentList({
       })
       .catch((error) => {
         console.warn("[mail-display] failed to load attachments", error)
-        if (!cancelled) setLoadError("Could not load attachments.")
+        if (!cancelled) setLoadError(i18next.t("reader.attachments.loadFailed"))
       })
     return () => {
       cancelled = true
@@ -1818,8 +1857,7 @@ function AttachmentList({
       <Separator className="mb-3" />
       <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <Paperclip className="size-3.5" />
-        {attachments.length}{" "}
-        {attachments.length === 1 ? "attachment" : "attachments"}
+        {t("reader.attachments.count", { count: attachments.length })}
       </div>
       <ul className="grid gap-2">
         {attachments.map((attachment) => (
@@ -1843,8 +1881,18 @@ const RISK_CHIP: Record<
   Exclude<AttachmentRisk, "safe">,
   { label: string; variant: "destructive" | "secondary" }
 > = {
-  block: { label: "Dangerous", variant: "destructive" },
-  caution: { label: "Macros", variant: "secondary" },
+  block: {
+    get label() {
+      return i18next.t("reader.attachments.risk.dangerous")
+    },
+    variant: "destructive",
+  },
+  caution: {
+    get label() {
+      return i18next.t("reader.attachments.risk.macros")
+    },
+    variant: "secondary",
+  },
 }
 
 function AttachmentItem({
@@ -1858,6 +1906,7 @@ function AttachmentItem({
   account: EmailAccount | null
   attachmentDeps: FileActionDeps | undefined
 }) {
+  const { t } = useTranslation()
   // "save" | "open" while the content fetch/file action is in flight.
   const [busy, setBusy] = useState<"save" | "open" | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -1899,7 +1948,7 @@ function AttachmentItem({
       })
       .catch((saveError) => {
         console.warn("[mail-display] attachment save failed", saveError)
-        setError("Could not save this file.")
+        setError(t("reader.attachments.saveFailed"))
       })
       .finally(() => setBusy(null))
   }
@@ -1919,7 +1968,7 @@ function AttachmentItem({
       })
       .catch((openError) => {
         console.warn("[mail-display] attachment open failed", openError)
-        setError("Could not open this file.")
+        setError(t("reader.attachments.openFailed"))
       })
       .finally(() => setBusy(null))
   }
@@ -1933,14 +1982,16 @@ function AttachmentItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-sm font-medium">
-            {attachment.filename || "(unnamed)"}
+            {attachment.filename || t("reader.attachments.unnamed")}
           </span>
           {risk !== "safe" && (
             <Badge
               variant={RISK_CHIP[risk].variant}
               className="shrink-0 gap-1"
               data-testid="attachment-risk-chip"
-              aria-label={`${RISK_CHIP[risk].label} file type`}
+              aria-label={t("reader.attachments.riskLabel", {
+                risk: RISK_CHIP[risk].label,
+              })}
             >
               <ShieldAlert className="size-3" />
               {RISK_CHIP[risk].label}
@@ -1951,10 +2002,10 @@ function AttachmentItem({
               variant="destructive"
               className="shrink-0 gap-1"
               data-testid="attachment-verdict-chip"
-              aria-label="Flagged malicious by the malware lookup"
+              aria-label={t("reader.attachments.maliciousLabel")}
             >
               <ShieldAlert className="size-3" />
-              Malicious
+              {t("reader.attachments.malicious")}
             </Badge>
           )}
           {verdict?.verdict === "suspicious" && (
@@ -1962,10 +2013,10 @@ function AttachmentItem({
               variant="outline"
               className="shrink-0 gap-1"
               data-testid="attachment-verdict-chip"
-              aria-label="Flagged suspicious by the malware lookup"
+              aria-label={t("reader.attachments.suspiciousLabel")}
             >
               <ShieldAlert className="size-3" />
-              Suspicious
+              {t("reader.attachments.suspicious")}
             </Badge>
           )}
         </div>
@@ -1989,7 +2040,7 @@ function AttachmentItem({
             onClick={() => setIcsOpen(true)}
           >
             <CalendarPlus className="size-3.5" />
-            Add to calendar
+            {t("reader.attachments.addToCalendar")}
           </Button>
         )}
         <Button
@@ -2001,7 +2052,9 @@ function AttachmentItem({
           onClick={handleSave}
         >
           <Save className="size-3.5" />
-          {busy === "save" ? "Saving…" : "Save"}
+          {busy === "save"
+            ? t("reader.attachments.saving")
+            : t("reader.attachments.save")}
         </Button>
         <Button
           variant="ghost"
@@ -2011,7 +2064,9 @@ function AttachmentItem({
           disabled={!account || busy !== null}
           onClick={handleOpen}
         >
-          {busy === "open" ? "Opening…" : "Open"}
+          {busy === "open"
+            ? t("reader.attachments.opening")
+            : t("reader.attachments.open")}
         </Button>
       </div>
       {isCalendar && (

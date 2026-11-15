@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import type { SqlExecutor } from "@/services/db/executor"
 import { getExecutor } from "@/services/db/executor"
 import {
@@ -184,8 +185,12 @@ export function buildTaskPrefill(
   const trimmedSubject = subject?.trim() ?? ""
   const trimmedSnippet = snippet?.trim() ?? ""
   return {
-    title: trimmedSubject !== "" ? trimmedSubject : "Task from email",
-    notes: trimmedSnippet !== "" ? trimmedSnippet.slice(0, TASK_NOTES_CAP) : null,
+    title:
+      trimmedSubject !== ""
+        ? trimmedSubject
+        : i18next.t("sidebar.tasks.fromEmail"),
+    notes:
+      trimmedSnippet !== "" ? trimmedSnippet.slice(0, TASK_NOTES_CAP) : null,
   }
 }
 
@@ -234,16 +239,16 @@ export async function createTaskFromEmail(
       sourceThreadId: input.threadId,
     })
     notifyTasksChanged()
-    toast.success("Task created", {
+    toast.success(i18next.t("sidebar.tasks.created"), {
       action: {
-        label: "Open",
+        label: i18next.t("sidebar.tasks.open"),
         onClick: () => openTaskSourceThread(input.threadId),
       },
     })
     return task
   } catch (error) {
     console.warn("[tasks-section] create from email failed", error)
-    toast.error("Could not create the task")
+    toast.error(i18next.t("sidebar.tasks.createFailed"))
     return null
   }
 }

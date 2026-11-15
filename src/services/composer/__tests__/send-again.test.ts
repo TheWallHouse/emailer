@@ -1,23 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { createAccount, createImapFolderLabel, createMessage, createThread, uid } from "../../db/__tests__/fixtures"
+import {
+  createAccount,
+  createImapFolderLabel,
+  createMessage,
+  createThread,
+  uid,
+} from "../../db/__tests__/fixtures"
 import {
   createTestExecutor,
   type TestExecutor,
 } from "../../db/__tests__/test-executor"
 import { insertLabel } from "../../db/labels"
 import { setThreadFolder, setThreadLabels } from "../../db/threads"
-import {
-  getComposerPayload,
-  useComposerStore,
-} from "@/stores/composer-store"
+import { getComposerPayload, useComposerStore } from "@/stores/composer-store"
 import { useUiStore } from "@/stores/ui-store"
 import { BLOCKED_IMAGE_PLACEHOLDER } from "@/services/renderer/sanitize"
 import { sendComposerDraft } from "../send"
 import {
   isThreadInSentFolder,
   openSendAgainForMessage,
-  SEND_AGAIN_ATTACHMENT_NOTICE,
+  sendAgainAttachmentNotice,
 } from "../send-again"
 
 // The sent chime is a seam (same substitution as send.test.ts).
@@ -117,9 +120,7 @@ async function seedSentMessage(options?: {
 describe("isThreadInSentFolder", () => {
   it("recognizes a gmail thread by its sent-label membership", async () => {
     const { threadId, accountId } = await seedSentMessage()
-    expect(await isThreadInSentFolder(executor, accountId, threadId)).toBe(
-      true
-    )
+    expect(await isThreadInSentFolder(executor, accountId, threadId)).toBe(true)
   })
 
   it("reads false for a thread outside the sent folder", async () => {
@@ -143,12 +144,15 @@ describe("isThreadInSentFolder", () => {
 
   it("recognizes an imap thread by its folder assignment", async () => {
     const accountId = await createAccount(executor, "imap")
-    const sent = await createImapFolderLabel(executor, accountId, "Sent", "sent")
+    const sent = await createImapFolderLabel(
+      executor,
+      accountId,
+      "Sent",
+      "sent"
+    )
     const threadId = await createThread(executor, accountId)
     await setThreadFolder(executor, threadId, sent)
-    expect(await isThreadInSentFolder(executor, accountId, threadId)).toBe(
-      true
-    )
+    expect(await isThreadInSentFolder(executor, accountId, threadId)).toBe(true)
   })
 
   it("reads false when the account has no sent-role label at all", async () => {
@@ -189,13 +193,10 @@ describe("openSendAgainForMessage", () => {
 
   it("sanitizes the sent body html: tracking pixels blocked, formatting kept", async () => {
     const { messageId } = await seedSentMessage()
-    await executor.execute(
-      "UPDATE messages SET body_html = $1 WHERE id = $2",
-      [
-        '<p>Report <b>attached</b>.</p><img src="https://tracker.example/pixel.gif">',
-        messageId,
-      ]
-    )
+    await executor.execute("UPDATE messages SET body_html = $1 WHERE id = $2", [
+      '<p>Report <b>attached</b>.</p><img src="https://tracker.example/pixel.gif">',
+      messageId,
+    ])
 
     const opened = await openSendAgainForMessage(messageId, { executor })
 
@@ -274,7 +275,7 @@ describe("openSendAgainForMessage", () => {
 
     const state = useComposerStore.getState()
     expect(state.attachments).toHaveLength(0)
-    expect(state.attachmentNotice).toBe(SEND_AGAIN_ATTACHMENT_NOTICE)
+    expect(state.attachmentNotice).toBe(sendAgainAttachmentNotice())
     expect(getComposerPayload().attachments).toBeUndefined()
   })
 
@@ -285,7 +286,17 @@ describe("openSendAgainForMessage", () => {
          id, message_id, account_id, filename, mime_type, size, content_id,
          is_inline, provider_part_id
        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [uid("att"), messageId, accountId, "logo.png", "image/png", 9, "<logo-cid>", 1, "part-2"]
+      [
+        uid("att"),
+        messageId,
+        accountId,
+        "logo.png",
+        "image/png",
+        9,
+        "<logo-cid>",
+        1,
+        "part-2",
+      ]
     )
 
     await openSendAgainForMessage(messageId, { executor })
@@ -359,9 +370,10 @@ describe("openSendAgainForMessage", () => {
       references_header: string | null
       subject: string | null
       thread_id: string
-    }>("SELECT in_reply_to, references_header, subject, thread_id FROM messages WHERE thread_id = $1", [
-      result.threadId,
-    ])
+    }>(
+      "SELECT in_reply_to, references_header, subject, thread_id FROM messages WHERE thread_id = $1",
+      [result.threadId]
+    )
     expect(rows).toHaveLength(1)
     expect(rows[0].in_reply_to).toBeNull()
     expect(rows[0].references_header).toBeNull()

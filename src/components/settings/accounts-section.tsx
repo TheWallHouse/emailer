@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { CirclePlus, KeyRound, Trash2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
+import { Trans, useTranslation } from "react-i18next"
 
 import { AddAccountDialog } from "@/components/accounts/add-account-dialog"
 import { ReauthDialog } from "@/components/accounts/reauth-dialog"
@@ -9,6 +10,7 @@ import {
   ALL_HISTORY_VALUE,
   historyWindowLabel,
 } from "@/services/sync/history-window"
+import { i18next } from "@/i18n"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -36,9 +38,7 @@ import {
   setAccountReminderLeadMinutes,
   updateHistoryWindow,
 } from "@/services/db/accounts"
-import {
-  enqueueHistoryBackfill,
-} from "@/services/queue/operation"
+import { enqueueHistoryBackfill } from "@/services/queue/operation"
 import {
   HISTORY_WINDOWS,
   historyWindowBoundary,
@@ -74,11 +74,21 @@ import { useAccountStore } from "@/stores/account-store"
 
 /** Select values are strings; "all" is the sentinel for the null setting. */
 const WINDOW_ITEMS: Record<HistoryWindow | typeof ALL_HISTORY_VALUE, string> = {
-  "1m": "1 month",
-  "3m": "3 months",
-  "6m": "6 months",
-  "1y": "1 year",
-  all: "All",
+  get "1m"() {
+    return i18next.t("settings.accounts.window.1m")
+  },
+  get "3m"() {
+    return i18next.t("settings.accounts.window.3m")
+  },
+  get "6m"() {
+    return i18next.t("settings.accounts.window.6m")
+  },
+  get "1y"() {
+    return i18next.t("settings.accounts.window.1y")
+  },
+  get all() {
+    return i18next.t("settings.accounts.window.all")
+  },
 }
 
 function settingToValue(window: HistoryWindowSetting): string {
@@ -95,11 +105,21 @@ function valueToSetting(value: string): HistoryWindowSetting {
 
 /** Meeting-reminder lead choices (parity-round-3 task 8.5, D5). */
 const REMINDER_LEAD_ITEMS: Record<string, string> = {
-  off: "Off",
-  "5": "5 min before",
-  "10": "10 min before",
-  "15": "15 min before",
-  "30": "30 min before",
+  get off() {
+    return i18next.t("settings.accounts.reminderLead.off")
+  },
+  get "5"() {
+    return i18next.t("settings.accounts.reminderLead.minutes", { minutes: 5 })
+  },
+  get "10"() {
+    return i18next.t("settings.accounts.reminderLead.minutes", { minutes: 10 })
+  },
+  get "15"() {
+    return i18next.t("settings.accounts.reminderLead.minutes", { minutes: 15 })
+  },
+  get "30"() {
+    return i18next.t("settings.accounts.reminderLead.minutes", { minutes: 30 })
+  },
 }
 
 function leadToValue(minutes: number | null | undefined): string {
@@ -136,6 +156,7 @@ function AccountRow({
   ) => Promise<void>
   onLeadChange: (account: AccountInfo, next: number | null) => Promise<void>
 }) {
+  const { t } = useTranslation()
   const brand = brandForAccount(account.type, account.email)
   const [savingWindow, setSavingWindow] = useState(false)
   const [savingLead, setSavingLead] = useState(false)
@@ -150,13 +171,15 @@ function AccountRow({
           <span className="truncate">{account.email}</span>
         </p>
         <p className="text-xs text-muted-foreground">
-          {account.displayName ?? "No display name"}
+          {account.displayName ?? t("settings.accounts.noDisplayName")}
         </p>
       </div>
       {/* First-sync download window (task 3.1, D6): compact per-row pick;
           the widening-backfill offer opens from the shared dialog below. */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-muted-foreground">First sync</span>
+        <span className="text-xs text-muted-foreground">
+          {t("settings.accounts.firstSync")}
+        </span>
         <Select
           items={WINDOW_ITEMS}
           value={settingToValue(account.historyWindow ?? null)}
@@ -177,7 +200,9 @@ function AccountRow({
           }}
         >
           <SelectTrigger
-            aria-label={`First sync download window for ${account.email}`}
+            aria-label={t("settings.accounts.firstSyncAria", {
+              email: account.email,
+            })}
             data-testid={`history-window-${account.id}`}
             className="w-28"
             size="sm"
@@ -187,8 +212,7 @@ function AccountRow({
           <SelectContent>
             {(
               [...HISTORY_WINDOWS, ALL_HISTORY_VALUE] as (
-                | HistoryWindow
-                | typeof ALL_HISTORY_VALUE
+                HistoryWindow | typeof ALL_HISTORY_VALUE
               )[]
             ).map((item) => (
               <SelectItem key={item} value={item}>
@@ -201,7 +225,9 @@ function AccountRow({
       {/* Meeting-reminder lead (task 8.5, D5): per-account, default Off;
           the scheduler reads the row directly each pass. */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs text-muted-foreground">Reminders</span>
+        <span className="text-xs text-muted-foreground">
+          {t("settings.accounts.reminders")}
+        </span>
         <Select
           items={REMINDER_LEAD_ITEMS}
           value={leadToValue(account.reminderLeadMinutes)}
@@ -222,7 +248,9 @@ function AccountRow({
           }}
         >
           <SelectTrigger
-            aria-label={`Meeting reminder lead for ${account.email}`}
+            aria-label={t("settings.accounts.remindersAria", {
+              email: account.email,
+            })}
             data-testid={`reminder-lead-${account.id}`}
             className="w-28"
             size="sm"
@@ -241,15 +269,17 @@ function AccountRow({
       {account.status === "auth-error" ? (
         <Badge variant="destructive">
           <TriangleAlert data-icon="inline-start" aria-hidden />
-          Sign-in error
+          {t("settings.accounts.signInError")}
         </Badge>
       ) : (
         account.unreadCount > 0 && (
           <Badge
             variant="secondary"
-            aria-label={`${account.unreadCount} unread`}
+            aria-label={t("settings.accounts.unread", {
+              count: account.unreadCount,
+            })}
           >
-            {account.unreadCount} unread
+            {t("settings.accounts.unread", { count: account.unreadCount })}
           </Badge>
         )
       )}
@@ -259,18 +289,19 @@ function AccountRow({
       {account.status === "auth-error" && (
         <Button variant="ghost" size="sm" onClick={() => onReauth(account)}>
           <KeyRound />
-          Re-authenticate
+          {t("settings.accounts.reauthenticate")}
         </Button>
       )}
       <Button variant="ghost" size="sm" onClick={() => onRemove(account)}>
         <Trash2 />
-        Remove
+        {t("settings.accounts.remove")}
       </Button>
     </div>
   )
 }
 
 export function AccountsSection() {
+  const { t } = useTranslation()
   const accounts = useAccountStore((state) => state.accounts)
   const [addOpen, setAddOpen] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<AccountInfo | null>(null)
@@ -344,7 +375,7 @@ export function AccountsSection() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Could not queue the download of older mail."
+          : i18next.t("settings.accounts.backfill.queueFailed")
       )
     } finally {
       setQueuingBackfill(false)
@@ -356,24 +387,28 @@ export function AccountsSection() {
     : ""
 
   return (
-    <section aria-label="Accounts" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.accounts.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Accounts</h2>
+          <h2 className="text-base font-semibold text-foreground">
+            {t("settings.accounts.title")}
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Accounts live on this machine; messages sync locally and work
-            offline.
+            {t("settings.accounts.description")}
           </p>
         </div>
         <Button size="sm" onClick={() => setAddOpen(true)}>
           <CirclePlus />
-          Add Account
+          {t("settings.accounts.add")}
         </Button>
       </div>
       <Separator />
       {accounts.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No accounts yet. Add one to start syncing mail.
+          {t("settings.accounts.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">
@@ -424,16 +459,16 @@ export function AccountsSection() {
         {backfillPrompt && (
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Download the older mail too?</DialogTitle>
+              <DialogTitle>{t("settings.accounts.backfill.title")}</DialogTitle>
               <DialogDescription>
-                The first-sync window for{" "}
-                <span className="font-medium">
-                  {backfillPrompt.accountEmail}
-                </span>{" "}
-                widened ({rangeLabel}). Messages that were skipped before can
-                be fetched now — only the newly covered range is downloaded,
-                online or at the next launch. Cancel to keep the wider window
-                without downloading older mail.
+                <Trans
+                  i18nKey="settings.accounts.backfill.description"
+                  values={{
+                    email: backfillPrompt.accountEmail,
+                    range: rangeLabel,
+                  }}
+                  components={{ email: <span className="font-medium" /> }}
+                />
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -442,7 +477,7 @@ export function AccountsSection() {
                 onClick={() => setBackfillPrompt(null)}
                 disabled={queuingBackfill}
               >
-                Not now
+                {t("settings.accounts.backfill.notNow")}
               </Button>
               <Button
                 onClick={() => {
@@ -450,7 +485,7 @@ export function AccountsSection() {
                 }}
                 disabled={queuingBackfill}
               >
-                Download older mail
+                {t("settings.accounts.backfill.confirm")}
               </Button>
             </DialogFooter>
           </DialogContent>

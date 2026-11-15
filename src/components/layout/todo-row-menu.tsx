@@ -1,4 +1,5 @@
 import { EllipsisVertical, Check, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { buttonVariants } from "@/components/ui/button"
 import {
@@ -26,13 +27,14 @@ export function TodoRowMenu({
   onCompleteMarkDone: () => void
   onRemove: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <button
             type="button"
-            aria-label={`More actions for ${subject}`}
+            aria-label={t("sidebar.todos.menu.moreActions", { subject })}
             className={buttonVariants({
               variant: "ghost",
               size: "icon-sm",
@@ -45,12 +47,12 @@ export function TodoRowMenu({
       <DropdownMenuContent align="start" className="w-56">
         <DropdownMenuItem onClick={onCompleteMarkDone}>
           <Check aria-hidden />
-          Complete and mark thread done
+          {t("sidebar.todos.menu.completeMarkDone")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={onRemove}>
           <Trash2 aria-hidden />
-          Remove from Todos
+          {t("sidebar.todos.menu.remove")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

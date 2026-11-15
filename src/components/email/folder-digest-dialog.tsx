@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+import { i18next } from "@/i18n"
 import { getExecutor } from "@/services/db/executor"
 import {
   buildFolderDigest,
@@ -61,6 +63,7 @@ export function FolderDigestDialog({
   scope,
   onOpenChange,
 }: FolderDigestDialogProps) {
+  const { t } = useTranslation()
   const [phase, setPhase] = useState<DigestPhase>({ phase: "loading" })
   // A ref for the close callback so an unstable parent handler can never
   // re-trigger the mount effect below (the digest runs once per open).
@@ -100,7 +103,7 @@ export function FolderDigestDialog({
             message:
               error instanceof Error
                 ? error.message
-                : "Could not build the digest.",
+                : i18next.t("reader.digest.failed"),
           })
         })
     } catch {
@@ -123,15 +126,11 @@ export function FolderDigestDialog({
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent
-        data-testid="folder-digest-dialog"
-        className="sm:max-w-lg"
-      >
+      <DialogContent data-testid="folder-digest-dialog" className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Catch me up</DialogTitle>
+          <DialogTitle>{t("reader.digest.title")}</DialogTitle>
           <DialogDescription>
-            An AI-generated briefing over this view's unread threads. Only
-            those threads' text is sent to the provider.
+            {t("reader.digest.description")}
           </DialogDescription>
         </DialogHeader>
         {phase.phase === "loading" && (
@@ -139,7 +138,7 @@ export function FolderDigestDialog({
             data-testid="folder-digest-busy"
             className="py-6 text-center text-sm text-muted-foreground"
           >
-            Catching you up…
+            {t("reader.digest.busy")}
           </div>
         )}
         {phase.phase === "empty" && (
@@ -147,7 +146,7 @@ export function FolderDigestDialog({
             data-testid="folder-digest-empty"
             className="py-6 text-center text-sm text-muted-foreground"
           >
-            No unread threads.
+            {t("reader.digest.empty")}
           </div>
         )}
         {phase.phase === "error" && (
@@ -156,7 +155,7 @@ export function FolderDigestDialog({
             className="flex flex-col items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm"
           >
             <span className="text-destructive">
-              {phase.message ?? "Could not build the digest."}
+              {phase.message ?? t("reader.digest.failed")}
             </span>
             <Button
               variant="outline"
@@ -164,7 +163,7 @@ export function FolderDigestDialog({
               data-testid="folder-digest-retry"
               onClick={runDigest}
             >
-              Retry
+              {t("reader.digest.retry")}
             </Button>
           </div>
         )}
@@ -179,11 +178,12 @@ export function FolderDigestDialog({
               data-testid="folder-digest-meta"
               className="text-xs text-muted-foreground"
             >
-              {phase.result.threadCount} unread{" "}
-              {phase.result.threadCount === 1 ? "thread" : "threads"} covered
               {phase.result.omittedCount > 0
-                ? `, and ${phase.result.omittedCount} more not covered`
-                : ""}
+                ? t("reader.digest.metaWithOmitted", {
+                    count: phase.result.threadCount,
+                    omitted: phase.result.omittedCount,
+                  })
+                : t("reader.digest.meta", { count: phase.result.threadCount })}
             </p>
           </>
         )}
@@ -191,9 +191,9 @@ export function FolderDigestDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            aria-label="Close digest"
+            aria-label={t("reader.digest.closeLabel")}
           >
-            Close
+            {t("reader.digest.close")}
           </Button>
         </DialogFooter>
       </DialogContent>

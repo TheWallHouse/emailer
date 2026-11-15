@@ -11,6 +11,7 @@ import {
   UserRound,
   Zap,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import {
   Command,
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/command"
 import { FOLDER_ITEMS } from "@/components/layout/folders"
 import { ProviderIcon } from "@/components/providers/provider-icon"
+import { i18next } from "@/i18n"
 import { filterByFuzzy } from "@/lib/fuzzy-match"
 import { isAiConfigured, isSurfaceEnabled } from "@/services/ai/settings"
 import { brandForAccount } from "@/services/account-flows"
@@ -58,11 +60,7 @@ import { usePaletteQuickSteps } from "./use-palette-quick-steps"
  */
 
 type PaletteGroup =
-  | "actions"
-  | "quick-steps"
-  | "folders"
-  | "labels"
-  | "accounts"
+  "actions" | "quick-steps" | "folders" | "labels" | "accounts"
 
 const GROUP_ORDER: PaletteGroup[] = [
   "actions",
@@ -72,12 +70,23 @@ const GROUP_ORDER: PaletteGroup[] = [
   "accounts",
 ]
 
+/** Group headings, localized at read time (getters follow the language). */
 const GROUP_HEADINGS: Record<PaletteGroup, string> = {
-  actions: "Actions",
-  "quick-steps": "Quick steps",
-  folders: "Folders",
-  labels: "Labels",
-  accounts: "Accounts",
+  get actions() {
+    return i18next.t("search.palette.groups.actions")
+  },
+  get "quick-steps"() {
+    return i18next.t("search.palette.groups.quickSteps")
+  },
+  get folders() {
+    return i18next.t("search.palette.groups.folders")
+  },
+  get labels() {
+    return i18next.t("search.palette.groups.labels")
+  },
+  get accounts() {
+    return i18next.t("search.palette.groups.accounts")
+  },
 }
 
 interface PaletteItem {
@@ -92,6 +101,7 @@ interface PaletteItem {
 }
 
 export function CommandPalette() {
+  const { t } = useTranslation()
   const open = usePaletteStore((state) => state.open)
   const setOpen = usePaletteStore((state) => state.setOpen)
   const [query, setQuery] = useState("")
@@ -148,7 +158,7 @@ export function CommandPalette() {
       {
         id: "action-compose",
         group: "actions",
-        label: "Compose new message",
+        label: t("search.palette.compose"),
         keywords: ["compose", "write", "new", "email"],
         icon: SquarePen,
         run: () => useUiStore.getState().setComposerOpen(true),
@@ -156,7 +166,7 @@ export function CommandPalette() {
       {
         id: "action-search",
         group: "actions",
-        label: "Search mail",
+        label: t("search.palette.search"),
         keywords: ["search", "find", "query", "messages"],
         icon: Search,
         run: () =>
@@ -167,7 +177,7 @@ export function CommandPalette() {
       {
         id: "action-settings",
         group: "actions",
-        label: "Open settings",
+        label: t("search.palette.settings"),
         keywords: ["settings", "preferences"],
         icon: Settings,
         run: () => useUiStore.getState().setView({ kind: "settings" }),
@@ -178,7 +188,7 @@ export function CommandPalette() {
         // center dialog (ui-store.helpCenterOpen drives the shell mount).
         id: "action-help",
         group: "actions",
-        label: "Open help center",
+        label: t("search.palette.help"),
         keywords: ["help", "support", "guide", "documentation", "faq"],
         icon: CircleHelp,
         run: () => useUiStore.getState().setHelpCenterOpen(true),
@@ -192,7 +202,7 @@ export function CommandPalette() {
       actionItems.push({
         id: "open-assistant",
         group: "actions",
-        label: "Open AI assistant",
+        label: t("search.palette.assistant"),
         keywords: ["ai", "assistant", "chat", "ask"],
         icon: Sparkles,
         run: () => useUiStore.getState().setAssistantOpen(true),
@@ -201,7 +211,7 @@ export function CommandPalette() {
     const quickStepItems: PaletteItem[] = quickSteps.map((step) => ({
       id: `quick-step-${step.id}`,
       group: "quick-steps",
-      label: `Run quick step: ${step.name}`,
+      label: t("search.palette.runQuickStep", { name: step.name }),
       keywords: ["quick", "step", "run", ...step.name.split(/\s+/)],
       icon: Zap,
       run: () => {
@@ -238,7 +248,7 @@ export function CommandPalette() {
       return {
         id: `account-${account.id}`,
         group: "accounts",
-        label: `Switch to ${account.email}`,
+        label: t("search.palette.switchAccount", { email: account.email }),
         keywords: ["switch", "account", account.email],
         // Brand glyph when the provider is known; generic user icon
         // otherwise (unchanged behavior for custom domains).
@@ -259,7 +269,9 @@ export function CommandPalette() {
       ...labelItems,
       ...accountItems,
     ]
-  }, [accounts, assistantAvailable, labels, quickSteps, query])
+    // `t` changes identity with the language, so the memo also re-reads
+    // the folder titles (getters) on a language switch.
+  }, [accounts, assistantAvailable, labels, quickSteps, query, t])
 
   const visibleItems = useMemo(
     () => filterByFuzzy(items, query, (item) => [item.label, ...item.keywords]),
@@ -288,7 +300,7 @@ export function CommandPalette() {
         <CommandInput
           value={query}
           onValueChange={setQuery}
-          placeholder="Search mail or jump to a folder, label, account…"
+          placeholder={t("search.palette.placeholder")}
         />
         <CommandList>
           {groups.map(({ group, items: groupItems }) => (
@@ -309,14 +321,14 @@ export function CommandPalette() {
             </CommandGroup>
           ))}
           {groups.length === 0 && (
-            <CommandEmpty>No matching commands</CommandEmpty>
+            <CommandEmpty>{t("search.palette.empty")}</CommandEmpty>
           )}
         </CommandList>
       </Command>
       <div className="flex items-center gap-3 border-t px-3 py-2 text-xs text-muted-foreground">
-        <span>↑↓ navigate</span>
-        <span>↵ select</span>
-        <span>esc close</span>
+        <span>{t("search.palette.hintNavigate")}</span>
+        <span>{t("search.palette.hintSelect")}</span>
+        <span>{t("search.palette.hintClose")}</span>
       </div>
     </CommandDialog>
   )

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { formatDistanceToNow, fromUnixTime } from "date-fns"
 import { Loader2, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,6 +31,7 @@ import {
   AI_TIERS,
   addProvider,
   getAiSettings,
+  isAiSurfaceId,
   providerRequiresApiKey,
   removeProvider,
   setActiveProvider,
@@ -98,110 +101,46 @@ import { getExecutor } from "@/services/db/executor"
  * in the fine print below.
  */
 
-const KIND_LABELS: Record<AiProviderKind, string> = {
-  anthropic: "Anthropic",
-  openai: "OpenAI",
-  gemini: "Google Gemini",
-  ollama: "Ollama (local)",
-  custom: "Custom (OpenAI-compatible)",
+function kindLabel(t: TFunction, kind: AiProviderKind): string {
+  return t(`settingsAdvanced.ai.kinds.${kind}`)
 }
 
-const KIND_DEFAULT_LABELS: Record<AiProviderKind, string> = {
-  anthropic: "Anthropic",
-  openai: "OpenAI",
-  gemini: "Google Gemini",
-  ollama: "Ollama",
-  custom: "Custom endpoint",
+/** The name a new provider starts with (the user may type another). */
+function kindDefaultLabel(t: TFunction, kind: AiProviderKind): string {
+  switch (kind) {
+    case "ollama":
+      return "Ollama"
+    case "custom":
+      return t("settingsAdvanced.ai.customDefaultLabel")
+    default:
+      return kindLabel(t, kind)
+  }
 }
 
 /** Free-string model hints — the ids are never validated against a list
  * (spec: model selection is a free string, never an enum). */
-const KIND_MODEL_PLACEHOLDERS: Record<AiProviderKind, string> = {
-  anthropic: "e.g. claude-sonnet-4-5",
-  openai: "e.g. gpt-4.1",
-  gemini: "e.g. gemini-2.5-flash",
-  ollama: "e.g. llama3.1",
-  custom: "any model id the endpoint serves",
+function kindModelPlaceholder(t: TFunction, kind: AiProviderKind): string {
+  return t(`settingsAdvanced.ai.modelPlaceholders.${kind}`)
 }
 
-const SURFACE_COPY: Record<AiSurfaceId, { label: string; description: string }> =
-  {
-    summaries: {
-      label: "Thread summaries",
-      description: "Summarize an open thread on request.",
-    },
-    smartReplies: {
-      label: "Smart replies",
-      description: "Draft reply suggestions that match your writing style.",
-    },
-    composeTransform: {
-      label: "Compose transforms",
-      description: "Improve, shorten, or formalize selected draft text.",
-    },
-    askInbox: {
-      label: "Ask My Inbox",
-      description: "Translate natural-language questions into mailbox searches.",
-    },
-    taskExtraction: {
-      label: "Task extraction",
-      description: "Suggest tasks from open messages.",
-    },
-    categorizationAssist: {
-      label: "Categorization assist (opt-in)",
-      description:
-        "Let the provider classify messages the rule engine cannot. Off by default.",
-    },
-    quickReplies: {
-      label: "Quick replies",
-      description:
-        "Offer short one-tap reply chips under an open message. Nothing sends automatically.",
-    },
-    ruleAssist: {
-      label: "Natural-language rules",
-      description:
-        "Translate a typed rule description into a rule preview. Only your description is sent.",
-    },
-    eventExtraction: {
-      label: "Event extraction",
-      description:
-        "Suggest calendar events from open threads. Accepting one opens the event form prefilled — nothing is saved until you do.",
-    },
-    translation: {
-      label: "Translate",
-      description:
-        "Translate a message into your output language on request. Only that message's text is sent.",
-    },
-    folderDigest: {
-      label: "Catch-me-up digest",
-      description:
-        "Summarize the unread threads of the folder you invoke it in. Only threads from that folder are sent.",
-    },
-    assistant: {
-      label: "AI assistant",
-      description:
-        "Chat with your mailbox: ask questions and the assistant looks threads up read-only to answer. Nothing is changed by it.",
-    },
-    voiceProfile: {
-      label: "Writing voice learning",
-      description:
-        "The one-call action that learns your writing voice from sent mail for dictation-adjacent drafting. Runs only when you click Learn.",
-    },
-  }
+function surfaceLabel(t: TFunction, surface: AiSurfaceId): string {
+  return t(`settingsAdvanced.ai.surfaces.${surface}.label`)
+}
+
+function surfaceDescription(t: TFunction, surface: AiSurfaceId): string {
+  return t(`settingsAdvanced.ai.surfaces.${surface}.description`)
+}
 
 /** Tier display names (parity-round-2 task 2.1). */
-const TIER_LABELS: Record<AiTier, string> = {
-  instant: "Instant",
-  cheap: "Cheap",
-  intelligent: "Intelligent",
+function tierLabel(t: TFunction, tier: AiTier): string {
+  return t(`settingsAdvanced.ai.tiers.${tier}`)
 }
 
 /** Free-string hints for the per-tier model ids (never validated against
  * a list — like the provider model id, the ids are whatever the active
  * provider offers). */
-const TIER_MODEL_PLACEHOLDERS: Record<AiTier, string> = {
-  instant: "e.g. the provider's fastest model",
-  cheap: "e.g. the provider's economy model",
-  intelligent: "e.g. the provider's strongest model",
+function tierModelPlaceholder(t: TFunction, tier: AiTier): string {
+  return t(`settingsAdvanced.ai.tiers.placeholders.${tier}`)
 }
 
 /** The per-row connection-test display. */
@@ -212,21 +151,22 @@ interface TestOutcome {
 
 type DialogTarget = { mode: "add" } | { mode: "edit"; provider: AiProviderView }
 
-function isDefaultLabel(value: string): boolean {
+function isDefaultLabel(t: TFunction, value: string): boolean {
   return AI_PROVIDER_KINDS.some(
-    (candidate) => KIND_DEFAULT_LABELS[candidate] === value.trim()
+    (candidate) => kindDefaultLabel(t, candidate) === value.trim()
   )
 }
 
 export function AiSection() {
+  const { t } = useTranslation()
   const [config, setConfig] = useState<AiSettingsView | null>(null)
   const [cache, setCache] = useState<AiCacheStats | null>(null)
   const [usage, setUsage] = useState<AiUsageSummary | null>(null)
   const [confirmClearCache, setConfirmClearCache] = useState(false)
   const [confirmClearUsage, setConfirmClearUsage] = useState(false)
-  const [testOutcomes, setTestOutcomes] = useState<
-    Record<string, TestOutcome>
-  >({})
+  const [testOutcomes, setTestOutcomes] = useState<Record<string, TestOutcome>>(
+    {}
+  )
   const [testingId, setTestingId] = useState<string | null>(null)
 
   const [dialog, setDialog] = useState<DialogTarget | null>(null)
@@ -282,9 +222,7 @@ export function AiSection() {
   async function changeEnabled(enabled: boolean): Promise<void> {
     const previous = config
     // Optimistic: the switch reacts immediately, rolls back on failure.
-    setConfig((current) =>
-      current ? { ...current, enabled } : current
-    )
+    setConfig((current) => (current ? { ...current, enabled } : current))
     try {
       await setAiEnabled(getExecutor(), enabled)
     } catch (error) {
@@ -302,10 +240,7 @@ export function AiSection() {
       await setActiveProvider(getExecutor(), providerId)
     } catch (error) {
       setConfig(previous)
-      console.warn(
-        "[settings] failed to persist the active AI provider",
-        error
-      )
+      console.warn("[settings] failed to persist the active AI provider", error)
     }
   }
 
@@ -344,10 +279,7 @@ export function AiSection() {
       await setSurfaceTier(getExecutor(), surface, tier)
     } catch (error) {
       setConfig(previous)
-      console.warn(
-        "[settings] failed to persist the AI surface tier",
-        error
-      )
+      console.warn("[settings] failed to persist the AI surface tier", error)
     }
   }
 
@@ -385,10 +317,7 @@ export function AiSection() {
       await setOutputLanguage(getExecutor(), language)
     } catch (error) {
       setConfig(previous)
-      console.warn(
-        "[settings] failed to persist the AI output language",
-        error
-      )
+      console.warn("[settings] failed to persist the AI output language", error)
     }
   }
 
@@ -404,7 +333,7 @@ export function AiSection() {
       setTestOutcomes((current) => ({
         ...current,
         [provider.id]: result.ok
-          ? { ok: true, text: "Connection OK." }
+          ? { ok: true, text: t("settingsAdvanced.ai.providers.connectionOk") }
           : { ok: false, text: result.reason },
       }))
     } catch (error) {
@@ -434,7 +363,7 @@ export function AiSection() {
   function openAdd(): void {
     setDialog({ mode: "add" })
     setKind("anthropic")
-    setLabel(KIND_DEFAULT_LABELS.anthropic)
+    setLabel(kindDefaultLabel(t, "anthropic"))
     setModel("")
     setBaseUrl("")
     setApiKey("")
@@ -459,8 +388,8 @@ export function AiSection() {
     // default (add mode only — edit pins the kind).
     if (dialog?.mode === "add") {
       setLabel((current) =>
-        current.trim() === "" || isDefaultLabel(current)
-          ? KIND_DEFAULT_LABELS[next]
+        current.trim() === "" || isDefaultLabel(t, current)
+          ? kindDefaultLabel(t, next)
           : current
       )
     }
@@ -496,7 +425,7 @@ export function AiSection() {
           baseUrl: usesBaseUrl && baseUrl.trim() !== "" ? baseUrl : null,
         })
         if (!updated) {
-          setFormError("This provider no longer exists.")
+          setFormError(t("settingsAdvanced.ai.dialog.notFound"))
           return
         }
         if (apiKey.trim() !== "") {
@@ -509,9 +438,7 @@ export function AiSection() {
           kind,
           label,
           model,
-          ...(kind === "custom" || kind === "ollama"
-            ? { baseUrl }
-            : {}),
+          ...(kind === "custom" || kind === "ollama" ? { baseUrl } : {}),
           ...(apiKey.trim() !== "" ? { apiKey } : {}),
         })
       }
@@ -519,7 +446,9 @@ export function AiSection() {
       await refresh()
     } catch (error) {
       setFormError(
-        error instanceof Error ? error.message : "Saving the provider failed."
+        error instanceof Error
+          ? error.message
+          : t("settingsAdvanced.ai.dialog.saveFailed")
       )
     } finally {
       setSaving(false)
@@ -548,26 +477,31 @@ export function AiSection() {
 
   if (config === null) {
     return (
-      <section aria-label="AI" className="flex flex-col gap-4">
+      <section
+        aria-label={t("settingsAdvanced.ai.ariaLabel")}
+        className="flex flex-col gap-4"
+      >
         <SectionHeader />
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-3 animate-spin" aria-hidden />
-          Loading…
+          {t("settingsAdvanced.ai.loading")}
         </p>
       </section>
     )
   }
 
   return (
-    <section aria-label="AI" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsAdvanced.ai.ariaLabel")}
+      className="flex flex-col gap-4"
+    >
       <SectionHeader />
       <Separator />
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <Label htmlFor="ai-enabled">AI assistance</Label>
+          <Label htmlFor="ai-enabled">{t("settingsAdvanced.ai.title")}</Label>
           <p className="text-xs text-muted-foreground">
-            Off by default. With AI off, no AI affordances appear anywhere in
-            the app and nothing is ever sent to a provider.
+            {t("settingsAdvanced.ai.enableHint")}
           </p>
         </div>
         <Switch
@@ -623,12 +557,10 @@ export function AiSection() {
 
           <fieldset className="flex flex-col gap-3">
             <legend className="text-sm font-semibold text-foreground">
-              AI surfaces
+              {t("settingsAdvanced.ai.surfaces.title")}
             </legend>
             <p className="text-xs text-muted-foreground">
-              Each surface can be turned off individually. Surfaces only send
-              content you explicitly invoke them on, and only to the active
-              provider.
+              {t("settingsAdvanced.ai.surfaces.description")}
             </p>
             {AI_SURFACE_IDS.map((surface) => (
               <div
@@ -637,10 +569,10 @@ export function AiSection() {
               >
                 <div className="min-w-0">
                   <Label htmlFor={`ai-surface-${surface}`}>
-                    {SURFACE_COPY[surface].label}
+                    {surfaceLabel(t, surface)}
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    {SURFACE_COPY[surface].description}
+                    {surfaceDescription(t, surface)}
                   </p>
                 </div>
                 <Switch
@@ -713,30 +645,27 @@ export function AiSection() {
         </>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Turn AI assistance on to configure a provider, test the connection,
-          and choose which surfaces may use it.
+          {t("settingsAdvanced.ai.offHint")}
         </p>
       )}
 
       <Separator />
       <p className="text-xs text-muted-foreground">
-        Provider API keys are encrypted at rest on this machine and are never
-        included in exported data — exports contain mailbox content only.
-        Ollama runs entirely locally.
+        {t("settingsAdvanced.ai.keysFinePrint")}
       </p>
     </section>
   )
 }
 
 function SectionHeader() {
+  const { t } = useTranslation()
   return (
     <div>
       <h2 className="text-base font-semibold text-foreground">
-        AI assistance
+        {t("settingsAdvanced.ai.title")}
       </h2>
       <p className="text-sm text-muted-foreground">
-        Optional AI help over your mail, powered by a provider you configure —
-        including a fully local Ollama endpoint. Mail never depends on AI.
+        {t("settingsAdvanced.ai.description")}
       </p>
     </div>
   )
@@ -770,27 +699,28 @@ interface ProvidersBlockProps {
 }
 
 function ProvidersBlock(props: ProvidersBlockProps) {
+  const { t } = useTranslation()
   const { config } = props
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Providers</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            {t("settingsAdvanced.ai.providers.title")}
+          </h3>
           <p className="text-xs text-muted-foreground">
-            Add a provider, test the connection, then mark one active. Model
-            ids are free text — type whatever your provider offers.
+            {t("settingsAdvanced.ai.providers.description")}
           </p>
         </div>
         <Button size="sm" onClick={props.onAdd}>
           <Plus aria-hidden />
-          Add provider
+          {t("settingsAdvanced.ai.providers.add")}
         </Button>
       </div>
 
       {config.providers.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No providers configured yet. Until one is active, no AI affordances
-          appear anywhere in the app.
+          {t("settingsAdvanced.ai.providers.empty")}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -844,6 +774,7 @@ interface ProviderRowProps {
 }
 
 function ProviderRow(props: ProviderRowProps) {
+  const { t } = useTranslation()
   const { provider } = props
   return (
     <li
@@ -857,7 +788,9 @@ function ProviderRow(props: ProviderRowProps) {
           value={provider.id}
           checked={props.isActive}
           onChange={() => props.onActivate(provider.id)}
-          aria-label={`Use ${provider.label} for AI`}
+          aria-label={t("settingsAdvanced.ai.providers.use", {
+            label: provider.label,
+          })}
           className="size-4 shrink-0"
         />
         <div className="min-w-0 flex-1">
@@ -865,19 +798,25 @@ function ProviderRow(props: ProviderRowProps) {
             <span className="truncate text-sm font-medium text-foreground">
               {provider.label}
             </span>
-            <Badge variant="outline">{KIND_LABELS[provider.kind]}</Badge>
+            <Badge variant="outline">{kindLabel(t, provider.kind)}</Badge>
             {provider.kind === "ollama" ? (
               <span className="text-xs text-muted-foreground">
-                no key needed
+                {t("settingsAdvanced.ai.providers.noKeyNeeded")}
               </span>
             ) : provider.hasApiKey ? (
-              <Badge variant="secondary">key saved</Badge>
+              <Badge variant="secondary">
+                {t("settingsAdvanced.ai.providers.keySaved")}
+              </Badge>
             ) : (
-              <Badge variant="outline">no API key</Badge>
+              <Badge variant="outline">
+                {t("settingsAdvanced.ai.providers.noApiKey")}
+              </Badge>
             )}
           </div>
           <p className="truncate font-mono text-xs text-muted-foreground">
-            {provider.model === "" ? "no model set" : provider.model}
+            {provider.model === ""
+              ? t("settingsAdvanced.ai.providers.noModel")
+              : provider.model}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -890,12 +829,14 @@ function ProviderRow(props: ProviderRowProps) {
             {props.testing ? (
               <Loader2 className="animate-spin" aria-hidden />
             ) : null}
-            Test connection
+            {t("settingsAdvanced.ai.providers.testConnection")}
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            aria-label={`Edit ${provider.label}`}
+            aria-label={t("settingsAdvanced.ai.providers.edit", {
+              label: provider.label,
+            })}
             onClick={() => props.onEdit(provider)}
           >
             <Pencil aria-hidden />
@@ -903,7 +844,9 @@ function ProviderRow(props: ProviderRowProps) {
           <Button
             variant="ghost"
             size="sm"
-            aria-label={`Remove ${provider.label}`}
+            aria-label={t("settingsAdvanced.ai.providers.remove", {
+              label: provider.label,
+            })}
             onClick={() => props.onRemove(provider.id)}
           >
             <Trash2 aria-hidden />
@@ -947,12 +890,13 @@ interface ProviderDialogProps {
 }
 
 function ProviderDialog(props: ProviderDialogProps) {
+  const { t } = useTranslation()
   const open = props.dialog !== null
   const isEdit = props.dialog?.mode === "edit"
   const usesBaseUrl = props.kind === "custom" || props.kind === "ollama"
   const usesApiKey = props.kind !== "ollama"
   const kindItems = Object.fromEntries(
-    AI_PROVIDER_KINDS.map((candidate) => [candidate, KIND_LABELS[candidate]])
+    AI_PROVIDER_KINDS.map((candidate) => [candidate, kindLabel(t, candidate)])
   )
   return (
     <Dialog
@@ -964,26 +908,33 @@ function ProviderDialog(props: ProviderDialogProps) {
       <DialogContent data-testid="ai-provider-dialog">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit provider" : "Add an AI provider"}
+            {isEdit
+              ? t("settingsAdvanced.ai.dialog.editTitle")
+              : t("settingsAdvanced.ai.dialog.addTitle")}
           </DialogTitle>
           <DialogDescription>
-            Your key is encrypted on this machine and is sent only to the
-            provider you configured, per request.
+            {t("settingsAdvanced.ai.dialog.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3">
           {isEdit ? (
             <p className="text-xs text-muted-foreground">
-              Provider type: {KIND_LABELS[props.kind]}
+              {t("settingsAdvanced.ai.dialog.providerTypeValue", {
+                kind: kindLabel(t, props.kind),
+              })}
             </p>
           ) : (
             <div className="grid gap-2">
-              <Label htmlFor="ai-provider-kind">Provider type</Label>
+              <Label htmlFor="ai-provider-kind">
+                {t("settingsAdvanced.ai.dialog.providerType")}
+              </Label>
               <Select
                 value={props.kind}
                 items={kindItems}
-                onValueChange={(value) => props.onKindChange(String(value) as AiProviderKind)}
+                onValueChange={(value) =>
+                  props.onKindChange(String(value) as AiProviderKind)
+                }
               >
                 <SelectTrigger id="ai-provider-kind" className="w-72">
                   <SelectValue />
@@ -991,7 +942,7 @@ function ProviderDialog(props: ProviderDialogProps) {
                 <SelectContent>
                   {AI_PROVIDER_KINDS.map((candidate) => (
                     <SelectItem key={candidate} value={candidate}>
-                      {KIND_LABELS[candidate]}
+                      {kindLabel(t, candidate)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1000,22 +951,26 @@ function ProviderDialog(props: ProviderDialogProps) {
           )}
 
           <div className="grid gap-2">
-            <Label htmlFor="ai-provider-label">Name</Label>
+            <Label htmlFor="ai-provider-label">
+              {t("settingsAdvanced.ai.dialog.name")}
+            </Label>
             <Input
               id="ai-provider-label"
               value={props.label}
               onChange={(event) => props.onLabelChange(event.target.value)}
-              placeholder="Work Anthropic"
+              placeholder={t("settingsAdvanced.ai.dialog.namePlaceholder")}
             />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="ai-provider-model">Model id</Label>
+            <Label htmlFor="ai-provider-model">
+              {t("settingsAdvanced.ai.dialog.modelId")}
+            </Label>
             <Input
               id="ai-provider-model"
               value={props.model}
               onChange={(event) => props.onModelChange(event.target.value)}
-              placeholder={KIND_MODEL_PLACEHOLDERS[props.kind]}
+              placeholder={kindModelPlaceholder(t, props.kind)}
               className="font-mono"
             />
           </div>
@@ -1023,7 +978,9 @@ function ProviderDialog(props: ProviderDialogProps) {
           {usesBaseUrl ? (
             <div className="grid gap-2">
               <Label htmlFor="ai-provider-base-url">
-                Base URL{props.kind === "custom" ? "" : " (optional)"}
+                {props.kind === "custom"
+                  ? t("settingsAdvanced.ai.dialog.baseUrl")
+                  : t("settingsAdvanced.ai.dialog.baseUrlOptional")}
               </Label>
               <Input
                 id="ai-provider-base-url"
@@ -1041,21 +998,23 @@ function ProviderDialog(props: ProviderDialogProps) {
 
           {props.kind === "ollama" ? (
             <p className="text-xs text-muted-foreground">
-              Ollama runs on this machine — requests never leave your computer
-              and no API key is needed.
+              {t("settingsAdvanced.ai.dialog.ollamaHint")}
             </p>
           ) : usesApiKey ? (
             <div className="grid gap-2">
-              <Label htmlFor="ai-provider-api-key">API key</Label>
+              <Label htmlFor="ai-provider-api-key">
+                {t("settingsAdvanced.ai.dialog.apiKey")}
+              </Label>
               <Input
                 id="ai-provider-api-key"
                 type="password"
                 value={props.apiKey}
                 onChange={(event) => props.onApiKeyChange(event.target.value)}
                 placeholder={
-                  props.dialog?.mode === "edit" && props.dialog.provider.hasApiKey
-                    ? "Saved — leave blank to keep the stored key"
-                    : "Paste your key (stored encrypted on this machine)"
+                  props.dialog?.mode === "edit" &&
+                  props.dialog.provider.hasApiKey
+                    ? t("settingsAdvanced.ai.dialog.apiKeySaved")
+                    : t("settingsAdvanced.ai.dialog.apiKeyPlaceholder")
                 }
                 autoComplete="off"
                 className="font-mono"
@@ -1076,13 +1035,18 @@ function ProviderDialog(props: ProviderDialogProps) {
             onClick={() => props.onDialogChange(null)}
             disabled={props.saving}
           >
-            Cancel
+            {t("settingsAdvanced.ai.dialog.cancel")}
           </Button>
-          <Button onClick={props.onSave} disabled={props.saveDisabled || props.saving}>
+          <Button
+            onClick={props.onSave}
+            disabled={props.saveDisabled || props.saving}
+          >
             {props.saving ? (
               <Loader2 className="animate-spin" aria-hidden />
             ) : null}
-            {isEdit ? "Save changes" : "Add provider"}
+            {isEdit
+              ? t("settingsAdvanced.ai.dialog.saveChanges")
+              : t("settingsAdvanced.ai.dialog.add")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1098,23 +1062,23 @@ interface CacheBlockProps {
 }
 
 function CacheBlock(props: CacheBlockProps) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm font-semibold text-foreground">
-        Cached AI results
+        {t("settingsAdvanced.ai.cache.title")}
       </h3>
       <p className="text-xs text-muted-foreground">
-        AI results are cached on this machine, keyed by input content and
-        model, and reused when the same input repeats. Removing an account
-        automatically deletes the results derived from its mail.
+        {t("settingsAdvanced.ai.cache.description")}
       </p>
       {props.cache === null ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">
+          {t("settingsAdvanced.ai.cache.loading")}
+        </p>
       ) : (
         <div data-testid="ai-cache-stats" className="flex flex-col gap-1">
           <p className="text-sm text-foreground">
-            {props.cache.total} cached result
-            {props.cache.total === 1 ? "" : "s"}
+            {t("settingsAdvanced.ai.cache.total", { count: props.cache.total })}
           </p>
           {props.cache.byKind.map((entry) => (
             <p key={entry.kind} className="text-xs text-muted-foreground">
@@ -1127,18 +1091,19 @@ function CacheBlock(props: CacheBlockProps) {
         props.confirmClear ? (
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
-              Clear all {props.cache.total} cached result
-              {props.cache.total === 1 ? "" : "s"}?
+              {t("settingsAdvanced.ai.cache.confirm", {
+                count: props.cache.total,
+              })}
             </span>
             <Button size="sm" variant="destructive" onClick={props.onClear}>
-              Clear all
+              {t("settingsAdvanced.ai.cache.clearAll")}
             </Button>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => props.onConfirmClearChange(false)}
             >
-              Cancel
+              {t("settingsAdvanced.ai.cache.cancel")}
             </Button>
           </div>
         ) : (
@@ -1148,7 +1113,7 @@ function CacheBlock(props: CacheBlockProps) {
               variant="outline"
               onClick={() => props.onConfirmClearChange(true)}
             >
-              Clear all
+              {t("settingsAdvanced.ai.cache.clearAll")}
             </Button>
           </div>
         )
@@ -1175,32 +1140,32 @@ interface TiersBlockProps {
 }
 
 function TiersBlock(props: TiersBlockProps) {
+  const { t } = useTranslation()
   const { config } = props
   const tierItems = Object.fromEntries(
-    AI_TIERS.map((tier) => [tier, TIER_LABELS[tier]])
+    AI_TIERS.map((tier) => [tier, tierLabel(t, tier)])
   )
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <h3 className="text-sm font-semibold text-foreground">Model tiers</h3>
+        <h3 className="text-sm font-semibold text-foreground">
+          {t("settingsAdvanced.ai.tiers.title")}
+        </h3>
         <p className="text-xs text-muted-foreground">
-          Each surface runs on one of three tiers. Set a model id per tier
-          for the active provider; a tier left empty uses the provider's
-          default model.
+          {t("settingsAdvanced.ai.tiers.description")}
         </p>
       </div>
 
       {AI_SURFACE_IDS.map((surface) => (
-        <div
-          key={surface}
-          className="flex items-center justify-between gap-4"
-        >
+        <div key={surface} className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <Label htmlFor={`ai-tier-${surface}`}>
-              {SURFACE_COPY[surface].label}
+              {surfaceLabel(t, surface)}
             </Label>
             <p className="text-xs text-muted-foreground">
-              Tier: {TIER_LABELS[config.surfaceTiers[surface]]}
+              {t("settingsAdvanced.ai.tiers.current", {
+                tier: tierLabel(t, config.surfaceTiers[surface]),
+              })}
             </p>
           </div>
           <Select
@@ -1212,7 +1177,9 @@ function TiersBlock(props: TiersBlockProps) {
           >
             <SelectTrigger
               id={`ai-tier-${surface}`}
-              aria-label={`Tier for ${SURFACE_COPY[surface].label}`}
+              aria-label={t("settingsAdvanced.ai.tiers.tierFor", {
+                surface: surfaceLabel(t, surface),
+              })}
               className="w-40"
             >
               <SelectValue />
@@ -1220,7 +1187,7 @@ function TiersBlock(props: TiersBlockProps) {
             <SelectContent>
               {AI_TIERS.map((tier) => (
                 <SelectItem key={tier} value={tier}>
-                  {TIER_LABELS[tier]}
+                  {tierLabel(t, tier)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -1232,7 +1199,9 @@ function TiersBlock(props: TiersBlockProps) {
         {AI_TIERS.map((tier) => (
           <div key={tier} className="grid gap-2">
             <Label htmlFor={`ai-tier-model-${tier}`}>
-              {TIER_LABELS[tier]} model id
+              {t("settingsAdvanced.ai.tiers.modelId", {
+                tier: tierLabel(t, tier),
+              })}
             </Label>
             {/* Uncontrolled + blur-persist: the key re-mounts the field
             whenever the stored value changes (initial load, refresh,
@@ -1244,7 +1213,7 @@ function TiersBlock(props: TiersBlockProps) {
               onBlur={(event) =>
                 props.onChangeTierModel(tier, event.target.value)
               }
-              placeholder={TIER_MODEL_PLACEHOLDERS[tier]}
+              placeholder={tierModelPlaceholder(t, tier)}
               className="font-mono"
             />
           </div>
@@ -1252,17 +1221,18 @@ function TiersBlock(props: TiersBlockProps) {
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="ai-output-language">Output language</Label>
+        <Label htmlFor="ai-output-language">
+          {t("settingsAdvanced.ai.tiers.outputLanguage")}
+        </Label>
         <Input
           key={`ai-output-language-${config.outputLanguage ?? ""}`}
           id="ai-output-language"
           defaultValue={config.outputLanguage ?? ""}
           onBlur={(event) => props.onChangeOutputLanguage(event.target.value)}
-          placeholder="e.g. German — leave empty to infer from the input"
+          placeholder={t("settingsAdvanced.ai.tiers.outputLanguagePlaceholder")}
         />
         <p className="text-xs text-muted-foreground">
-          Generative surfaces answer in this language when set; left empty,
-          the language follows the conversation.
+          {t("settingsAdvanced.ai.tiers.outputLanguageHint")}
         </p>
       </div>
     </div>
@@ -1287,34 +1257,44 @@ interface UsageBlockProps {
 }
 
 function UsageBlock(props: UsageBlockProps) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-semibold text-foreground">Usage</h3>
+      <h3 className="text-sm font-semibold text-foreground">
+        {t("settingsAdvanced.ai.usage.title")}
+      </h3>
       <p className="text-xs text-muted-foreground">
-        Requests and token totals per surface, recorded on this machine.
-        Cached results are reused without a request and are not counted.
+        {t("settingsAdvanced.ai.usage.description")}
       </p>
       {props.usage === null ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">
+          {t("settingsAdvanced.ai.usage.loading")}
+        </p>
       ) : props.usage.totalRequests === 0 ? (
         <p data-testid="ai-usage-stats" className="text-sm text-foreground">
-          No usage recorded yet.
+          {t("settingsAdvanced.ai.usage.empty")}
         </p>
       ) : (
         <div data-testid="ai-usage-stats" className="flex flex-col gap-1">
           {props.usage.surfaces.map((surface) => {
-            const label = SURFACE_COPY[surface.surface as AiSurfaceId]?.label
-            const approximate = surface.estimatedRequests > 0
+            const label = isAiSurfaceId(surface.surface)
+              ? surfaceLabel(t, surface.surface)
+              : surface.surface
+            const values = {
+              surface: label,
+              count: surface.requests,
+              prompt: surface.promptTokens,
+              completion: surface.completionTokens,
+              total: surface.totalTokens,
+            }
             return (
               <p
                 key={surface.surface}
                 className="text-xs text-muted-foreground"
               >
-                {label ?? surface.surface}: {surface.requests} request
-                {surface.requests === 1 ? "" : "s"} ·{" "}
-                {surface.promptTokens} prompt · {surface.completionTokens}{" "}
-                completion · {surface.totalTokens} total tokens
-                {approximate ? " (approx.)" : ""}
+                {surface.estimatedRequests > 0
+                  ? t("settingsAdvanced.ai.usage.lineApprox", values)
+                  : t("settingsAdvanced.ai.usage.line", values)}
               </p>
             )
           })}
@@ -1324,19 +1304,19 @@ function UsageBlock(props: UsageBlockProps) {
         props.confirmClear ? (
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
-              Clear the recorded usage (
-              {props.usage.totalRequests} request
-              {props.usage.totalRequests === 1 ? "" : "s"})?
+              {t("settingsAdvanced.ai.usage.confirm", {
+                count: props.usage.totalRequests,
+              })}
             </span>
             <Button size="sm" variant="destructive" onClick={props.onClear}>
-              Clear usage
+              {t("settingsAdvanced.ai.usage.clear")}
             </Button>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => props.onConfirmClearChange(false)}
             >
-              Cancel
+              {t("settingsAdvanced.ai.usage.cancel")}
             </Button>
           </div>
         ) : (
@@ -1346,7 +1326,7 @@ function UsageBlock(props: UsageBlockProps) {
               variant="outline"
               onClick={() => props.onConfirmClearChange(true)}
             >
-              Clear usage
+              {t("settingsAdvanced.ai.usage.clear")}
             </Button>
           </div>
         )
@@ -1357,16 +1337,19 @@ function UsageBlock(props: UsageBlockProps) {
 
 /** Human copy for the profile-build failure reasons (mirrors the smart-
  * reply dialog's copy — same typed reasons, one voice). */
-function buildFailureCopy(reason: StyleProfileBuildFailure): string {
+function buildFailureCopy(
+  t: TFunction,
+  reason: StyleProfileBuildFailure
+): string {
   switch (reason) {
     case "not-configured":
-      return "AI assistance is not configured."
+      return t("settingsAdvanced.ai.writingStyle.failures.notConfigured")
     case "no-sent-mail":
-      return "No recent sent messages were found to analyze."
+      return t("settingsAdvanced.ai.writingStyle.failures.noSentMail")
     case "parse":
-      return "The writing style could not be read from the model's reply. Try again."
+      return t("settingsAdvanced.ai.writingStyle.failures.parse")
     case "provider":
-      return "The provider request failed."
+      return t("settingsAdvanced.ai.writingStyle.failures.provider")
   }
 }
 
@@ -1387,6 +1370,7 @@ function buildFailureCopy(reason: StyleProfileBuildFailure): string {
  * none is active.
  */
 function WritingStyleBlock() {
+  const { t } = useTranslation()
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
   /** The loaded status, keyed by the account it was loaded FOR — the
    * render derives "Loading…" while a different account's probe is in
@@ -1405,8 +1389,7 @@ function WritingStyleBlock() {
 
   const statusKnown = loadedFor?.accountId === activeAccountId
   const profile = statusKnown ? (loadedFor?.profile ?? null) : null
-  const accountNotice =
-    notice?.accountId === activeAccountId ? notice : null
+  const accountNotice = notice?.accountId === activeAccountId ? notice : null
 
   useEffect(() => {
     if (activeAccountId === null) return
@@ -1448,9 +1431,9 @@ function WritingStyleBlock() {
         setNotice({
           accountId: activeAccountId,
           ok: true,
-          text: `Profile rebuilt from ${result.sampleSize} sent message${
-            result.sampleSize === 1 ? "" : "s"
-          }.`,
+          text: t("settingsAdvanced.ai.writingStyle.rebuilt", {
+            count: result.sampleSize,
+          }),
         })
       } else {
         setNotice({
@@ -1458,8 +1441,11 @@ function WritingStyleBlock() {
           ok: false,
           text:
             result.reason === "provider" && result.message
-              ? `${buildFailureCopy(result.reason)} ${result.message}`
-              : buildFailureCopy(result.reason),
+              ? t(
+                  "settingsAdvanced.ai.writingStyle.failures.providerWithMessage",
+                  { message: result.message }
+                )
+              : buildFailureCopy(t, result.reason),
         })
       }
     } catch (error) {
@@ -1467,7 +1453,7 @@ function WritingStyleBlock() {
       setNotice({
         accountId: activeAccountId,
         ok: false,
-        text: "Rebuilding the profile failed.",
+        text: t("settingsAdvanced.ai.writingStyle.rebuildFailed"),
       })
     } finally {
       setBuilding(false)
@@ -1482,7 +1468,7 @@ function WritingStyleBlock() {
       setNotice({
         accountId: activeAccountId,
         ok: true,
-        text: "Writing-style profile deleted.",
+        text: t("settingsAdvanced.ai.writingStyle.deleted"),
       })
     } catch (error) {
       console.warn("[settings] writing-style delete failed", error)
@@ -1493,18 +1479,15 @@ function WritingStyleBlock() {
     <div
       data-testid="writing-style-block"
       className="flex flex-col gap-2"
-      aria-label="Writing style"
+      aria-label={t("settingsAdvanced.ai.writingStyle.ariaLabel")}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-foreground">
-            Writing style
+            {t("settingsAdvanced.ai.writingStyle.title")}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Smart replies follow your writing style. Building the profile
-            analyzes your recent sent messages with the active provider —
-            suggestions are always editable drafts; nothing is ever sent
-            automatically.
+            {t("settingsAdvanced.ai.writingStyle.description")}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -1522,7 +1505,9 @@ function WritingStyleBlock() {
             ) : (
               <RefreshCw aria-hidden />
             )}
-            {statusKnown && profile ? "Rebuild" : "Build profile"}
+            {statusKnown && profile
+              ? t("settingsAdvanced.ai.writingStyle.rebuild")
+              : t("settingsAdvanced.ai.writingStyle.build")}
           </Button>
           {profile ? (
             <Button
@@ -1530,7 +1515,7 @@ function WritingStyleBlock() {
               variant="ghost"
               data-testid="writing-style-delete"
               disabled={building}
-              aria-label="Delete writing-style profile"
+              aria-label={t("settingsAdvanced.ai.writingStyle.delete")}
               onClick={() => {
                 void remove()
               }}
@@ -1542,8 +1527,7 @@ function WritingStyleBlock() {
       </div>
       {activeAccountId === null ? (
         <p className="text-xs text-muted-foreground">
-          No active account — the profile is built per account from its sent
-          mail.
+          {t("settingsAdvanced.ai.writingStyle.noAccount")}
         </p>
       ) : statusKnown ? (
         <p
@@ -1551,15 +1535,18 @@ function WritingStyleBlock() {
           className="text-sm text-foreground"
         >
           {profile
-            ? `Built ${formatDistanceToNow(fromUnixTime(profile.builtAt), {
-                addSuffix: true,
-              })} · ${profile.sampleSize} sample${
-                profile.sampleSize === 1 ? "" : "s"
-              }`
-            : "No profile yet."}
+            ? t("settingsAdvanced.ai.writingStyle.built", {
+                when: formatDistanceToNow(fromUnixTime(profile.builtAt), {
+                  addSuffix: true,
+                }),
+                count: profile.sampleSize,
+              })
+            : t("settingsAdvanced.ai.writingStyle.none")}
         </p>
       ) : (
-        <p className="text-xs text-muted-foreground">Loading…</p>
+        <p className="text-xs text-muted-foreground">
+          {t("settingsAdvanced.ai.writingStyle.loading")}
+        </p>
       )}
       {accountNotice !== null && (
         <p

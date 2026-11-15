@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { ClockIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -25,6 +26,7 @@ import { countPendingOperationsByAccount } from "@/services/db/pending-operation
 const POLL_INTERVAL_MS = 30_000
 
 export function PendingOpsBadge() {
+  const { t } = useTranslation()
   const [count, setCount] = useState(0)
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function PendingOpsBadge() {
           <Badge
             variant="secondary"
             data-testid="pending-ops-badge"
-            aria-label={`${count} pending changes`}
+            aria-label={t("sidebar.pendingOps.count", { count })}
             className="cursor-default gap-0.5 tabular-nums"
           >
             <ClockIcon data-icon="inline-start" aria-hidden="true" />
@@ -69,7 +71,9 @@ export function PendingOpsBadge() {
           </Badge>
         }
       />
-      <TooltipContent>{count} pending changes</TooltipContent>
+      <TooltipContent>
+        {t("sidebar.pendingOps.count", { count })}
+      </TooltipContent>
     </Tooltip>
   )
 }

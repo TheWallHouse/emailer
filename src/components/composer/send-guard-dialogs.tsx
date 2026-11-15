@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -44,6 +45,7 @@ export function SendGuardDialogs({
   onGoBack,
   onDismiss,
 }: SendGuardDialogsProps) {
+  const { t } = useTranslation()
   // Per-prompt checkbox state; reset when its dialog closes so a reopened
   // prompt never inherits a stale opt-in.
   const [suppressAttachment, setSuppressAttachment] = useState(false)
@@ -62,9 +64,9 @@ export function SendGuardDialogs({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Missing attachment?</DialogTitle>
+            <DialogTitle>{t("composer.guards.attachment.title")}</DialogTitle>
             <DialogDescription>
-              Your message mentions an attachment, but no file is attached.
+              {t("composer.guards.attachment.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-2">
@@ -76,7 +78,7 @@ export function SendGuardDialogs({
               }}
             />
             <Label htmlFor="guard-suppress-attachment" className="font-normal">
-              Don&apos;t ask again for this account
+              {t("composer.guards.dontAskAgain")}
             </Label>
           </div>
           <DialogFooter>
@@ -84,10 +86,10 @@ export function SendGuardDialogs({
               variant="outline"
               onClick={() => onGoBack("attachment", suppressAttachment)}
             >
-              Attach a file
+              {t("composer.guards.attachment.fix")}
             </Button>
             <Button onClick={() => onConfirm("attachment", suppressAttachment)}>
-              Send anyway
+              {t("composer.guards.sendAnyway")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -104,9 +106,9 @@ export function SendGuardDialogs({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send without a subject?</DialogTitle>
+            <DialogTitle>{t("composer.guards.emptySubject.title")}</DialogTitle>
             <DialogDescription>
-              The subject line is empty. You can still send the message.
+              {t("composer.guards.emptySubject.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-2">
@@ -121,7 +123,7 @@ export function SendGuardDialogs({
               htmlFor="guard-suppress-empty-subject"
               className="font-normal"
             >
-              Don&apos;t ask again for this account
+              {t("composer.guards.dontAskAgain")}
             </Label>
           </div>
           <DialogFooter>
@@ -129,12 +131,12 @@ export function SendGuardDialogs({
               variant="outline"
               onClick={() => onGoBack("emptySubject", suppressEmptySubject)}
             >
-              Add a subject
+              {t("composer.guards.emptySubject.fix")}
             </Button>
             <Button
               onClick={() => onConfirm("emptySubject", suppressEmptySubject)}
             >
-              Send anyway
+              {t("composer.guards.sendAnyway")}
             </Button>
           </DialogFooter>
         </DialogContent>

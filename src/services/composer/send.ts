@@ -1,5 +1,7 @@
 import type * as OpenPGP from "openpgp"
 
+import { i18next } from "@/i18n"
+
 import type { ComposerSendPayload } from "../../stores/composer-store"
 import {
   findEncryptionKeysByEmails,
@@ -110,7 +112,7 @@ export class SendValidationError extends Error {
 /** No recipients at all — the spec's "fully addressed" gate. */
 export class MissingRecipientsError extends SendValidationError {
   constructor() {
-    super("Add at least one recipient before sending")
+    super(i18next.t("composer.validation.missingRecipients"))
     this.name = "MissingRecipientsError"
   }
 }
@@ -123,11 +125,7 @@ export class InvalidRecipientError extends SendValidationError {
   readonly count: number
 
   constructor(count: number) {
-    super(
-      count === 1
-        ? "1 recipient address is not valid"
-        : `${count} recipient addresses are not valid`
-    )
+    super(i18next.t("composer.validation.invalidRecipients", { count }))
     this.name = "InvalidRecipientError"
     this.count = count
   }
@@ -136,7 +134,7 @@ export class InvalidRecipientError extends SendValidationError {
 /** Nothing to send: subject and body are both blank/whitespace. */
 export class EmptyMessageError extends SendValidationError {
   constructor() {
-    super("Write a subject or a message body before sending")
+    super(i18next.t("composer.validation.emptyMessage"))
     this.name = "EmptyMessageError"
   }
 }
@@ -168,10 +166,7 @@ export class FailedSendNotFoundError extends Error {
  */
 export class ReauthRequiredError extends SendValidationError {
   constructor(email: string) {
-    super(
-      `${email} needs to be signed in again before sending — ` +
-        "use “Re-authenticate…” in the account picker."
-    )
+    super(i18next.t("composer.validation.reauthRequired", { email }))
     this.name = "ReauthRequiredError"
   }
 }
@@ -206,7 +201,7 @@ export interface PgpSendOptions {
  * key management). The composer surfaces this as a send error. */
 export class PgpSigningKeyMissingError extends SendValidationError {
   constructor() {
-    super("Add a PGP private key for this account before signing messages")
+    super(i18next.t("composer.pgp.noPrivateKey"))
     this.name = "PgpSigningKeyMissingError"
   }
 }
@@ -222,7 +217,11 @@ export class MissingPgpKeysError extends SendValidationError {
   readonly emails: string[]
 
   constructor(emails: string[]) {
-    super(`No PGP public key for: ${emails.join(", ")}`)
+    super(
+      i18next.t("composer.validation.missingPgpKeys", {
+        recipients: emails.join(", "),
+      })
+    )
     this.name = "MissingPgpKeysError"
     this.emails = emails
   }
@@ -538,7 +537,7 @@ async function preparePgpOptions(
   if (wantsSign) {
     if (!pgp.passphrase) {
       throw new SendValidationError(
-        "Enter your PGP passphrase to sign this message"
+        i18next.t("composer.validation.passphraseRequired")
       )
     }
     const key = await getDefaultPrivateKey(executor, accountId)

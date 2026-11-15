@@ -1,4 +1,5 @@
 import { X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -22,6 +23,7 @@ import {
  * the use-sidebar-data.ts pattern).
  */
 export function SnoozedSection() {
+  const { t } = useTranslation()
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
   const snoozed = useSnoozedThreads(activeAccountId)
   if (snoozed.length === 0) return null
@@ -29,15 +31,15 @@ export function SnoozedSection() {
     <>
       <Separator />
       <nav
-        aria-label="Snoozed"
+        aria-label={t("sidebar.snoozed.title")}
         data-testid="snoozed-section"
         className="grid items-start gap-0.5 p-2"
       >
         <p className="px-2 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Snoozed
+          {t("sidebar.snoozed.title")}
         </p>
         {snoozed.map((thread) => {
-          const subject = thread.subject || "(no subject)"
+          const subject = thread.subject || t("sidebar.noSubject")
           return (
             <div
               key={thread.id}
@@ -58,7 +60,7 @@ export function SnoozedSection() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Cancel snooze for ${subject}`}
+                aria-label={t("sidebar.snoozed.cancel", { subject })}
                 onClick={() => {
                   void cancelSnooze(thread.id)
                 }}

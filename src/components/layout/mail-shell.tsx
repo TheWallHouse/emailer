@@ -11,8 +11,10 @@ import type { PointerEvent as ReactPointerEvent, ReactNode } from "react"
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import type { DragEndEvent } from "@dnd-kit/core"
 import { formatDistanceToNow } from "date-fns"
+import { useTranslation } from "react-i18next"
 import { usePanelRef } from "react-resizable-panels"
 
+import { i18next } from "@/i18n"
 import { cn } from "@/lib/utils"
 import {
   ResizableHandle,
@@ -121,6 +123,7 @@ const SIDEBAR_EXPAND_ABOVE_PX = 160
  * connected the list area becomes the first-run welcome panel (6.9).
  */
 function MailboxPane({ onAddAccount }: { onAddAccount: () => void }) {
+  const { t } = useTranslation()
   const view = useUiStore((state) => state.view)
   const listScope = useUiStore((state) => state.listScope)
   const readingPane = useUiStore((state) => state.readingPane)
@@ -161,11 +164,11 @@ function MailboxPane({ onAddAccount }: { onAddAccount: () => void }) {
       <div className="flex items-center justify-between gap-2 px-4 py-1.5">
         <h1 className="truncate text-xl font-bold text-foreground">
           {unified
-            ? "Unified Inbox"
+            ? t("shell.unifiedInbox")
             : priority
-              ? "Priority inbox"
+              ? t("shell.priorityInbox")
               : nudges
-                ? "Nudges"
+                ? t("shell.nudges")
                 : splitScope
                   ? splitScope.name
                   : categoryScope
@@ -476,12 +479,14 @@ export function MailShell({
     // preservation territory: its percentage shrinking on a wide window
     // is not drift.
     const pixels = panel.getSize().inPixels
-    if (!panel.isCollapsed() && !(pixels > 0 && pixels < SIDEBAR_EXPAND_ABOVE_PX)) {
+    if (
+      !panel.isCollapsed() &&
+      !(pixels > 0 && pixels < SIDEBAR_EXPAND_ABOVE_PX)
+    ) {
       return
     }
     panel.expand()
-    const target =
-      lastExpandedSizeRef.current ?? `${defaultLayout[0]}%`
+    const target = lastExpandedSizeRef.current ?? `${defaultLayout[0]}%`
     panel.resize(target)
   }, [panelRef, sidebarCollapsed, readingPane, fullPageOpen, defaultLayout])
 
@@ -916,7 +921,7 @@ function CenteredComposerCard({ children }: { children: ReactNode }) {
 
   const isHandleTarget = (target: EventTarget | null): boolean =>
     target instanceof Element &&
-    target.closest('[data-composer-drag-handle]') !== null &&
+    target.closest("[data-composer-drag-handle]") !== null &&
     // Buttons inside the header row keep their click; dragging starts on
     // the title strip and the empty space around it only.
     target.closest("button, a, input, select, textarea, [role='button']") ===
@@ -978,16 +983,12 @@ function CenteredComposerCard({ children }: { children: ReactNode }) {
     // Width/height follow the pointer, clamped to a usable minimum and to
     // the viewport from where the top-left corner sits (the resize anchors
     // that corner, so the bottom-right edge is the viewport limit).
-    const maxWidth = Math.max(
-      COMPOSER_MIN_WIDTH,
-      vw - gutter - resize.left
-    )
-    const maxHeight = Math.max(
-      COMPOSER_MIN_HEIGHT,
-      vh - gutter - resize.top
-    )
-    const growX = resize.direction === "bottom" ? 0 : event.clientX - resize.startX
-    const growY = resize.direction === "right" ? 0 : event.clientY - resize.startY
+    const maxWidth = Math.max(COMPOSER_MIN_WIDTH, vw - gutter - resize.left)
+    const maxHeight = Math.max(COMPOSER_MIN_HEIGHT, vh - gutter - resize.top)
+    const growX =
+      resize.direction === "bottom" ? 0 : event.clientX - resize.startX
+    const growY =
+      resize.direction === "right" ? 0 : event.clientY - resize.startY
     const width = Math.min(
       Math.max(resize.baseWidth + growX, COMPOSER_MIN_WIDTH),
       maxWidth
@@ -1008,15 +1009,18 @@ function CenteredComposerCard({ children }: { children: ReactNode }) {
 
   function onPointerUp(event: ReactPointerEvent<HTMLDivElement>): void {
     if (dragRef.current?.pointerId === event.pointerId) dragRef.current = null
-    if (resizeRef.current?.pointerId === event.pointerId) resizeRef.current = null
+    if (resizeRef.current?.pointerId === event.pointerId)
+      resizeRef.current = null
   }
 
-  function onResizePointerDown(
-    event: ReactPointerEvent<HTMLDivElement>
-  ): void {
+  function onResizePointerDown(event: ReactPointerEvent<HTMLDivElement>): void {
     if (event.button !== 0) return
     const direction = event.currentTarget.dataset.resizeDirection
-    if (direction !== "right" && direction !== "bottom" && direction !== "corner")
+    if (
+      direction !== "right" &&
+      direction !== "bottom" &&
+      direction !== "corner"
+    )
       return
     const card = cardRef.current
     if (!card) return
@@ -1049,7 +1053,9 @@ function CenteredComposerCard({ children }: { children: ReactNode }) {
       }
       style={{
         ...(size ? { width: size.width, height: size.height } : {}),
-        ...(offset ? { transform: `translate(${offset.x}px, ${offset.y}px)` } : {}),
+        ...(offset
+          ? { transform: `translate(${offset.x}px, ${offset.y}px)` }
+          : {}),
       }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -1068,21 +1074,21 @@ function CenteredComposerCard({ children }: { children: ReactNode }) {
         data-testid="composer-resize-right"
         data-resize-direction="right"
         onPointerDown={onResizePointerDown}
-        className="absolute bottom-5 right-0 top-10 w-1.5 cursor-ew-resize touch-none"
+        className="absolute top-10 right-0 bottom-5 w-1.5 cursor-ew-resize touch-none"
       />
       <div
         aria-hidden="true"
         data-testid="composer-resize-bottom"
         data-resize-direction="bottom"
         onPointerDown={onResizePointerDown}
-        className="absolute bottom-0 left-10 right-5 h-1.5 cursor-ns-resize touch-none"
+        className="absolute right-5 bottom-0 left-10 h-1.5 cursor-ns-resize touch-none"
       />
       <div
         aria-hidden="true"
         data-testid="composer-resize-corner"
         data-resize-direction="corner"
         onPointerDown={onResizePointerDown}
-        className="absolute bottom-0 right-0 size-5 cursor-nwse-resize touch-none"
+        className="absolute right-0 bottom-0 size-5 cursor-nwse-resize touch-none"
       />
     </div>
   )
@@ -1097,20 +1103,28 @@ function CenteredComposerCard({ children }: { children: ReactNode }) {
  * the full indicator (SyncIndicator) already lives in the status bar.
  */
 function syncStateLabel(state?: AccountSyncState): string {
-  if (!state) return "Not synced yet"
-  if (state.status === "syncing") return "Syncing…"
-  if (state.status === "error") return state.error ?? "Last sync failed"
+  if (!state) return i18next.t("shell.sync.notSynced")
+  if (state.status === "syncing") return i18next.t("shell.sync.syncing")
+  if (state.status === "error") {
+    return state.error ?? i18next.t("shell.sync.failed")
+  }
   return state.lastSyncAt
-    ? `Synced ${formatDistanceToNow(new Date(state.lastSyncAt * 1000), {
-        addSuffix: true,
-      })}`
-    : "Not synced yet"
+    ? i18next.t("shell.sync.synced", {
+        when: formatDistanceToNow(new Date(state.lastSyncAt * 1000), {
+          addSuffix: true,
+        }),
+      })
+    : i18next.t("shell.sync.notSynced")
 }
 
 function UnifiedAccountSync({ accounts }: { accounts: AccountInfo[] }) {
+  const { t } = useTranslation()
   const perAccount = useSyncStore((state) => state.perAccount)
   return (
-    <div className="flex items-center gap-1.5" aria-label="Account sync status">
+    <div
+      className="flex items-center gap-1.5"
+      aria-label={t("shell.sync.accountsLabel")}
+    >
       {accounts.map((account) => {
         const state = perAccount[account.id]
         return (
@@ -1118,8 +1132,14 @@ function UnifiedAccountSync({ accounts }: { accounts: AccountInfo[] }) {
             key={account.id}
             role="img"
             data-account-sync={account.id}
-            aria-label={`${account.email}: ${syncStateLabel(state)}`}
-            title={`${account.email} — ${syncStateLabel(state)}`}
+            aria-label={t("shell.sync.accountState", {
+              email: account.email,
+              state: syncStateLabel(state),
+            })}
+            title={t("shell.sync.accountStateTitle", {
+              email: account.email,
+              state: syncStateLabel(state),
+            })}
             className="size-2 rounded-full"
             style={{
               backgroundColor: `hsl(${accountHue(account.id)} 55% 50%)`,
@@ -1138,12 +1158,13 @@ function UnifiedAccountSync({ accounts }: { accounts: AccountInfo[] }) {
  * rows.
  */
 function UnreadFilterToggle() {
+  const { t } = useTranslation()
   const unreadOnly = useThreadListStore((state) => state.unreadOnly)
   const setUnreadOnly = useThreadListStore((state) => state.setUnreadOnly)
   return (
     <div
       role="group"
-      aria-label="Filter threads"
+      aria-label={t("shell.filter.label")}
       className="flex items-center rounded-lg border bg-muted/40 p-0.5 text-xs"
     >
       <button
@@ -1157,7 +1178,7 @@ function UnreadFilterToggle() {
         )}
         onClick={() => setUnreadOnly(false)}
       >
-        All mail
+        {t("shell.filter.allMail")}
       </button>
       <button
         type="button"
@@ -1170,7 +1191,7 @@ function UnreadFilterToggle() {
         )}
         onClick={() => setUnreadOnly(true)}
       >
-        Unread
+        {t("shell.filter.unread")}
       </button>
     </div>
   )

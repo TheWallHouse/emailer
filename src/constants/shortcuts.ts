@@ -19,6 +19,8 @@
  * same shape.
  */
 
+import { i18next } from "@/i18n"
+
 /** Areas the help overlay / settings editor group bindings by. */
 export type ShortcutGroup =
   "navigation" | "actions" | "compose" | "search" | "general"
@@ -52,22 +54,49 @@ export interface ShortcutBinding {
   id: ShortcutId
   /** Display string for the reference UI (may list aliases, e.g. "j / ↓"). */
   keys: string
-  /** One-line human description shown next to the keys. */
+  /** One-line human description shown next to the keys (a getter on the
+   * default table, so it follows the interface language). */
   description: string
   group: ShortcutGroup
 }
 
 /** Fixed group order for the reference UIs; groups render only when the
- * table contains at least one binding for them. */
+ * table contains at least one binding for them. Labels are getters so
+ * they follow the interface language. */
 export const SHORTCUT_GROUPS: ReadonlyArray<{
   id: ShortcutGroup
   label: string
 }> = [
-  { id: "navigation", label: "Navigation" },
-  { id: "actions", label: "Actions" },
-  { id: "compose", label: "Compose" },
-  { id: "search", label: "Search" },
-  { id: "general", label: "General" },
+  {
+    id: "navigation",
+    get label() {
+      return i18next.t("shortcuts.groups.navigation")
+    },
+  },
+  {
+    id: "actions",
+    get label() {
+      return i18next.t("shortcuts.groups.actions")
+    },
+  },
+  {
+    id: "compose",
+    get label() {
+      return i18next.t("shortcuts.groups.compose")
+    },
+  },
+  {
+    id: "search",
+    get label() {
+      return i18next.t("shortcuts.groups.search")
+    },
+  },
+  {
+    id: "general",
+    get label() {
+      return i18next.t("shortcuts.groups.general")
+    },
+  },
 ]
 
 /** Groups the settings editor (task 20.1) lets the user rebind: the
@@ -91,91 +120,121 @@ export const SHORTCUTS: ReadonlyArray<ShortcutBinding> = [
   {
     id: "next-thread",
     keys: "j / ↓",
-    description: "Select next thread",
+    get description() {
+      return i18next.t("shortcuts.descriptions.nextThread")
+    },
     group: "navigation",
   },
   {
     id: "previous-thread",
     keys: "k / ↑",
-    description: "Select previous thread",
+    get description() {
+      return i18next.t("shortcuts.descriptions.previousThread")
+    },
     group: "navigation",
   },
   {
     id: "open-thread",
     keys: "Enter / o",
-    description: "Open the selected thread",
+    get description() {
+      return i18next.t("shortcuts.descriptions.openThread")
+    },
     group: "navigation",
   },
   {
     id: "archive",
     keys: "e",
-    description: "Archive the selected thread",
+    get description() {
+      return i18next.t("shortcuts.descriptions.archive")
+    },
     group: "actions",
   },
   {
     id: "trash",
     keys: "#",
-    description: "Move the selected thread to Trash",
+    get description() {
+      return i18next.t("shortcuts.descriptions.trash")
+    },
     group: "actions",
   },
   {
     id: "toggle-read",
     keys: "m",
-    description: "Toggle read / unread",
+    get description() {
+      return i18next.t("shortcuts.descriptions.toggleRead")
+    },
     group: "actions",
   },
   {
     id: "toggle-star",
     keys: "s",
-    description: "Toggle star",
+    get description() {
+      return i18next.t("shortcuts.descriptions.toggleStar")
+    },
     group: "actions",
   },
   {
     id: "snooze",
     keys: "b",
-    description: "Snooze the selected thread until tomorrow",
+    get description() {
+      return i18next.t("shortcuts.descriptions.snooze")
+    },
     group: "actions",
   },
   {
     id: "reply",
     keys: "r",
-    description: "Reply to the selected thread",
+    get description() {
+      return i18next.t("shortcuts.descriptions.reply")
+    },
     group: "compose",
   },
   {
     id: "compose",
     keys: "c",
-    description: "Compose a new message",
+    get description() {
+      return i18next.t("shortcuts.descriptions.compose")
+    },
     group: "compose",
   },
   {
     id: "send-message",
     keys: "Cmd/Ctrl+Enter",
-    description: "Send the message being composed",
+    get description() {
+      return i18next.t("shortcuts.descriptions.sendMessage")
+    },
     group: "compose",
   },
   {
     id: "refresh",
     keys: "Shift+R",
-    description: "Sync all accounts now",
+    get description() {
+      return i18next.t("shortcuts.descriptions.refresh")
+    },
     group: "general",
   },
   {
     id: "focus-search",
     keys: "/",
-    description: "Focus the search input",
+    get description() {
+      return i18next.t("shortcuts.descriptions.focusSearch")
+    },
     group: "search",
   },
   {
     id: "find-in-message",
     keys: "Cmd/Ctrl+F",
-    description: "Find in the open message",
+    get description() {
+      return i18next.t("shortcuts.descriptions.findInMessage")
+    },
     group: "search",
   },
   {
     id: "palette",
     keys: "Cmd/Ctrl+K",
-    description: "Toggle the command palette",
+    get description() {
+      return i18next.t("shortcuts.descriptions.palette")
+    },
     group: "search",
   },
   {
@@ -184,31 +243,41 @@ export const SHORTCUTS: ReadonlyArray<ShortcutBinding> = [
     // points decide whether anything is there to open.
     id: "assistant",
     keys: "Cmd/Ctrl+J",
-    description: "Open the AI assistant",
+    get description() {
+      return i18next.t("shortcuts.descriptions.assistant")
+    },
     group: "search",
   },
   {
     id: "print-thread",
     keys: "Cmd/Ctrl+P",
-    description: "Print the open thread",
+    get description() {
+      return i18next.t("shortcuts.descriptions.printThread")
+    },
     group: "actions",
   },
   {
     id: "help",
     keys: "?",
-    description: "Show this shortcuts reference",
+    get description() {
+      return i18next.t("shortcuts.descriptions.help")
+    },
     group: "general",
   },
   {
     id: "toggle-sidebar",
     keys: "Cmd/Ctrl+\\",
-    description: "Collapse or expand the sidebar",
+    get description() {
+      return i18next.t("shortcuts.descriptions.toggleSidebar")
+    },
     group: "general",
   },
   {
     id: "dismiss",
     keys: "Esc",
-    description: "Dismiss the shortcuts reference",
+    get description() {
+      return i18next.t("shortcuts.descriptions.dismiss")
+    },
     group: "general",
   },
   {
@@ -224,7 +293,9 @@ export const SHORTCUTS: ReadonlyArray<ShortcutBinding> = [
     // its C1 name so persisted overrides stay addressable.
     id: "close-composer",
     keys: "Esc",
-    description: "Minimize the composer (the draft keeps autosaving)",
+    get description() {
+      return i18next.t("shortcuts.descriptions.closeComposer")
+    },
     group: "compose",
   },
 ]

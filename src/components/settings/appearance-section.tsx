@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import {
@@ -36,6 +37,12 @@ import {
   type ThemeMode,
 } from "@/services/settings/preferences"
 import { useTheme } from "@/components/theme-provider"
+import {
+  getLanguagePreference,
+  LANGUAGES,
+  setLanguagePreference,
+  type LanguagePreference,
+} from "@/i18n"
 
 /**
  * Settings "Appearance" section (task 11.2): theme mode (next-themes,
@@ -83,13 +90,21 @@ function SettingRow({
   )
 }
 
-const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
-]
+const THEME_OPTIONS: ThemeMode[] = ["light", "dark", "system"]
 
 export function AppearanceSection() {
+  const { t } = useTranslation()
+  const [language, setLanguage] = useState<LanguagePreference>(
+    getLanguagePreference()
+  )
+  const languageOptions: { value: LanguagePreference; label: string }[] = [
+    { value: "system", label: t("common.system") },
+    ...LANGUAGES.map((lang) => ({ value: lang.id, label: lang.name })),
+  ]
+  const themeLabel = (mode: ThemeMode) =>
+    t(`settings.appearance.themeMode.${mode}`)
+  const accentName = (id: string) =>
+    t(`settings.appearance.accent.names.${id}` as "settings.appearance.accent.names.default")
   const { theme, setTheme } = useTheme()
   const [density, setDensity] = useState<DensityPreset>("default")
   const [fontScale, setFontScale] = useState(1)
@@ -130,6 +145,13 @@ export function AppearanceSection() {
       console.warn("[appearance] preference load failed", error)
     }
   }, [])
+
+  function changeLanguage(preference: LanguagePreference): void {
+    setLanguage(preference)
+    void setLanguagePreference(preference).catch((error) => {
+      console.warn("[appearance] failed to switch language", error)
+    })
+  }
 
   function changeThemeMode(mode: ThemeMode): void {
     setTheme(mode)
@@ -234,24 +256,54 @@ export function AppearanceSection() {
   }
 
   return (
-    <section aria-label="Appearance" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.appearance.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Appearance</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settings.appearance.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Theme, accent color and content sizing. Changes apply immediately and
-          are remembered.
+          {t("settings.appearance.description")}
         </p>
       </div>
       <div className="divide-y divide-border">
         <SettingRow
+          controlId="appearance-language"
+          label={t("settings.appearance.language.label")}
+          hint={t("settings.appearance.language.hint")}
+        >
+          <Select
+            value={language}
+            items={Object.fromEntries(
+              languageOptions.map((option) => [option.value, option.label])
+            )}
+            onValueChange={(value) =>
+              changeLanguage(String(value) as LanguagePreference)
+            }
+          >
+            <SelectTrigger id="appearance-language" className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {languageOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </SettingRow>
+        <SettingRow
           controlId="appearance-theme-mode"
-          label="Theme mode"
-          hint="Light, dark, or follow the system setting."
+          label={t("settings.appearance.themeMode.label")}
+          hint={t("settings.appearance.themeMode.hint")}
         >
           <Select
             value={theme ?? "system"}
             items={Object.fromEntries(
-              THEME_OPTIONS.map((option) => [option.value, option.label])
+              THEME_OPTIONS.map((mode) => [mode, themeLabel(mode)])
             )}
             onValueChange={(value) =>
               changeThemeMode(String(value) as ThemeMode)
@@ -261,30 +313,32 @@ export function AppearanceSection() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {THEME_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+              {THEME_OPTIONS.map((mode) => (
+                <SelectItem key={mode} value={mode}>
+                  {themeLabel(mode)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </SettingRow>
         <SettingRow
-          label="Accent color"
-          hint="Used for buttons, links and highlights."
+          label={t("settings.appearance.accent.label")}
+          hint={t("settings.appearance.accent.hint")}
         >
           <div
             role="group"
-            aria-label="Accent color"
+            aria-label={t("settings.appearance.accent.label")}
             className="flex items-center gap-1.5"
           >
             {ACCENTS.map((accent) => (
               <button
                 key={accent.id}
                 type="button"
-                aria-label={`Accent: ${accent.name}`}
+                aria-label={t("settings.appearance.accent.item", {
+                  name: accentName(accent.id),
+                })}
                 aria-pressed={accentId === accent.id}
-                title={accent.name}
+                title={accentName(accent.id)}
                 className={cn(
                   "rounded-full p-0.5",
                   accentId === accent.id &&
@@ -307,10 +361,13 @@ export function AppearanceSection() {
             ))}
           </div>
         </SettingRow>
-        <SettingRow label="List density" hint="Spacing of list rows.">
+        <SettingRow
+          label={t("settings.appearance.density.label")}
+          hint={t("settings.appearance.density.hint")}
+        >
           <ToggleGroup
             variant="outline"
-            aria-label="List density"
+            aria-label={t("settings.appearance.density.label")}
             value={[density]}
             onValueChange={(groupValue) => {
               const next = groupValue[0] as DensityPreset | undefined
@@ -320,15 +377,15 @@ export function AppearanceSection() {
           >
             {DENSITY_PRESETS.map((preset) => (
               <ToggleGroupItem key={preset.id} value={preset.id}>
-                {preset.label}
+                {t(`settings.appearance.density.${preset.id}`)}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
         </SettingRow>
         <SettingRow
           controlId="appearance-font-scale"
-          label="Font size"
-          hint="Scales the entire interface."
+          label={t("settings.appearance.fontScale.label")}
+          hint={t("settings.appearance.fontScale.hint")}
         >
           <Select
             value={String(fontScale)}
@@ -353,8 +410,8 @@ export function AppearanceSection() {
         </SettingRow>
         <SettingRow
           controlId="appearance-contact-avatars"
-          label="Contact avatars"
-          hint="Off by default — enabling sends a one-way hash of each contact's email address to gravatar.com. Avatars are cached locally; turning this off hides them again."
+          label={t("settings.appearance.avatars.label")}
+          hint={t("settings.appearance.avatars.hint")}
         >
           <Switch
             id="appearance-contact-avatars"
@@ -364,8 +421,8 @@ export function AppearanceSection() {
         </SettingRow>
         <SettingRow
           controlId="appearance-profile-markers"
-          label="Profile color markers"
-          hint="Show a colored bar at the start of each thread in cross-account lists, colored by the account's profile or account color."
+          label={t("settings.appearance.profileMarkers.label")}
+          hint={t("settings.appearance.profileMarkers.hint")}
         >
           <Switch
             id="appearance-profile-markers"

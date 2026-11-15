@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Pencil, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +43,7 @@ function RenameSavedSearchDialog({
   search: SavedSearchRow
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState(search.name)
   const [saving, setSaving] = useState(false)
 
@@ -63,10 +65,11 @@ function RenameSavedSearchDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rename saved search</DialogTitle>
+          <DialogTitle>
+            {t("sidebar.savedSearches.renameDialog.title")}
+          </DialogTitle>
           <DialogDescription>
-            The stored query stays unchanged — only the sidebar entry name is
-            updated.
+            {t("sidebar.savedSearches.renameDialog.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -77,7 +80,7 @@ function RenameSavedSearchDialog({
           }}
         >
           <Input
-            aria-label="Saved search name"
+            aria-label={t("sidebar.savedSearches.renameDialog.nameLabel")}
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder={search.name}
@@ -91,10 +94,10 @@ function RenameSavedSearchDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("sidebar.savedSearches.renameDialog.cancel")}
             </Button>
             <Button type="submit" disabled={saving || !name.trim()}>
-              Save
+              {t("sidebar.savedSearches.renameDialog.save")}
             </Button>
           </DialogFooter>
         </form>
@@ -104,6 +107,7 @@ function RenameSavedSearchDialog({
 }
 
 export function SavedSearchesSection() {
+  const { t } = useTranslation()
   const searches = useSavedSearches()
   const view = useUiStore((state) => state.view)
   const [renaming, setRenaming] = useState<SavedSearchRow | null>(null)
@@ -112,12 +116,12 @@ export function SavedSearchesSection() {
     <>
       <Separator />
       <nav
-        aria-label="Saved searches"
+        aria-label={t("sidebar.savedSearches.title")}
         data-testid="saved-searches-section"
         className="grid items-start gap-0.5 p-2"
       >
         <p className="px-2 py-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Saved searches
+          {t("sidebar.savedSearches.title")}
         </p>
         {searches.map((search) => {
           const isActive = view.kind === "search" && view.query === search.query
@@ -144,7 +148,9 @@ export function SavedSearchesSection() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Rename saved search ${search.name}`}
+                aria-label={t("sidebar.savedSearches.rename", {
+                  name: search.name,
+                })}
                 onClick={() => setRenaming(search)}
               >
                 <Pencil />
@@ -152,7 +158,9 @@ export function SavedSearchesSection() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Delete saved search ${search.name}`}
+                aria-label={t("sidebar.savedSearches.delete", {
+                  name: search.name,
+                })}
                 onClick={() => {
                   void deleteSavedSearchById(search.id)
                 }}

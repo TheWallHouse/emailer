@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   Archive,
   ArrowDownUp,
@@ -29,6 +30,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
+import { i18next } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -106,60 +108,198 @@ const SECTIONS: {
   label: string
   icon: LucideIcon
 }[] = [
-  { id: "accounts", label: "Accounts", icon: UserRound },
+  {
+    id: "accounts",
+    get label() {
+      return i18next.t("settings.page.sections.accounts")
+    },
+    icon: UserRound,
+  },
   // CardDAV address-book sync (parity-round-2 task 4.3, spec contacts):
   // connect/disconnect, sync status, sealed-password note.
-  { id: "address-book", label: "Address book", icon: Users },
+  {
+    id: "address-book",
+    get label() {
+      return i18next.t("settings.page.sections.addressBook")
+    },
+    icon: Users,
+  },
   // Calendar sources (task 5.2, spec calendar): Google/CalDAV connect,
   // discovery and removal.
-  { id: "calendar", label: "Calendar", icon: Calendar },
-  { id: "pgp", label: "Encryption", icon: KeyRound },
+  {
+    id: "calendar",
+    get label() {
+      return i18next.t("settings.page.sections.calendar")
+    },
+    icon: Calendar,
+  },
+  {
+    id: "pgp",
+    get label() {
+      return i18next.t("settings.page.sections.pgp")
+    },
+    icon: KeyRound,
+  },
   {
     id: "attachment-security",
-    label: "Attachment security",
+    get label() {
+      return i18next.t("settings.page.sections.attachmentSecurity")
+    },
     icon: ShieldAlert,
   },
-  { id: "junk-filter", label: "Junk filter", icon: MailWarning },
+  {
+    id: "junk-filter",
+    get label() {
+      return i18next.t("settings.page.sections.junkFilter")
+    },
+    icon: MailWarning,
+  },
   {
     id: "data-portability",
-    label: "Import & export",
+    get label() {
+      return i18next.t("settings.page.sections.dataPortability")
+    },
     icon: ArrowDownUp,
   },
   // Portable backup/restore (parity-round-3 tasks 5.1–5.5, design D4):
   // checksummed .emailer-backup export + replace/merge restore.
-  { id: "backup", label: "Backup & restore", icon: DatabaseBackup },
+  {
+    id: "backup",
+    get label() {
+      return i18next.t("settings.page.sections.backup")
+    },
+    icon: DatabaseBackup,
+  },
   // Storage usage + delete-all-local-data (tasks 1.6/1.7, settings spec).
-  { id: "storage", label: "Storage", icon: Database },
-  { id: "updates", label: "Updates", icon: RefreshCw },
-  { id: "desktop", label: "Desktop", icon: Monitor },
-  { id: "appearance", label: "Appearance", icon: Palette },
-  { id: "reading", label: "Reading", icon: BookOpen },
+  {
+    id: "storage",
+    get label() {
+      return i18next.t("settings.page.sections.storage")
+    },
+    icon: Database,
+  },
+  {
+    id: "updates",
+    get label() {
+      return i18next.t("settings.page.sections.updates")
+    },
+    icon: RefreshCw,
+  },
+  {
+    id: "desktop",
+    get label() {
+      return i18next.t("settings.page.sections.desktop")
+    },
+    icon: Monitor,
+  },
+  {
+    id: "appearance",
+    get label() {
+      return i18next.t("settings.page.sections.appearance")
+    },
+    icon: Palette,
+  },
+  {
+    id: "reading",
+    get label() {
+      return i18next.t("settings.page.sections.reading")
+    },
+    icon: BookOpen,
+  },
   // AI assistance (task 4.2, spec ai-assistance): provider configuration,
   // per-surface toggles and cache management.
-  { id: "ai", label: "AI", icon: Sparkles },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "rules", label: "Rules", icon: Filter },
+  {
+    id: "ai",
+    get label() {
+      return i18next.t("settings.page.sections.ai")
+    },
+    icon: Sparkles,
+  },
+  {
+    id: "notifications",
+    get label() {
+      return i18next.t("settings.page.sections.notifications")
+    },
+    icon: Bell,
+  },
+  {
+    id: "rules",
+    get label() {
+      return i18next.t("settings.page.sections.rules")
+    },
+    icon: Filter,
+  },
   // Category tabs (task 3.5): the inbox category tab row's visibility +
   // the on-demand back-categorization launch.
-  { id: "categories", label: "Categories", icon: Tags },
+  {
+    id: "categories",
+    get label() {
+      return i18next.t("settings.page.sections.categories")
+    },
+    icon: Tags,
+  },
   // Quick steps (task 3.2): the manage UI for the 3.1 service — chains of
   // actions runnable from the context menu, the palette, or a digit key.
-  { id: "quick-steps", label: "Quick steps", icon: ListChecks },
-  { id: "blocked-senders", label: "Blocked senders", icon: Ban },
+  {
+    id: "quick-steps",
+    get label() {
+      return i18next.t("settings.page.sections.quickSteps")
+    },
+    icon: ListChecks,
+  },
+  {
+    id: "blocked-senders",
+    get label() {
+      return i18next.t("settings.page.sections.blockedSenders")
+    },
+    icon: Ban,
+  },
   // Subscription manager (task 3.6): detected newsletter senders +
   // unsubscribed senders, with bulk unsubscribe.
-  { id: "subscriptions", label: "Subscriptions", icon: MailX },
+  {
+    id: "subscriptions",
+    get label() {
+      return i18next.t("settings.page.sections.subscriptions")
+    },
+    icon: MailX,
+  },
   {
     id: "delivery-schedules",
-    label: "Delivery schedules",
+    get label() {
+      return i18next.t("settings.page.sections.deliverySchedules")
+    },
     icon: CalendarClock,
   },
-  { id: "auto-archive", label: "Auto-archive", icon: Archive },
-  { id: "shortcuts", label: "Shortcuts", icon: Keyboard },
-  { id: "snippets", label: "Snippets", icon: Zap },
+  {
+    id: "auto-archive",
+    get label() {
+      return i18next.t("settings.page.sections.autoArchive")
+    },
+    icon: Archive,
+  },
+  {
+    id: "shortcuts",
+    get label() {
+      return i18next.t("settings.page.sections.shortcuts")
+    },
+    icon: Keyboard,
+  },
+  {
+    id: "snippets",
+    get label() {
+      return i18next.t("settings.page.sections.snippets")
+    },
+    icon: Zap,
+  },
   // Help center (task 2.9): the settings-page entry point; the palette's
   // "Open help center" command opens the same center as a dialog.
-  { id: "help", label: "Help", icon: CircleHelp },
+  {
+    id: "help",
+    get label() {
+      return i18next.t("settings.page.sections.help")
+    },
+    icon: CircleHelp,
+  },
 ]
 
 /**
@@ -221,6 +361,7 @@ function ActiveSection({ id }: { id: SettingsSectionId }) {
 }
 
 export function SettingsPage() {
+  const { t } = useTranslation()
   const [section, setSection] = useState<SettingsSectionId>("accounts")
   const setView = useUiStore((state) => state.setView)
   const previousView = useUiStore((state) => state.previousView)
@@ -231,18 +372,20 @@ export function SettingsPage() {
         <Button
           variant="ghost"
           size="sm"
-          aria-label="Back to mailbox"
+          aria-label={t("settings.page.backToMailbox")}
           onClick={() => setView(previousView)}
         >
           <ArrowLeft />
-          Back
+          {t("settings.page.back")}
         </Button>
-        <h1 className="truncate text-xl font-bold text-foreground">Settings</h1>
+        <h1 className="truncate text-xl font-bold text-foreground">
+          {t("settings.page.title")}
+        </h1>
       </div>
       <Separator />
       <div className="flex min-h-0 flex-1">
         <nav
-          aria-label="Settings sections"
+          aria-label={t("settings.page.sectionsNav")}
           className="grid w-44 shrink-0 content-start gap-0.5 p-2"
         >
           {SECTIONS.map(({ id, label, icon: Icon }) => (

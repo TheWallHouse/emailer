@@ -1,5 +1,7 @@
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
+
 import {
   notifySnoozedThreadsChanged,
   refreshAfterSnoozeChange,
@@ -19,8 +21,10 @@ import type { SqlExecutor } from "@/services/db/executor"
  * the Snoozed section's notify seam.
  */
 
-/** Menu label of the custom date/time entry. */
-export const SNOOZE_CUSTOM_LABEL = "Pick date & time…"
+/** Menu label of the custom date/time entry (localized at call time). */
+export function snoozeCustomLabel(): string {
+  return i18next.t("threadList.snooze.customLabel")
+}
 
 /**
  * Snooze every `threadIds` thread until `until` (unix seconds) and run
@@ -42,7 +46,9 @@ export async function snoozeThreadsWithRefresh(
     console.warn("[snooze] failed", error)
     return false
   }
-  toast.success(`Snoozed until ${label}`)
+  toast.success(
+    i18next.t("threadList.snooze.toast", { count: threadIds.length, label })
+  )
   notifySnoozedThreadsChanged()
   await refreshAfterSnoozeChange()
   return true

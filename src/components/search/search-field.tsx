@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { FormEvent } from "react"
 import { SearchIcon, SparklesIcon, XIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { isAiConfigured, isSurfaceEnabled } from "@/services/ai/settings"
@@ -51,6 +52,7 @@ function useAssistantAvailable(): boolean {
  * level (design D1).
  */
 export function AssistantButton() {
+  const { t } = useTranslation()
   const available = useAssistantAvailable()
   if (!available) return null
   return (
@@ -58,8 +60,8 @@ export function AssistantButton() {
       type="button"
       variant="ghost"
       size="icon-sm"
-      aria-label="AI assistant"
-      title="AI assistant"
+      aria-label={t("search.field.assistant")}
+      title={t("search.field.assistant")}
       data-testid="assistant-button"
       onClick={() => useUiStore.getState().setAssistantOpen(true)}
     >
@@ -86,6 +88,7 @@ export function AssistantButton() {
  * one effect below keeps the DOM value in step with the active query.
  */
 export function SearchField({ className }: { className?: string }) {
+  const { t } = useTranslation()
   const view = useUiStore((state) => state.view)
   const setView = useUiStore((state) => state.setView)
   const clearSearch = useUiStore((state) => state.clearSearch)
@@ -135,8 +138,8 @@ export function SearchField({ className }: { className?: string }) {
           // uncontrolled input (React warning). The effect below owns the
           // DOM value; this only seeds the initial render.
           defaultValue=""
-          placeholder="Search mail…"
-          aria-label="Search mail"
+          placeholder={t("search.field.placeholder")}
+          aria-label={t("search.field.label")}
           autoComplete="off"
           className="ps-8"
           onKeyDown={(event) => {
@@ -171,7 +174,7 @@ export function SearchField({ className }: { className?: string }) {
             <span className="truncate">{activeQuery}</span>
             <button
               type="button"
-              aria-label="Clear search"
+              aria-label={t("search.field.clear")}
               onClick={clearSearch}
               className="rounded-full p-1 hover:bg-accent"
             >

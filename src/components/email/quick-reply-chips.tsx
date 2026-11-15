@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Reply, Sparkles } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { getExecutor } from "@/services/db/executor"
@@ -49,6 +50,7 @@ export function QuickReplyChips({
   accountId,
   disabled = false,
 }: QuickReplyChipsProps) {
+  const { t } = useTranslation()
   const [chips, setChips] = useState<Chips>({ stage: "loading" })
 
   // Load once per thread mount. Failures of every kind (gate closed,
@@ -94,7 +96,7 @@ export function QuickReplyChips({
     >
       <span className="flex items-center gap-1 text-xs text-muted-foreground">
         <Sparkles className="size-3" aria-hidden />
-        Quick replies
+        {t("reader.quickReplies.label")}
       </span>
       {chips.replies.slice(0, MAX_QUICK_REPLIES).map((reply) => (
         <Button
@@ -105,7 +107,7 @@ export function QuickReplyChips({
           className="h-7 max-w-72 rounded-full px-3 text-xs font-normal"
           disabled={disabled}
           data-testid="quick-reply-chip"
-          title="Open as a draft reply"
+          title={t("reader.quickReplies.chipTitle")}
           onClick={() => {
             try {
               void openQuickReplyForThread({

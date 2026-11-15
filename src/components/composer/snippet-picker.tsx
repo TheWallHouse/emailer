@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import type { Editor } from "@tiptap/react"
 import { ScrollText } from "lucide-react"
 
@@ -34,6 +35,7 @@ export function SnippetPicker({
   snippets: SnippetRow[]
   disabled: boolean
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
   return (
@@ -43,23 +45,23 @@ export function SnippetPicker({
           <Button
             variant="ghost"
             size="sm"
-            aria-label="Insert snippet"
+            aria-label={t("composer.snippets.insertSnippet")}
             disabled={disabled}
           >
             <ScrollText aria-hidden />
-            Snippet
+            {t("composer.snippets.snippet")}
           </Button>
         }
       />
       <PopoverContent align="start" className="w-80 p-1">
         {snippets.length === 0 ? (
           <p className="px-2 py-3 text-xs text-muted-foreground">
-            No snippets yet. Add them in Settings → Snippets.
+            {t("composer.snippets.empty")}
           </p>
         ) : (
           <ul
             role="listbox"
-            aria-label="Snippets"
+            aria-label={t("composer.snippets.list")}
             className="max-h-64 overflow-y-auto"
           >
             {snippets.map((snippet) => {
@@ -72,7 +74,9 @@ export function SnippetPicker({
                     variant="ghost"
                     size="sm"
                     className="h-auto w-full flex-col items-start gap-0.5 px-2 py-1.5"
-                    aria-label={`Insert ${snippet.name}`}
+                    aria-label={t("composer.snippets.insertNamed", {
+                      name: snippet.name,
+                    })}
                     onClick={() => {
                       if (!editor) return
                       insertSnippetBody(editor, snippet.body)
@@ -97,9 +101,9 @@ export function SnippetPicker({
                         data-testid="snippet-variable-hint"
                         className="w-full truncate text-xs font-normal text-muted-foreground"
                       >
-                        {variableIds.length}{" "}
-                        {variableIds.length === 1 ? "variable" : "variables"} —
-                        you'll be asked for any we can't fill
+                        {t("composer.snippets.variableHint", {
+                          count: variableIds.length,
+                        })}
                       </span>
                     )}
                   </Button>

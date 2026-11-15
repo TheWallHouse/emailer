@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { SparklesIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { isAiConfigured, isSurfaceEnabled } from "@/services/ai/settings"
 import { translateQuestion } from "@/services/ai/ask-inbox"
@@ -80,6 +81,7 @@ function useAskInboxAvailable(): boolean {
  * save-search-button pattern).
  */
 export function AskInboxButton() {
+  const { t } = useTranslation()
   const available = useAskInboxAvailable()
   const [open, setOpen] = useState(false)
   if (!available) return null
@@ -89,8 +91,8 @@ export function AskInboxButton() {
         type="button"
         variant="ghost"
         size="icon-sm"
-        aria-label="Ask My Inbox"
-        title="Ask My Inbox"
+        aria-label={t("search.askInbox.title")}
+        title={t("search.askInbox.title")}
         data-testid="ask-inbox-button"
         onClick={() => setOpen(true)}
       >
@@ -111,6 +113,7 @@ function AskInboxDialog({
 }: {
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   const [question, setQuestion] = useState("")
   const [busy, setBusy] = useState(false)
   const [phase, setPhase] = useState<AskPhase>({ phase: "idle" })
@@ -137,7 +140,7 @@ function AskInboxDialog({
         message:
           error instanceof Error
             ? error.message
-            : "The AI provider could not be reached.",
+            : t("search.askInbox.providerUnreachable"),
       })
     } finally {
       setBusy(false)
@@ -163,11 +166,9 @@ function AskInboxDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent data-testid="ask-inbox-dialog">
         <DialogHeader>
-          <DialogTitle>Ask My Inbox</DialogTitle>
+          <DialogTitle>{t("search.askInbox.title")}</DialogTitle>
           <DialogDescription>
-            Ask a question about your mail in plain language. Your question
-            and the search grammar are sent to the AI provider; your
-            messages stay on this machine.
+            {t("search.askInbox.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -192,7 +193,7 @@ function AskInboxDialog({
                 disabled={busy}
                 onClick={() => void ask()}
               >
-                Retry
+                {t("search.askInbox.retry")}
               </Button>
             </div>
           )}
@@ -208,14 +209,14 @@ function AskInboxDialog({
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="ask-inbox-question">
               {phase.phase === "clarify"
-                ? "Refine your question"
-                : "Your question"}
+                ? t("search.askInbox.refineQuestion")
+                : t("search.askInbox.yourQuestion")}
             </Label>
             <Textarea
               id="ask-inbox-question"
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              placeholder="e.g. attachments from maria since monday"
+              placeholder={t("search.askInbox.questionPlaceholder")}
               rows={2}
               autoFocus
               disabled={busy}
@@ -223,7 +224,9 @@ function AskInboxDialog({
           </div>
           {queryActive && (
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ask-inbox-query">Interpreted query</Label>
+              <Label htmlFor="ask-inbox-query">
+                {t("search.askInbox.interpretedQuery")}
+              </Label>
               <Input
                 id="ask-inbox-query"
                 value={phase.draft}
@@ -235,8 +238,7 @@ function AskInboxDialog({
                 data-testid="ask-inbox-query-input"
               />
               <p className="text-xs text-muted-foreground">
-                Edit the query if the translation missed something, then
-                search.
+                {t("search.askInbox.editHint")}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -244,14 +246,14 @@ function AskInboxDialog({
                   data-testid="ask-inbox-search"
                   onClick={() => runSearch(phase.draft)}
                 >
-                  Search
+                  {t("search.askInbox.search")}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setPhase({ phase: "idle" })}
                 >
-                  Ask again
+                  {t("search.askInbox.askAgain")}
                 </Button>
               </div>
             </div>
@@ -263,10 +265,10 @@ function AskInboxDialog({
               onClick={() => onOpenChange(false)}
               disabled={busy}
             >
-              Cancel
+              {t("search.askInbox.cancel")}
             </Button>
             <Button type="submit" disabled={busy || question.trim() === ""}>
-              {busy ? "Asking…" : "Ask"}
+              {busy ? t("search.askInbox.asking") : t("search.askInbox.ask")}
             </Button>
           </DialogFooter>
         </form>

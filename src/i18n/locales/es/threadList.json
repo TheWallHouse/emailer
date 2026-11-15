@@ -1,0 +1,170 @@
+{
+  "noSubject": "(sin asunto)",
+  "actions": {
+    "archive": "Archivar",
+    "trash": "Eliminar",
+    "markRead": "Marcar como leído",
+    "markUnread": "Marcar como no leído",
+    "star": "Destacar",
+    "unstar": "Quitar destacado",
+    "mute": "Silenciar",
+    "unmute": "Dejar de silenciar",
+    "pin": "Fijar",
+    "unpin": "Dejar de fijar",
+    "done": "Hecho",
+    "markDone": "Marcar como hecho",
+    "markNotDone": "Marcar como pendiente",
+    "snooze": "Posponer",
+    "labels": "Etiquetas"
+  },
+  "emptyState": {
+    "noResults": "No hay resultados para \"{{query}}\"",
+    "searchOperatorsHint": "Los operadores como from:, to:, subject:, is: y -término se aplican tal cual están escritos. Revisa sus valores o quita alguno para ampliar la búsqueda.",
+    "searchHint": "Ninguna conversación contiene todos los términos. Prueba con otras palabras o con operadores como from:alguien@example.com, subject:reunión o is:unread.",
+    "nothingIn": "No hay nada en {{name}}",
+    "labelHint": "Las conversaciones con esta etiqueta aparecerán aquí cuando se sincronicen.",
+    "starredHint": "Destaca una conversación y aparecerá aquí.",
+    "draftsHint": "Los mensajes que empiezas a escribir se guardan aquí automáticamente.",
+    "folderHint": "Los mensajes sincronizados en esta carpeta aparecerán aquí.",
+    "nothingToList": "No hay nada que mostrar",
+    "settingsHint": "Los ajustes sustituyen a los paneles del correo.",
+    "unifiedTitle": "La bandeja unificada está vacía",
+    "unifiedHint": "Las conversaciones de Recibidos de todas las cuentas activas aparecen aquí a medida que se sincronizan.",
+    "priorityTitle": "La bandeja prioritaria está vacía",
+    "priorityHint": "Las conversaciones de remitentes a los que respondes o que se dirigen directamente a ti aparecen aquí a medida que llega el correo.",
+    "nudgesTitle": "No hay recordatorios ahora mismo",
+    "nudgesHint": "Las conversaciones que esperan tu respuesta se reunirán aquí cuando lleven sin respuesta más tiempo del umbral de recordatorio.",
+    "splitTitle": "No hay conversaciones en \"{{name}}\"",
+    "splitHint": "Las conversaciones que coincidan con la búsqueda de esta pestaña aparecerán aquí a medida que se sincronicen.",
+    "categoryHint": "El correo nuevo que el motor de categorización archive aquí aparecerá a medida que llegue."
+  },
+  "sort": {
+    "label": "Ordenar conversaciones",
+    "options": {
+      "dateDesc": "Más recientes primero",
+      "dateAsc": "Más antiguos primero",
+      "sender": "Remitente",
+      "subject": "Asunto",
+      "unreadFirst": "No leídos primero"
+    }
+  },
+  "groupBySender": {
+    "label": "Agrupar por remitente",
+    "title": "Agrupar conversaciones consecutivas del mismo remitente",
+    "button": "Agrupar"
+  },
+  "catchMeUp": {
+    "label": "Ponme al día",
+    "title": "Resumir con IA las conversaciones no leídas de esta vista"
+  },
+  "header": {
+    "relaxedBadge": "Mostrando resultados más amplios",
+    "relaxedTitle": "Ninguna conversación contiene todos los términos: se muestran las que coinciden con alguno de ellos, primero las más relevantes. Pulsa Intro para repetir la búsqueda exacta."
+  },
+  "noAccount": "No hay ninguna cuenta conectada",
+  "loading": "Cargando…",
+  "noUnread": "No hay mensajes no leídos",
+  "toasts": {
+    "quickStepMissing": "Ese paso rápido ya no existe",
+    "movedToCategory": "Conversación movida a {{category}}",
+    "alwaysFromSender": "Los próximos mensajes de este remitente se clasificarán en {{category}}"
+  },
+  "selection": {
+    "selectAll": "Seleccionar todo",
+    "clearSelection": "Quitar selección",
+    "count_one": "{{count}} seleccionada",
+    "count_other": "{{count}} seleccionadas",
+    "clear": "Deseleccionar"
+  },
+  "row": {
+    "select": "Seleccionar {{subject}}",
+    "unknownSender": "Remitente desconocido",
+    "unread": "No leída",
+    "muted": "Silenciada",
+    "pinned": "Fijada",
+    "done": "Hecha",
+    "hasNote": "Tiene una nota",
+    "hasAttachments": "Tiene archivos adjuntos",
+    "starred": "Destacada",
+    "notStarred": "No destacada"
+  },
+  "bundle": {
+    "label_one": "Grupo de {{count}} conversación de {{sender}}",
+    "label_other": "Grupo de {{count}} conversaciones de {{sender}}",
+    "count_one": "{{count}} conversación",
+    "count_other": "{{count}} conversaciones",
+    "snooze": "Posponer grupo"
+  },
+  "draft": {
+    "noRecipients": "Sin destinatarios",
+    "to": "Para: {{recipient}}",
+    "toMore": "Para: {{recipient}}, +{{more}}",
+    "resume": "Retomar borrador {{subject}}",
+    "badge": "Borrador"
+  },
+  "contextMenu": {
+    "open": "Abrir",
+    "openInNewWindow": "Abrir en una ventana nueva",
+    "reply": "Responder",
+    "exportEml": "Exportar como EML",
+    "createTask": "Crear tarea",
+    "deleteForever": "Eliminar definitivamente",
+    "blockSender": "Bloquear remitente",
+    "moveToCategory": "Mover a categoría",
+    "alwaysCategorize": "Clasificar siempre a {{sender}} como",
+    "quickStep": "Paso rápido",
+    "export": {
+      "success_one": "Se ha exportado {{count}} mensaje como .eml",
+      "success_other": "Se han exportado {{count}} mensajes como .eml",
+      "successWithMissing_one": "Se ha exportado {{count}} mensaje como .eml — {{missing}}",
+      "successWithMissing_other": "Se han exportado {{count}} mensajes como .eml — {{missing}}",
+      "missingAttachments_one": "{{count}} archivo adjunto no estaba en caché y se ha exportado vacío",
+      "missingAttachments_other": "{{count}} archivos adjuntos no estaban en caché y se han exportado vacíos",
+      "failed": "Error al exportar: no se han podido escribir los mensajes"
+    }
+  },
+  "snooze": {
+    "customLabel": "Elegir fecha y hora…",
+    "until": "Posponer hasta",
+    "cancel": "Cancelar",
+    "confirm": "Posponer",
+    "toast_one": "Conversación pospuesta hasta {{label}}",
+    "toast_other": "Conversaciones pospuestas hasta {{label}}"
+  },
+  "stateToasts": {
+    "mute_one": "Conversación silenciada",
+    "mute_other": "Conversaciones silenciadas",
+    "unmute_one": "Conversación ya no silenciada",
+    "unmute_other": "Conversaciones ya no silenciadas",
+    "pin_one": "Conversación fijada",
+    "pin_other": "Conversaciones fijadas",
+    "unpin_one": "Conversación ya no fijada",
+    "unpin_other": "Conversaciones ya no fijadas",
+    "done_one": "Conversación marcada como hecha",
+    "done_other": "Conversaciones marcadas como hechas",
+    "undone_one": "Conversación marcada como pendiente",
+    "undone_other": "Conversaciones marcadas como pendientes"
+  },
+  "boundedSync": {
+    "notice": "La primera sincronización de esta cuenta se limitó al periodo «{{window}}»: el correo más antiguo sigue en el servidor. El correo nuevo se sincroniza con normalidad.",
+    "dismiss": "Cerrar el aviso de la primera sincronización"
+  },
+  "welcome": {
+    "title": "Te damos la bienvenida a Emailer",
+    "hint": "Un cliente de correo local: tus mensajes se quedan en este equipo y siguen disponibles sin conexión. Conecta una cuenta para empezar a sincronizar.",
+    "addGmail": "Añadir Gmail",
+    "addImap": "Añadir IMAP/SMTP"
+  },
+  "accountBadge": {
+    "label": "Cuenta {{email}}"
+  },
+  "authBadge": {
+    "label": "Resultados de autenticación del correo",
+    "result": "{{mechanism}}: {{verdict}}",
+    "verdicts": {
+      "pass": "superado",
+      "fail": "fallido",
+      "none": "ninguno"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { EllipsisVertical, Palette, Pencil, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { buttonVariants } from "@/components/ui/button"
 import {
@@ -27,13 +28,14 @@ export function LabelRowMenu({
   onRecolor: (label: LabelRow) => void
   onDelete: (label: LabelRow) => void
 }) {
+  const { t } = useTranslation()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <button
             type="button"
-            aria-label={`Options for ${label.name}`}
+            aria-label={t("labels.rowMenu.options", { name: label.name })}
             className={buttonVariants({
               variant: "ghost",
               size: "icon-sm",
@@ -46,16 +48,16 @@ export function LabelRowMenu({
       <DropdownMenuContent align="start" className="w-44">
         <DropdownMenuItem onClick={() => onRename(label)}>
           <Pencil aria-hidden />
-          Rename…
+          {t("labels.rowMenu.rename")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onRecolor(label)}>
           <Palette aria-hidden />
-          Change color…
+          {t("labels.rowMenu.changeColor")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={() => onDelete(label)}>
           <Trash2 aria-hidden />
-          Delete…
+          {t("labels.rowMenu.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

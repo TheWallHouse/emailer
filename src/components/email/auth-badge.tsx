@@ -1,4 +1,5 @@
 import { ShieldCheck, ShieldQuestionMark, ShieldX } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -47,6 +48,7 @@ const VERDICT_CHIP: Record<
 }
 
 export function AuthBadge({ authResults }: { authResults: string | null }) {
+  const { t } = useTranslation()
   const parsed = parseStoredAuthResults(authResults)
   if (!parsed) return null
 
@@ -58,12 +60,15 @@ export function AuthBadge({ authResults }: { authResults: string | null }) {
     <div
       data-testid="auth-badge"
       className="flex items-center gap-1"
-      aria-label="Email authentication results"
+      aria-label={t("threadList.authBadge.label")}
     >
       {mechanisms.map((mechanism) => {
         const verdict = parsed[mechanism]!
         const { Icon, className } = VERDICT_CHIP[verdict]
-        const label = `${MECHANISM_LABELS[mechanism]}: ${verdict}`
+        const label = t("threadList.authBadge.result", {
+          mechanism: MECHANISM_LABELS[mechanism],
+          verdict: t(`threadList.authBadge.verdicts.${verdict}`),
+        })
         return (
           <Badge
             key={mechanism}

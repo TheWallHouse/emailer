@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { AlertTriangle } from "lucide-react"
 
@@ -38,6 +39,7 @@ import {
  * "not approved" and ignores the checkbox, like the send-guard dialogs.
  */
 export function QuickStepConfirmHost() {
+  const { t } = useTranslation()
   const [pending, setPending] = useState<PendingQuickStepConfirm | null>(null)
   const [dontAskAgain, setDontAskAgain] = useState(false)
 
@@ -72,14 +74,14 @@ export function QuickStepConfirmHost() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="size-4 text-destructive" aria-hidden />
-            Run &ldquo;{pending?.step.name}&rdquo;?
+            {t("reader.quickStepConfirm.title", { name: pending?.step.name })}
           </DialogTitle>
           <DialogDescription>
-            This quick step moves threads to Trash.{" "}
+            {t("reader.quickStepConfirm.description")}{" "}
             {pending
-              ? `${pending.threadCount} thread${
-                  pending.threadCount === 1 ? "" : "s"
-                } will be affected.`
+              ? t("reader.quickStepConfirm.affected", {
+                  count: pending.threadCount,
+                })
               : null}
           </DialogDescription>
         </DialogHeader>
@@ -92,15 +94,15 @@ export function QuickStepConfirmHost() {
             }}
           />
           <Label htmlFor="quick-step-dont-ask" className="font-normal">
-            Don&apos;t ask again
+            {t("reader.quickStepConfirm.dontAskAgain")}
           </Label>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => settle(false)}>
-            Cancel
+            {t("reader.quickStepConfirm.cancel")}
           </Button>
           <Button variant="destructive" onClick={() => settle(true)}>
-            Run
+            {t("reader.quickStepConfirm.run")}
           </Button>
         </DialogFooter>
       </DialogContent>

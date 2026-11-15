@@ -9,6 +9,7 @@ import {
   Trash,
 } from "lucide-react"
 
+import { i18next } from "@/i18n"
 import type { FolderCountKey } from "@/services/db/folder-counts"
 import type { FolderSelection } from "@/stores/ui-store"
 
@@ -22,7 +23,8 @@ import type { FolderSelection } from "@/stores/ui-store"
 export interface FolderEntry {
   /** Key into FolderUnreadCounts (badge data, unused by the palette). */
   countKey: FolderCountKey
-  title: string
+  /** Localized at read time (getter), so it follows language changes. */
+  readonly title: string
   icon: LucideIcon
   /** ViewSelection folder payload (see ui-store's query mapping). */
   folder: FolderSelection
@@ -31,43 +33,57 @@ export interface FolderEntry {
 export const FOLDER_ITEMS: FolderEntry[] = [
   {
     countKey: "inbox",
-    title: "Inbox",
+    get title() {
+      return i18next.t("common.folders.inbox")
+    },
     icon: Inbox,
     folder: { kind: "specialUse", specialUse: "inbox" },
   },
   {
     countKey: "starred",
-    title: "Starred",
+    get title() {
+      return i18next.t("common.folders.starred")
+    },
     icon: Star,
     folder: { kind: "starred" },
   },
   {
     countKey: "sent",
-    title: "Sent",
+    get title() {
+      return i18next.t("common.folders.sent")
+    },
     icon: Send,
     folder: { kind: "specialUse", specialUse: "sent" },
   },
   {
     countKey: "drafts",
-    title: "Drafts",
+    get title() {
+      return i18next.t("common.folders.drafts")
+    },
     icon: FileText,
     folder: { kind: "specialUse", specialUse: "drafts" },
   },
   {
     countKey: "archive",
-    title: "Archive",
+    get title() {
+      return i18next.t("common.folders.archive")
+    },
     icon: Archive,
     folder: { kind: "specialUse", specialUse: "archive" },
   },
   {
     countKey: "spam",
-    title: "Spam",
+    get title() {
+      return i18next.t("common.folders.spam")
+    },
     icon: OctagonAlert,
     folder: { kind: "specialUse", specialUse: "spam" },
   },
   {
     countKey: "trash",
-    title: "Trash",
+    get title() {
+      return i18next.t("common.folders.trash")
+    },
     icon: Trash,
     folder: { kind: "specialUse", specialUse: "trash" },
   },

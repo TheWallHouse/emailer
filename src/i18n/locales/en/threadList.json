@@ -1,0 +1,170 @@
+{
+  "noSubject": "(no subject)",
+  "actions": {
+    "archive": "Archive",
+    "trash": "Trash",
+    "markRead": "Mark read",
+    "markUnread": "Mark unread",
+    "star": "Star",
+    "unstar": "Unstar",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "done": "Done",
+    "markDone": "Mark done",
+    "markNotDone": "Mark not done",
+    "snooze": "Snooze",
+    "labels": "Labels"
+  },
+  "emptyState": {
+    "noResults": "No results for \"{{query}}\"",
+    "searchOperatorsHint": "Operators like from:, to:, subject:, is: and -term are matched exactly as written. Check their values, or remove one to widen the search.",
+    "searchHint": "No thread matched every term. Try different keywords, or operators like from:someone@example.com, subject:meeting or is:unread.",
+    "nothingIn": "Nothing in {{name}}",
+    "labelHint": "Threads carrying this label will appear here once they sync.",
+    "starredHint": "Star a thread and it will show up here.",
+    "draftsHint": "Messages you start writing are saved here automatically.",
+    "folderHint": "Messages synced into this folder will appear here.",
+    "nothingToList": "Nothing to list",
+    "settingsHint": "Settings replaces the mailbox panes.",
+    "unifiedTitle": "Unified inbox is empty",
+    "unifiedHint": "Inbox threads from every active account appear here as they sync.",
+    "priorityTitle": "Priority inbox is empty",
+    "priorityHint": "Threads from senders you reply to or that address you directly show up here as mail arrives.",
+    "nudgesTitle": "No nudges right now",
+    "nudgesHint": "Threads waiting on your reply will gather here once they sit unanswered past your nudge threshold.",
+    "splitTitle": "No threads in \"{{name}}\"",
+    "splitHint": "Threads matching this split's search will appear here as they sync.",
+    "categoryHint": "New mail the categorization engine files here will appear as it arrives."
+  },
+  "sort": {
+    "label": "Sort threads",
+    "options": {
+      "dateDesc": "Newest first",
+      "dateAsc": "Oldest first",
+      "sender": "Sender",
+      "subject": "Subject",
+      "unreadFirst": "Unread first"
+    }
+  },
+  "groupBySender": {
+    "label": "Group by sender",
+    "title": "Group consecutive threads from the same sender",
+    "button": "Group"
+  },
+  "catchMeUp": {
+    "label": "Catch me up",
+    "title": "Summarize this view's unread threads with AI"
+  },
+  "header": {
+    "relaxedBadge": "Showing broader results",
+    "relaxedTitle": "No thread matched every term — showing threads matching any single term of the query, best matches first. Press Enter to re-run the exact search."
+  },
+  "noAccount": "No account connected",
+  "loading": "Loading…",
+  "noUnread": "No unread messages",
+  "toasts": {
+    "quickStepMissing": "That quick step no longer exists",
+    "movedToCategory": "Moved to {{category}}",
+    "alwaysFromSender": "Future messages from this sender will be filed under {{category}}"
+  },
+  "selection": {
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection",
+    "count_one": "{{count}} selected",
+    "count_other": "{{count}} selected",
+    "clear": "Clear"
+  },
+  "row": {
+    "select": "Select {{subject}}",
+    "unknownSender": "Unknown sender",
+    "unread": "Unread",
+    "muted": "Muted",
+    "pinned": "Pinned",
+    "done": "Done",
+    "hasNote": "Has note",
+    "hasAttachments": "Has attachments",
+    "starred": "Starred",
+    "notStarred": "Not starred"
+  },
+  "bundle": {
+    "label_one": "Bundle of {{count}} threads from {{sender}}",
+    "label_other": "Bundle of {{count}} threads from {{sender}}",
+    "count_one": "{{count}} thread",
+    "count_other": "{{count}} threads",
+    "snooze": "Snooze bundle"
+  },
+  "draft": {
+    "noRecipients": "No recipients",
+    "to": "To: {{recipient}}",
+    "toMore": "To: {{recipient}}, +{{more}}",
+    "resume": "Resume draft {{subject}}",
+    "badge": "Draft"
+  },
+  "contextMenu": {
+    "open": "Open",
+    "openInNewWindow": "Open in new window",
+    "reply": "Reply",
+    "exportEml": "Export as EML",
+    "createTask": "Create task",
+    "deleteForever": "Delete forever",
+    "blockSender": "Block sender",
+    "moveToCategory": "Move to category",
+    "alwaysCategorize": "Always categorize {{sender}} as",
+    "quickStep": "Quick step",
+    "export": {
+      "success_one": "Exported {{count}} message as .eml",
+      "success_other": "Exported {{count}} messages as .eml",
+      "successWithMissing_one": "Exported {{count}} message as .eml — {{missing}}",
+      "successWithMissing_other": "Exported {{count}} messages as .eml — {{missing}}",
+      "missingAttachments_one": "{{count}} attachment file not cached, exported empty",
+      "missingAttachments_other": "{{count}} attachment files not cached, exported empty",
+      "failed": "Export failed — the messages could not be written"
+    }
+  },
+  "snooze": {
+    "customLabel": "Pick date & time…",
+    "until": "Snooze until",
+    "cancel": "Cancel",
+    "confirm": "Snooze",
+    "toast_one": "Snoozed until {{label}}",
+    "toast_other": "Snoozed until {{label}}"
+  },
+  "stateToasts": {
+    "mute_one": "Muted",
+    "mute_other": "Muted",
+    "unmute_one": "Unmuted",
+    "unmute_other": "Unmuted",
+    "pin_one": "Pinned",
+    "pin_other": "Pinned",
+    "unpin_one": "Unpinned",
+    "unpin_other": "Unpinned",
+    "done_one": "Marked done",
+    "done_other": "Marked done",
+    "undone_one": "Marked not done",
+    "undone_other": "Marked not done"
+  },
+  "boundedSync": {
+    "notice": "First sync for this account was limited to {{window}} — older mail is still on the server. New mail syncs normally.",
+    "dismiss": "Dismiss the first-sync notice"
+  },
+  "welcome": {
+    "title": "Welcome to Emailer",
+    "hint": "A local-first mail client: your messages stay on this machine and keep working offline. Connect an account to start syncing.",
+    "addGmail": "Add Gmail",
+    "addImap": "Add IMAP/SMTP"
+  },
+  "accountBadge": {
+    "label": "Account {{email}}"
+  },
+  "authBadge": {
+    "label": "Email authentication results",
+    "result": "{{mechanism}}: {{verdict}}",
+    "verdicts": {
+      "pass": "pass",
+      "fail": "fail",
+      "none": "none"
+    }
+  }
+}

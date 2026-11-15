@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -50,10 +52,11 @@ export function HistoryWindowField({
   onChange,
   disabled,
 }: HistoryWindowFieldProps) {
+  const { t } = useTranslation()
   return (
     <div className="grid gap-1">
       <Label htmlFor={id} className="text-xs text-muted-foreground">
-        First sync download
+        {t("accounts.historyWindow.fieldLabel")}
       </Label>
       <Select
         items={WINDOW_ITEM_LABELS}
@@ -69,8 +72,7 @@ export function HistoryWindowField({
         <SelectContent>
           {(
             [...HISTORY_WINDOWS, ALL_HISTORY_VALUE] as (
-              | HistoryWindow
-              | typeof ALL_HISTORY_VALUE
+              HistoryWindow | typeof ALL_HISTORY_VALUE
             )[]
           ).map((item) => (
             <SelectItem key={item} value={item}>
@@ -80,8 +82,7 @@ export function HistoryWindowField({
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">
-        Applies to the first sync only — messages older than this are left
-        on the server. New mail always syncs.
+        {t("accounts.historyWindow.fieldHint")}
       </p>
     </div>
   )

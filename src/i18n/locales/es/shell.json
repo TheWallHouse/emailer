@@ -1,0 +1,19 @@
+{
+  "unifiedInbox": "Bandeja unificada",
+  "priorityInbox": "Prioritarios",
+  "nudges": "Recordatorios",
+  "sync": {
+    "notSynced": "Aún no sincronizado",
+    "syncing": "Sincronizando…",
+    "failed": "La última sincronización falló",
+    "synced": "Sincronizado {{when}}",
+    "accountsLabel": "Estado de sincronización de las cuentas",
+    "accountState": "{{email}}: {{state}}",
+    "accountStateTitle": "{{email}} — {{state}}"
+  },
+  "filter": {
+    "label": "Filtrar conversaciones",
+    "allMail": "Todo el correo",
+    "unread": "No leídos"
+  }
+}

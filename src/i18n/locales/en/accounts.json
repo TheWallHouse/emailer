@@ -1,0 +1,105 @@
+{
+  "add": {
+    "title": "Add an account",
+    "description": "Accounts live on this machine; messages sync locally and work offline.",
+    "whatDoINeed": "What do I need?",
+    "gmailDescription": "Sign in with your Google account in the browser. Needs a Google Client ID (free).",
+    "microsoftDescription": "Sign in with your Microsoft account in the browser — work, school or personal (Outlook, Hotmail, Live). Needs a one-time app registration (free).",
+    "imapTitle": "Other email (IMAP/SMTP)",
+    "imapDescription": "Yahoo, iCloud, Fastmail, GMX, Zoho or any provider — with your email address and password."
+  },
+  "oauth": {
+    "steps": {
+      "consent": "Waiting for you to finish in the browser…",
+      "exchange": "Signing you in…",
+      "gmailProfile": "Reading your Gmail profile…",
+      "microsoftProfile": "Reading your Microsoft 365 profile…",
+      "save": "Saving the account…",
+      "update": "Updating the account…"
+    },
+    "clientId": "Client ID",
+    "applicationClientId": "Application (client) ID",
+    "enterGoogleClientId": "Enter your Google OAuth Client ID to continue.",
+    "enterMicrosoftClientId": "Enter your Microsoft app registration's Client ID to continue.",
+    "signInFailed": "Sign-in failed. Please try again.",
+    "continueInBrowser": "Continue in browser",
+    "cancel": "Cancel",
+    "back": "Back"
+  },
+  "gmail": {
+    "title": "Connect Gmail",
+    "waiting": "A Google sign-in page opened in your browser. Finish there — this window continues automatically.",
+    "description": "Paste your own Google OAuth Client ID (type “Desktop app”). It is stored on this device only."
+  },
+  "microsoft": {
+    "title": "Connect Microsoft 365",
+    "waiting": "A Microsoft sign-in page opened in your browser. Finish there — this window continues automatically.",
+    "description": "Emailer has no built-in Microsoft app, so a one-time personal registration is needed. It stays on this device only.",
+    "registerHelp": "In the <link>Azure portal</link> register an app (type “Accounts in any organizational directory and personal Microsoft accounts”), then add the redirect URI<code>http://localhost:{{port}}</code>as a <em>mobile and desktop</em> platform entry. No client secret is needed.",
+    "adminHelp": "Work or school account? Your organization may require admin approval for the app registration — if sign-in reports that admin approval is needed, ask your IT administrator to grant it."
+  },
+  "imap": {
+    "identityTitle": "Add an email account",
+    "identityDescription": "Your address and password stay on this device; known providers are filled in automatically.",
+    "emailAddress": "Email address",
+    "password": "Password",
+    "passwordPlaceholder": "Password or app password",
+    "brandDetected": "{{brand}} detected — server settings will be prefilled.",
+    "microsoftHint": "Outlook/Hotmail/Live addresses connect better via “Microsoft 365 / Outlook.com” on the previous screen (modern OAuth sign-in instead of a password).",
+    "invalidEmail": "Enter a valid email address.",
+    "enterPassword": "Enter the account password (or app password).",
+    "continue": "Continue",
+    "back": "Back",
+    "serversTitle": "Server settings",
+    "autoFilledBrand": "Auto-filled from {{brand}}'s known settings — edit if they differ.",
+    "autoFilled": "Auto-filled from this provider's known settings — edit if they differ.",
+    "unknownProvider": "This provider is not in the known list — enter the server details from your provider.",
+    "incoming": "Incoming mail (IMAP)",
+    "outgoing": "Outgoing mail (SMTP)",
+    "server": "{{side}} server",
+    "port": "{{side}} port",
+    "security": "{{side}} security",
+    "securityNone": "None",
+    "test": "Test",
+    "connected": "Connected",
+    "connectedFolders_one": "Connected — {{count}} folder",
+    "connectedFolders_other": "Connected — {{count}} folders",
+    "smtpAccepted": "Connected, sign-in accepted",
+    "enterHost": "Enter the server host.",
+    "enterPort": "Enter a port between 1 and 65535.",
+    "saveFailed": "Could not save the account.",
+    "saveAccount": "Save account",
+    "testAndSave": "Test and save"
+  },
+  "reauth": {
+    "signInAgain": "Sign in again",
+    "waitingMicrosoft": "A Microsoft sign-in page opened in your browser for {{email}}. Finish there — this window continues automatically.",
+    "waitingGoogle": "A Google sign-in page opened in your browser for {{email}}. Finish there — this window continues automatically.",
+    "brokenMicrosoft": "Microsoft reports this account's sign-in no longer works. Re-authorize {{email}} in the browser — your local mail is kept.",
+    "brokenGoogle": "Google reports this account's sign-in no longer works. Re-authorize {{email}} in the browser — your local mail is kept.",
+    "updatePassword": "Update password",
+    "passwordRejected": "The server rejected {{email}}'s password. Enter the new one — both the incoming and outgoing connections are tested before it is saved, and your local mail is kept.",
+    "newPassword": "New password",
+    "enterNewPassword": "Enter the new password (or app password).",
+    "incomingFailed": "Incoming mail (IMAP): {{message}}",
+    "outgoingFailed": "Outgoing mail (SMTP): {{message}}",
+    "updateFailed": "Could not update the password.",
+    "testAndSave": "Test and save"
+  },
+  "remove": {
+    "title": "Remove account",
+    "description": "Remove <email>{{email}}</email> from this device? Every locally stored message, thread and label of this account will be deleted. The account itself is not deleted at the provider — adding it again syncs fresh from the server.",
+    "failed": "Could not remove the account.",
+    "cancel": "Cancel",
+    "confirm": "Remove account"
+  },
+  "historyWindow": {
+    "lastMonth": "Last month",
+    "last3Months": "Last 3 months",
+    "last6Months": "Last 6 months",
+    "lastYear": "Last year",
+    "all": "All history",
+    "fieldLabel": "First sync download",
+    "fieldHint": "Applies to the first sync only — messages older than this are left on the server. New mail always syncs."
+  }
+}

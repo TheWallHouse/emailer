@@ -1,6 +1,7 @@
 import { open } from "@tauri-apps/plugin-dialog"
 import { readFile } from "@tauri-apps/plugin-fs"
 
+import { i18next } from "@/i18n"
 import { useComposerStore } from "@/stores/composer-store"
 
 import { setAttachmentBytes } from "./attachment-bytes"
@@ -36,7 +37,11 @@ export const MAX_TOTAL_ATTACHMENT_BYTES = 25 * 1024 * 1024
 export class AttachmentTooLargeError extends Error {
   constructor(fileName: string, size: number) {
     super(
-      `"${fileName}" is ${formatAttachmentSize(size)} — files can be at most ${formatAttachmentSize(MAX_SINGLE_ATTACHMENT_BYTES)}`
+      i18next.t("composer.attachments.tooLarge", {
+        name: fileName,
+        size: formatAttachmentSize(size),
+        max: formatAttachmentSize(MAX_SINGLE_ATTACHMENT_BYTES),
+      })
     )
     this.name = "AttachmentTooLargeError"
   }
@@ -46,7 +51,10 @@ export class AttachmentTooLargeError extends Error {
 export class AttachmentTotalSizeError extends Error {
   constructor(fileName: string) {
     super(
-      `"${fileName}" would push the attachments over the ${formatAttachmentSize(MAX_TOTAL_ATTACHMENT_BYTES)} total limit`
+      i18next.t("composer.attachments.overTotal", {
+        name: fileName,
+        limit: formatAttachmentSize(MAX_TOTAL_ATTACHMENT_BYTES),
+      })
     )
     this.name = "AttachmentTotalSizeError"
   }

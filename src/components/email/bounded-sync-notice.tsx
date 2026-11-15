@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { History, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -38,6 +39,7 @@ interface NoticeState {
 }
 
 export function BoundedSyncNotice({ accountId }: BoundedSyncNoticeProps) {
+  const { t } = useTranslation()
   const [state, setState] = useState<NoticeState | null>(null)
 
   useEffect(() => {
@@ -85,14 +87,13 @@ export function BoundedSyncNotice({ accountId }: BoundedSyncNoticeProps) {
     >
       <History className="size-3.5 shrink-0" aria-hidden />
       <span className="min-w-0 flex-1">
-        First sync for this account was limited to {state.windowLabel} — older
-        mail is still on the server. New mail syncs normally.
+        {t("threadList.boundedSync.notice", { window: state.windowLabel })}
       </span>
       <Button
         variant="ghost"
         size="sm"
         className="h-6 px-2 text-xs"
-        aria-label="Dismiss the first-sync notice"
+        aria-label={t("threadList.boundedSync.dismiss")}
         data-testid="bounded-sync-notice-dismiss"
         onClick={() => {
           const next = { ...state, dismissed: true }

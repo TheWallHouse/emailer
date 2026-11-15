@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Label } from "@/components/ui/label"
 import {
@@ -29,6 +30,7 @@ import {
 const DAY_OPTIONS = [7, 14, 30, 60, 90, 180, 365]
 
 export function AutoArchiveSection() {
+  const { t } = useTranslation()
   const [enabled, setEnabled] = useState(false)
   const [days, setDays] = useState(DEFAULT_AUTO_ARCHIVE_DAYS)
   // Set as soon as the user changes anything: the async initial load must
@@ -69,23 +71,26 @@ export function AutoArchiveSection() {
   }
 
   return (
-    <section aria-label="Auto-archive" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.autoArchive.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
         <h2 className="text-base font-semibold text-foreground">
-          Auto-archive
+          {t("settingsMail.autoArchive.title")}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Keep the inbox tidy by archiving old mail in the background.
+          {t("settingsMail.autoArchive.subtitle")}
         </p>
       </div>
       <div className="divide-y divide-border">
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
-            <Label htmlFor="auto-archive-enabled">Auto-archive old mail</Label>
+            <Label htmlFor="auto-archive-enabled">
+              {t("settingsMail.autoArchive.enable")}
+            </Label>
             <p className="text-xs text-muted-foreground">
-              Archive inbox threads that have been read and untouched for the
-              chosen number of days. Archived threads stay in All Mail and
-              keep their labels.
+              {t("settingsMail.autoArchive.enableHelp")}
             </p>
           </div>
           <Switch
@@ -98,10 +103,11 @@ export function AutoArchiveSection() {
         </div>
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
-            <Label htmlFor="auto-archive-days">Archive after</Label>
+            <Label htmlFor="auto-archive-days">
+              {t("settingsMail.autoArchive.after")}
+            </Label>
             <p className="text-xs text-muted-foreground">
-              Days of read-and-untouched inactivity before a thread is
-              archived.
+              {t("settingsMail.autoArchive.afterHelp")}
             </p>
           </div>
           <Select
@@ -111,12 +117,16 @@ export function AutoArchiveSection() {
             }}
           >
             <SelectTrigger id="auto-archive-days" className="w-32">
-              <SelectValue>{(value: string) => `${value} days`}</SelectValue>
+              <SelectValue>
+                {(value: string) =>
+                  t("settingsMail.autoArchive.days", { count: Number(value) })
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {DAY_OPTIONS.map((option) => (
                 <SelectItem key={option} value={String(option)}>
-                  {option} days
+                  {t("settingsMail.autoArchive.days", { count: option })}
                 </SelectItem>
               ))}
             </SelectContent>

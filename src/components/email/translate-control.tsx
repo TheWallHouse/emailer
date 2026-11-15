@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Languages } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { AiUnavailableError } from "@/services/ai/client"
@@ -59,6 +60,7 @@ export function TranslateControl({
   message,
   disabled = false,
 }: TranslateControlProps) {
+  const { t } = useTranslation()
   const [state, setState] = useState<TranslateStage>({ stage: "hidden" })
 
   // Gate check (spec "Gating"): configured AND the translation surface
@@ -108,11 +110,16 @@ export function TranslateControl({
           setState({
             stage: "error",
             message:
-              error instanceof Error ? error.message : "Translation failed.",
+              error instanceof Error
+                ? error.message
+                : t("reader.translate.failed"),
           })
         })
     } catch {
-      setState({ stage: "error", message: "Translation is unavailable." })
+      setState({
+        stage: "error",
+        message: t("reader.translate.unavailable"),
+      })
     }
   }
 
@@ -144,10 +151,10 @@ export function TranslateControl({
       >
         <Languages className="size-3.5" aria-hidden />
         {state.stage === "open"
-          ? "Hide translation"
+          ? t("reader.translate.hide")
           : state.stage === "loading"
-            ? "Translating…"
-            : "Translate"}
+            ? t("reader.translate.translating")
+            : t("reader.translate.translate")}
       </Button>
       {state.stage === "open" && (
         <div
@@ -156,10 +163,12 @@ export function TranslateControl({
         >
           {state.result.language !== null && (
             <p className="mb-1 text-xs font-medium text-muted-foreground">
-              Translated to {state.result.language}
+              {t("reader.translate.translatedTo", {
+                language: state.result.language,
+              })}
             </p>
           )}
-          <p className="whitespace-pre-wrap text-sm">
+          <p className="text-sm whitespace-pre-wrap">
             {state.result.translation}
           </p>
         </div>
@@ -180,7 +189,7 @@ export function TranslateControl({
             data-testid="message-translate-retry"
             onClick={runTranslate}
           >
-            Retry
+            {t("reader.translate.retry")}
           </Button>
         </div>
       )}

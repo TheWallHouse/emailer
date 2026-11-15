@@ -1,0 +1,519 @@
+{
+  "appearance": {
+    "title": "Apariencia",
+    "description": "Tema, color de acento, idioma y tamaño del contenido. Los cambios se aplican al momento y se recuerdan.",
+    "language": {
+      "label": "Idioma",
+      "hint": "Idioma de la interfaz. «Sistema» usa el de tu sistema operativo."
+    },
+    "themeMode": {
+      "label": "Modo del tema",
+      "hint": "Claro, oscuro o el que use el sistema.",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
+    "accent": {
+      "label": "Color de acento",
+      "hint": "Se usa en botones, enlaces y resaltados.",
+      "item": "Acento: {{name}}",
+      "names": {
+        "default": "Neutro",
+        "blue": "Azul",
+        "violet": "Violeta",
+        "green": "Verde",
+        "amber": "Ámbar",
+        "orange": "Naranja",
+        "rose": "Rosa",
+        "teal": "Verde azulado",
+        "cyan": "Cian"
+      }
+    },
+    "density": {
+      "label": "Densidad de la lista",
+      "hint": "Espaciado entre las filas de la lista.",
+      "compact": "Compacta",
+      "default": "Normal",
+      "relaxed": "Amplia"
+    },
+    "fontScale": {
+      "label": "Tamaño de letra",
+      "hint": "Escala toda la interfaz."
+    },
+    "avatars": {
+      "label": "Avatares de contactos",
+      "hint": "Desactivado por defecto: al activarlo se envía a gravatar.com un hash irreversible de la dirección de cada contacto. Los avatares se guardan en local; al desactivarlo se vuelven a ocultar."
+    },
+    "profileMarkers": {
+      "label": "Marcas de color por perfil",
+      "hint": "Muestra una barra de color al inicio de cada conversación en las listas que mezclan cuentas, con el color del perfil o de la cuenta."
+    }
+  },
+  "page": {
+    "title": "Ajustes",
+    "back": "Volver",
+    "backToMailbox": "Volver al correo",
+    "sectionsNav": "Secciones de ajustes",
+    "sections": {
+      "accounts": "Cuentas",
+      "addressBook": "Libreta de direcciones",
+      "calendar": "Calendario",
+      "pgp": "Cifrado",
+      "attachmentSecurity": "Seguridad de adjuntos",
+      "junkFilter": "Correo no deseado",
+      "dataPortability": "Importar y exportar",
+      "backup": "Copia de seguridad",
+      "storage": "Almacenamiento",
+      "updates": "Actualizaciones",
+      "desktop": "Escritorio",
+      "appearance": "Apariencia",
+      "reading": "Lectura",
+      "ai": "IA",
+      "notifications": "Notificaciones",
+      "rules": "Reglas",
+      "categories": "Categorías",
+      "quickSteps": "Pasos rápidos",
+      "blockedSenders": "Remitentes bloqueados",
+      "subscriptions": "Suscripciones",
+      "deliverySchedules": "Horarios de entrega",
+      "autoArchive": "Archivado automático",
+      "shortcuts": "Atajos de teclado",
+      "snippets": "Fragmentos",
+      "help": "Ayuda"
+    }
+  },
+  "accounts": {
+    "title": "Cuentas",
+    "description": "Las cuentas se guardan en este equipo; los mensajes se sincronizan en local y funcionan sin conexión.",
+    "add": "Añadir cuenta",
+    "empty": "Aún no hay cuentas. Añade una para empezar a sincronizar el correo.",
+    "noDisplayName": "Sin nombre visible",
+    "firstSync": "Primera sincronización",
+    "firstSyncAria": "Periodo de descarga de la primera sincronización de {{email}}",
+    "reminders": "Recordatorios",
+    "remindersAria": "Antelación de los recordatorios de reuniones de {{email}}",
+    "signInError": "Error de inicio de sesión",
+    "unread": "{{count}} sin leer",
+    "reauthenticate": "Volver a autenticar",
+    "remove": "Quitar",
+    "window": {
+      "1m": "1 mes",
+      "3m": "3 meses",
+      "6m": "6 meses",
+      "1y": "1 año",
+      "all": "Todo"
+    },
+    "reminderLead": {
+      "off": "Desactivados",
+      "minutes": "{{minutes}} min antes"
+    },
+    "backfill": {
+      "title": "¿Descargar también el correo más antiguo?",
+      "description": "El periodo de la primera sincronización de <email>{{email}}</email> se ha ampliado ({{range}}). Los mensajes que se omitieron antes se pueden descargar ahora: solo se descarga el periodo recién incluido, ya sea en línea o en el próximo inicio. Cancela para mantener el periodo más amplio sin descargar el correo antiguo.",
+      "notNow": "Ahora no",
+      "confirm": "Descargar correo antiguo",
+      "queueFailed": "No se pudo poner en cola la descarga del correo antiguo."
+    }
+  },
+  "reading": {
+    "title": "Lectura",
+    "description": "Cómo se organiza el buzón y cuándo se te avisa del correo nuevo.",
+    "pane": {
+      "label": "Panel de lectura",
+      "right": "Derecha",
+      "bottom": "Abajo",
+      "hidden": "Oculto",
+      "hints": {
+        "right": "Diseño clásico de tres paneles",
+        "bottom": "Lista encima del mensaje",
+        "hidden": "Dos paneles; los mensajes se abren a todo el ancho"
+      }
+    },
+    "notifications": {
+      "label": "Notificaciones de correo nuevo",
+      "hint": "Muestra una notificación del sistema cuando la sincronización encuentra mensajes nuevos. Los contadores de no leídos siempre se mantienen al día."
+    },
+    "markReadOnOpen": {
+      "label": "Marcar como leído al abrir",
+      "hint": "Al abrir un mensaje se marca como leído. Marcar como leído/no leído a mano y las reglas funcionan como siempre."
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "description": "Excepciones de notificación por remitente y por etiqueta.",
+    "descriptionFor": "Excepciones por remitente y por etiqueta para {{email}}.",
+    "addRule": "Añadir regla",
+    "newMailSound": {
+      "label": "Sonido de correo nuevo",
+      "hint": "Reproduce un aviso sonoro con las notificaciones de correo nuevo. Los remitentes y conversaciones silenciados siguen en silencio: sin aviso ni sonido."
+    },
+    "sentSound": {
+      "label": "Sonido de mensaje enviado",
+      "hint": "Reproduce un aviso sonoro al enviar un mensaje. No suena con los mensajes que solo se ponen en cola sin conexión."
+    },
+    "rulesNote": "Las reglas se aplican cuando la sincronización encuentra correo nuevo. Una regla «nunca» se impone a una regla «siempre» si coinciden ambas, y las conversaciones silenciadas siguen en silencio en cualquier caso. Los mensajes silenciados se reciben igualmente y quedan sin leer (también en el contador de no leídos), así que el contador puede incluir correo del que no se te avisó.",
+    "noAccount": "Añade una cuenta para gestionar sus reglas de notificación.",
+    "empty": "Aún no hay reglas. El correo nuevo se notifica como siempre.",
+    "matchType": {
+      "sender": "Remitente",
+      "label": "Etiqueta"
+    },
+    "action": {
+      "always": "Notificar siempre",
+      "never": "No notificar nunca"
+    },
+    "bySender": "Por remitente",
+    "byLabel": "Por etiqueta",
+    "delete": "Eliminar",
+    "deleteRule": "Eliminar {{value}}",
+    "addDialog": {
+      "title": "Añadir regla de notificación",
+      "description": "Muestra siempre o nunca las notificaciones de correo nuevo de un remitente o una etiqueta de esta cuenta.",
+      "matchBy": "Coincidir por",
+      "senderAddress": "Dirección del remitente",
+      "labelName": "Nombre de la etiqueta",
+      "senderPlaceholder": "p. ej., news@x.com",
+      "labelPlaceholder": "p. ej., Recibos",
+      "then": "Entonces",
+      "cancel": "Cancelar",
+      "saveFailed": "No se pudo guardar la regla; puede que ya exista una idéntica."
+    }
+  },
+  "desktop": {
+    "title": "Escritorio",
+    "description": "Cómo se comporta Emailer en tu sistema operativo.",
+    "mailto": {
+      "label": "Cliente de correo predeterminado",
+      "hint": "Abre en Emailer los enlaces mailto: del navegador y de otras aplicaciones. Al desactivarlo se restaura el cliente de correo predeterminado anterior."
+    },
+    "autostart": {
+      "label": "Iniciar al arrancar el sistema",
+      "hint": "Abre Emailer automáticamente al iniciar sesión, oculto en la bandeja del sistema, para que sincronice y notifique desde el principio."
+    },
+    "composeShortcut": {
+      "label": "Atajo global para redactar",
+      "placeholder": "p. ej., CmdOrCtrl+Shift+E",
+      "save": "Guardar",
+      "clear": "Borrar",
+      "registered": "Registrado: al pulsarlo desde cualquier aplicación, Emailer se abre con un mensaje nuevo.",
+      "none": "No hay ningún atajo global registrado. Usa prefijos de modificador como CmdOrCtrl+Shift+…"
+    },
+    "closeAction": {
+      "label": "Al cerrar la ventana",
+      "quit": "Salir de Emailer",
+      "hide": "Ocultar en la bandeja del sistema",
+      "hideHint": "Emailer sigue ejecutándose en la bandeja del sistema: el correo se sigue sincronizando y las notificaciones siguen llegando. Restáuralo desde el icono de la bandeja.",
+      "quitHint": "Al cerrar la ventana se sale de Emailer y se detiene la sincronización en segundo plano."
+    },
+    "noTray": "La bandeja del sistema no está disponible en esta plataforma; Emailer se comporta como una aplicación con ventanas normal."
+  },
+  "updates": {
+    "title": "Actualizaciones",
+    "running": "Estás usando emailer v{{version}}.",
+    "runningBeta": "Estás usando emailer v{{version}} en el canal beta.",
+    "channel": {
+      "label": "Canal de versiones",
+      "stable": "Estable",
+      "beta": "Beta",
+      "stableOption": "Estable: solo versiones publicadas",
+      "betaOption": "Beta: versiones preliminares en cuanto se compilan",
+      "hint": "El canal determina qué manifiesto consultan las búsquedas de actualizaciones; el cambio se aplica en la siguiente búsqueda."
+    },
+    "channelName": {
+      "stable": "estable",
+      "beta": "beta"
+    },
+    "check": "Buscar actualizaciones",
+    "desktopOnly": "Solo se pueden buscar actualizaciones en la aplicación de escritorio instalada.",
+    "checking": "Buscando en el canal {{channel}}…",
+    "upToDate": "Emailer está actualizado.",
+    "available": "La versión {{version}} está disponible en el canal {{channel}} (tienes la {{current}}).",
+    "install": "Descargar e instalar",
+    "downloading": "Descargando…",
+    "downloadingPercent": "Descargando: {{percent}} %",
+    "ready": "Actualización instalada: reinicia para aplicarla.",
+    "restart": "Reiniciar",
+    "checkFailed": "No se pudieron buscar actualizaciones.",
+    "downloadFailed": "No se pudo descargar la actualización."
+  },
+  "storage": {
+    "title": "Almacenamiento",
+    "description": "Lo que Emailer guarda en este dispositivo.",
+    "refresh": "Actualizar",
+    "calculating": "Calculando…",
+    "total": "Total",
+    "approximate": "No se pudieron leer algunos archivos, así que estos tamaños son un mínimo.",
+    "loadFailed": "No se pudo medir el almacenamiento local. Comprueba que la aplicación se ha iniciado desde su versión de escritorio y vuelve a intentarlo.",
+    "kinds": {
+      "attachments": {
+        "label": "Adjuntos",
+        "description": "Copias descargadas de adjuntos, almacenadas por hash"
+      },
+      "databases": {
+        "label": "Bases de datos e índices",
+        "description": "La base de datos local del correo: cuerpos de mensajes, caché de IA, datos de calendario y tareas, contactos y preferencias"
+      },
+      "keys": {
+        "label": "Credenciales protegidas",
+        "description": "El archivo de clave que protege las credenciales de las cuentas en este dispositivo"
+      },
+      "other": {
+        "label": "Otros archivos",
+        "description": "Archivos auxiliares, como los registros"
+      }
+    },
+    "deleteAll": {
+      "title": "Eliminar todos los datos locales",
+      "hint": "Borra todo lo que Emailer guarda en este dispositivo y empieza de cero. Tus servidores de correo no se tocan.",
+      "button": "Eliminar todo…"
+    },
+    "deleteFailed": {
+      "title": "No se pudieron terminar de eliminar los datos locales",
+      "description": "Puede que algunos datos locales ya se hayan borrado. Tus servidores de correo no se han tocado: reinicia Emailer y vuelve a intentarlo."
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar todos los datos locales?",
+      "description": "Esto borra de ESTE dispositivo, para todas las cuentas:",
+      "items": {
+        "mail": "el correo local de todas las cuentas: cuerpos de los mensajes y su estado de lectura",
+        "attachments": "los adjuntos descargados",
+        "aiCache": "la caché de IA",
+        "calendar": "los datos de calendario y tareas",
+        "contacts": "los contactos",
+        "preferences": "las preferencias y ajustes",
+        "credentials": "las credenciales protegidas: se cerrará la sesión de todas las cuentas"
+      },
+      "serversNote": "Tus servidores de correo no se tocan: todos los mensajes se quedan en el servidor. Tras el borrado, Emailer se reinicia como recién instalado y tu correo se vuelve a sincronizar cuando añadas de nuevo tus cuentas.",
+      "cancel": "Cancelar",
+      "continue": "Continuar",
+      "confirmTitle": "¿Seguro que quieres continuar?",
+      "confirmDescription": "Esta acción no se puede deshacer. Todo lo indicado se borrará de este dispositivo y Emailer se reiniciará como recién instalado. Tus servidores de correo conservan todos los mensajes.",
+      "back": "Atrás",
+      "deleteEverything": "Eliminar todo"
+    }
+  },
+  "backup": {
+    "title": "Copia de seguridad y restauración",
+    "description": "Lleva tu configuración de Emailer de un equipo a otro con un único archivo comprobado mediante sumas de verificación.",
+    "exportFailed": "No se pudo escribir la copia de seguridad",
+    "export": {
+      "title": "Exportar",
+      "hint": "Guarda en un solo archivo los ajustes de tus cuentas, perfiles, reglas, fragmentos, pasos rápidos, firmas, búsquedas guardadas, categorías y una instantánea verificada de la base de datos con el correo sincronizado. Nunca se incluyen contraseñas ni tokens; cada cuenta restaurada vuelve a iniciar sesión.",
+      "done": "Copia guardada en {{path}} ({{size}}).",
+      "button": "Exportar copia…"
+    },
+    "restore": {
+      "title": "Restaurar",
+      "hint": "Restaura un archivo de copia de seguridad. Todas las sumas de verificación se comprueban antes de cambiar nada, y si la restauración falla o se cancela tus datos actuales quedan intactos.",
+      "button": "Restaurar copia…",
+      "replaceDone_one": "Se ha restaurado {{count}} cuenta. Inicia sesión en ella para volver a sincronizar; el correo restaurado ya se puede leer.",
+      "replaceDone_other": "Se han restaurado {{count}} cuentas. Inicia sesión en cada una para volver a sincronizar; el correo restaurado ya se puede leer.",
+      "mergeDone": "Restaurado: {{items}}.",
+      "mergeNote": "La combinación no incluye los cuerpos de los mensajes: cada cuenta vuelve a descargar su correo en la primera sincronización."
+    },
+    "mergeSummary": {
+      "accountsAdded_one": "{{count}} cuenta añadida",
+      "accountsAdded_other": "{{count}} cuentas añadidas",
+      "accountsKept_one": "{{count}} cuenta existente sin cambios",
+      "accountsKept_other": "{{count}} cuentas existentes sin cambios",
+      "profiles_one": "{{count}} perfil",
+      "profiles_other": "{{count}} perfiles",
+      "rules_one": "{{count}} regla",
+      "rules_other": "{{count}} reglas",
+      "snippets_one": "{{count}} fragmento",
+      "snippets_other": "{{count}} fragmentos",
+      "savedSearches_one": "{{count}} búsqueda guardada",
+      "savedSearches_other": "{{count}} búsquedas guardadas",
+      "categoryOverrides_one": "{{count}} excepción de categoría",
+      "categoryOverrides_other": "{{count}} excepciones de categoría",
+      "settings_one": "{{count}} ajuste",
+      "settings_other": "{{count}} ajustes"
+    },
+    "restoreDialog": {
+      "title": "Restaurar desde una copia de seguridad",
+      "verified": "Archivo verificado: todas las sumas de verificación coinciden.",
+      "format": "Formato",
+      "exported": "Exportada",
+      "madeWith": "Creada con",
+      "modeLabel": "¿Qué quieres hacer?",
+      "replace": "Reemplazar todo lo de este dispositivo",
+      "merge": "Combinar con mis datos actuales",
+      "replaceWarning": "Al reemplazar, primero se borra todo lo que Emailer guarda en este dispositivo (cuentas, cuerpos de mensajes, ajustes, perfiles y reglas) y se restaura la copia en su lugar. Las cuentas de la copia no incluyen contraseñas ni tokens: tendrás que iniciar sesión de nuevo en cada una antes de que sincronice o envíe. Tus servidores de correo no se tocan.",
+      "mergeWarning": "Al combinar se añade lo que falta en tu configuración actual: las cuentas se emparejan por dirección de correo y las entradas existentes se quedan como están. Los cuerpos de los mensajes NO se restauran al combinar: se vuelven a descargar del servidor en la primera sincronización de cada cuenta. Las cuentas restauradas vuelven a iniciar sesión antes de sincronizar.",
+      "restoring": "Restaurando…",
+      "cancelRestore": "Cancelar restauración",
+      "cancel": "Cancelar",
+      "start": "Restaurar {{file}}"
+    },
+    "errors": {
+      "newerVersion": "Esta copia se creó con una versión más reciente de Emailer (formato v{{version}}). Actualiza la aplicación y vuelve a intentarlo.",
+      "unreadableVersion": "Este archivo no es una copia de seguridad de Emailer legible (formato v{{version}}).",
+      "cancelled": "Restauración cancelada",
+      "cancelledDetail": "Restauración cancelada: tus datos actuales no han cambiado.",
+      "unreadable": "Este archivo no es una copia de seguridad de Emailer legible.",
+      "unreadableDetail": "Puede que esté dañado, incompleto o manipulado. Tus datos actuales no se han tocado.",
+      "io": "Emailer no ha podido acceder a ese archivo.",
+      "generic": "La copia de seguridad ha fallado."
+    }
+  },
+  "dataPortability": {
+    "title": "Importar y exportar",
+    "ariaLabel": "Importar y exportar",
+    "description": "Saca los datos del buzón en formatos estándar o vuelve a importar archivos. Exportar nunca modifica nada; importar nunca cambia los mensajes existentes.",
+    "account": "Cuenta",
+    "cancel": "Cancelar",
+    "export": {
+      "title": "Exportar carpeta como mbox",
+      "folder": "Carpeta que exportar",
+      "button": "Exportar…",
+      "progress": "Exportando… {{done}} / {{total}}",
+      "done_one": "Se ha exportado {{count}} mensaje a {{path}}.",
+      "done_other": "Se han exportado {{count}} mensajes a {{path}}.",
+      "cancelled_one": "Exportación cancelada: se ha eliminado el archivo parcial (se había escrito {{count}} mensaje).",
+      "cancelled_other": "Exportación cancelada: se ha eliminado el archivo parcial (se habían escrito {{count}} mensajes).",
+      "failed": "Error al exportar: {{error}}",
+      "hint": "Un mbox RFC 4155 por carpeta, que otros clientes de correo pueden importar. Exportar es de solo lectura. Para exportar una sola conversación, usa «Exportar como EML» en su menú contextual."
+    },
+    "import": {
+      "title": "Importar EML / mbox",
+      "chooseFiles": "Elegir archivos…",
+      "files_one": "{{count}} archivo: {{names}}",
+      "files_other": "{{count}} archivos: {{names}}",
+      "destination": "Carpeta de destino",
+      "newFolder": "Nueva carpeta…",
+      "newFolderName": "Nombre de la nueva carpeta",
+      "folderNamePlaceholder": "Nombre de la carpeta",
+      "upload": {
+        "label": "Subir también al servidor",
+        "hint": "Añade cada mensaje importado a la cuenta (carpeta IMAP o etiqueta de Gmail). Sin conexión, la importación se completa igualmente en local y se informa de las subidas omitidas."
+      },
+      "button": "Importar",
+      "progress": "Importando… {{done}} / {{total}}",
+      "failed": "Error al importar: {{error}}",
+      "hint": "Se omiten los mensajes que ya están en la carpeta de destino (mismo Message-ID). El correo importado se marca como leído y nunca sobrescribe mensajes existentes.",
+      "summary": {
+        "complete": "{{details}}.",
+        "cancelled": "Importación cancelada. {{details}}.",
+        "counts_one": "Importados: {{imported}}; duplicados omitidos: {{count}}; fallidos: {{failed}}",
+        "counts_other": "Importados: {{imported}}; duplicados omitidos: {{count}}; fallidos: {{failed}}",
+        "uploadFailures_one": "{{count}} subida fallida (se conserva en local)",
+        "uploadFailures_other": "{{count}} subidas fallidas (se conservan en local)",
+        "uploaded_one": "{{count}} subido",
+        "uploaded_other": "{{count}} subidos",
+        "uploadFailed": "{{file}}: error al subir: {{error}}"
+      }
+    }
+  },
+  "attachmentSecurity": {
+    "title": "Seguridad de adjuntos",
+    "description": "Los tipos de archivo peligrosos conocidos siempre se marcan y piden confirmación antes de abrirse. Opcionalmente, los adjuntos también se pueden comprobar con un servicio de detección de malware antes de abrirlos por primera vez.",
+    "lookup": {
+      "label": "Comprobar los adjuntos con un servicio antimalware",
+      "hint": "Antes de abrir un adjunto por primera vez, se consulta su hash SHA-256. Los archivos maliciosos se bloquean y se muestra el informe de detección (puedes abrirlos igualmente); los sospechosos muestran un aviso."
+    },
+    "apiKey": {
+      "label": "Clave de API de VirusTotal",
+      "placeholder": "Pega tu clave (se guarda en este equipo)",
+      "hint": "Solo se envía el hash SHA-256 del archivo: el contenido de los adjuntos nunca sale de este equipo. Los resultados se guardan en caché local por hash. Sin conexión, sin clave o si no se puede contactar con el servicio, solo se aplican los avisos integrados de archivos peligrosos indicados arriba."
+    },
+    "alwaysOn": "Los ejecutables, scripts, instaladores y documentos de Office con macros se marcan por tipo de archivo en todas las cuentas, independientemente de este ajuste."
+  },
+  "voice": {
+    "ariaLabel": "Voz",
+    "loading": "Cargando…",
+    "learned_one": "Estilo de escritura aprendido de {{count}} mensaje enviado.",
+    "learned_other": "Estilo de escritura aprendido de {{count}} mensajes enviados.",
+    "learnFailed": "No se pudo aprender el estilo de escritura.",
+    "deleted": "Perfil de estilo de escritura eliminado.",
+    "learnFailure": {
+      "notConfigured": "La asistencia de IA no está configurada.",
+      "noSentMail": "No se encontraron mensajes enviados que analizar.",
+      "notEnoughMail": "Aún no hay suficiente correo enviado: se necesitan al menos {{min}} mensajes enviados.",
+      "parse": "No se pudo leer el estilo de escritura en la respuesta del modelo. Vuelve a intentarlo.",
+      "provider": "La solicitud al proveedor ha fallado."
+    },
+    "learnDisabled": {
+      "noProvider": "Primero conecta y activa un proveedor de IA.",
+      "notEnoughMail": "Se necesitan al menos {{min}} mensajes enviados para aprender."
+    },
+    "dictation": {
+      "label": "Dictado",
+      "hint": "El micrófono del editor convierte la voz en texto íntegramente en este equipo: se descarga una vez un modelo de voz de {{size}} desde Hugging Face y tu voz nunca se sube.",
+      "modelReady": "Modelo de voz descargado ({{size}}).",
+      "downloading": "Descargando modelo… {{received}}",
+      "downloadingOf": "Descargando modelo… {{received}} de {{total}}",
+      "downloadingPercent": "Descargando modelo… {{received}} de {{total}} ({{percent}} %)",
+      "cancelDownload": "Cancelar descarga",
+      "downloadFailed": "No se pudo descargar el modelo ({{error}}). Puedes volver a intentarlo.",
+      "unknownError": "error desconocido",
+      "downloadCancelled": "Descarga cancelada: el dictado no estará disponible hasta que se descargue el modelo.",
+      "download": "Descargar modelo de voz ({{size}})"
+    },
+    "language": {
+      "label": "Idioma del dictado",
+      "hint": "Con la detección automática, el modelo reconoce el idioma hablado; si fijas un idioma, la transcripción se hace siempre en él."
+    },
+    "languages": {
+      "auto": "Detección automática",
+      "en": "Inglés",
+      "es": "Español",
+      "de": "Alemán",
+      "fr": "Francés",
+      "tr": "Turco",
+      "zh": "Chino",
+      "it": "Italiano",
+      "pt": "Portugués",
+      "nl": "Neerlandés",
+      "pl": "Polaco",
+      "ru": "Ruso",
+      "ja": "Japonés",
+      "ko": "Coreano",
+      "ar": "Árabe",
+      "hi": "Hindi"
+    },
+    "writing": {
+      "title": "Estilo de escritura",
+      "hint": "Aprende cómo sueles escribir a partir de tus mensajes enviados recientes (hasta 30) con una sola llamada a la IA; así, los borradores, las revisiones y las respuestas inteligentes siguen tu estilo. Solo se aprende cuando haces clic, y no se guarda nada de los mensajes, solo el estilo resumido.",
+      "refresh": "Actualizar",
+      "learn": "Aprender mi estilo de escritura",
+      "delete": "Eliminar el perfil de estilo de escritura",
+      "status_one": "Aprendido {{when}} · {{count}} mensaje",
+      "status_other": "Aprendido {{when}} · {{count}} mensajes",
+      "vocabulary": "Vocabulario: {{value}}",
+      "opens": "Saludo: {{value}}",
+      "closes": "Despedida: {{value}}",
+      "noneWithSent_one": "Aún no se ha aprendido tu estilo de escritura: hay {{count}} mensaje enviado disponible.",
+      "noneWithSent_other": "Aún no se ha aprendido tu estilo de escritura: hay {{count}} mensajes enviados disponibles.",
+      "none": "Aún no se ha aprendido tu estilo de escritura."
+    }
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "description": "Todas las combinaciones de teclas. Pulsa ? en cualquier momento para ver la referencia rápida.",
+    "resetAll": "Restablecer todos",
+    "filter": "Filtrar atajos",
+    "filterPlaceholder": "Filtrar atajos…",
+    "noMatches": "Ningún atajo coincide",
+    "pressKey": "Pulsa una tecla…",
+    "conflict": "«{{action}}» coincidiría con {{others}}: pulsa otra tecla o cancela.",
+    "and": " y ",
+    "cancel": "Cancelar",
+    "change": "Cambiar",
+    "changeAria": "Cambiar el atajo de: {{action}}",
+    "reset": "Restablecer",
+    "resetAria": "Restablecer el predeterminado: {{action}}"
+  },
+  "categories": {
+    "title": "Categorías",
+    "description": "Categorías automáticas de Recibidos ({{names}}) que se muestran como pestañas encima de la lista de conversaciones.",
+    "tabs": {
+      "label": "Pestañas de categorías",
+      "hint": "Muestra las pestañas de categorías encima de Recibidos, con el número de no leídos de cada una. Tus carpetas y pestañas personalizadas no cambian."
+    },
+    "existing": {
+      "label": "Categorizar el correo existente",
+      "hint": "Clasifica los mensajes que ya tienes en el buzón con el mismo motor local que usa el correo nuevo. Las conversaciones ya categorizadas no se tocan.",
+      "button": "Categorizar el correo existente"
+    }
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "ai": {
+    "ariaLabel": "AI",
+    "title": "AI assistance",
+    "description": "Optional AI help over your mail, powered by a provider you configure — including a fully local Ollama endpoint. Mail never depends on AI.",
+    "loading": "Loading…",
+    "enableHint": "Off by default. With AI off, no AI affordances appear anywhere in the app and nothing is ever sent to a provider.",
+    "offHint": "Turn AI assistance on to configure a provider, test the connection, and choose which surfaces may use it.",
+    "keysFinePrint": "Provider API keys are encrypted at rest on this machine and are never included in exported data — exports contain mailbox content only. Ollama runs entirely locally.",
+    "kinds": {
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "gemini": "Google Gemini",
+      "ollama": "Ollama (local)",
+      "custom": "Custom (OpenAI-compatible)"
+    },
+    "customDefaultLabel": "Custom endpoint",
+    "modelPlaceholders": {
+      "anthropic": "e.g. claude-sonnet-4-5",
+      "openai": "e.g. gpt-4.1",
+      "gemini": "e.g. gemini-2.5-flash",
+      "ollama": "e.g. llama3.1",
+      "custom": "any model id the endpoint serves"
+    },
+    "surfaces": {
+      "title": "AI surfaces",
+      "description": "Each surface can be turned off individually. Surfaces only send content you explicitly invoke them on, and only to the active provider.",
+      "summaries": {
+        "label": "Thread summaries",
+        "description": "Summarize an open thread on request."
+      },
+      "smartReplies": {
+        "label": "Smart replies",
+        "description": "Draft reply suggestions that match your writing style."
+      },
+      "composeTransform": {
+        "label": "Compose transforms",
+        "description": "Improve, shorten, or formalize selected draft text."
+      },
+      "askInbox": {
+        "label": "Ask My Inbox",
+        "description": "Translate natural-language questions into mailbox searches."
+      },
+      "taskExtraction": {
+        "label": "Task extraction",
+        "description": "Suggest tasks from open messages."
+      },
+      "categorizationAssist": {
+        "label": "Categorization assist (opt-in)",
+        "description": "Let the provider classify messages the rule engine cannot. Off by default."
+      },
+      "quickReplies": {
+        "label": "Quick replies",
+        "description": "Offer short one-tap reply chips under an open message. Nothing sends automatically."
+      },
+      "ruleAssist": {
+        "label": "Natural-language rules",
+        "description": "Translate a typed rule description into a rule preview. Only your description is sent."
+      },
+      "eventExtraction": {
+        "label": "Event extraction",
+        "description": "Suggest calendar events from open threads. Accepting one opens the event form prefilled — nothing is saved until you do."
+      },
+      "translation": {
+        "label": "Translate",
+        "description": "Translate a message into your output language on request. Only that message's text is sent."
+      },
+      "folderDigest": {
+        "label": "Catch-me-up digest",
+        "description": "Summarize the unread threads of the folder you invoke it in. Only threads from that folder are sent."
+      },
+      "assistant": {
+        "label": "AI assistant",
+        "description": "Chat with your mailbox: ask questions and the assistant looks threads up read-only to answer. Nothing is changed by it."
+      },
+      "voiceProfile": {
+        "label": "Writing voice learning",
+        "description": "The one-call action that learns your writing voice from sent mail for dictation-adjacent drafting. Runs only when you click Learn."
+      }
+    },
+    "tiers": {
+      "instant": "Instant",
+      "cheap": "Cheap",
+      "intelligent": "Intelligent",
+      "title": "Model tiers",
+      "description": "Each surface runs on one of three tiers. Set a model id per tier for the active provider; a tier left empty uses the provider's default model.",
+      "current": "Tier: {{tier}}",
+      "tierFor": "Tier for {{surface}}",
+      "modelId": "{{tier}} model id",
+      "placeholders": {
+        "instant": "e.g. the provider's fastest model",
+        "cheap": "e.g. the provider's economy model",
+        "intelligent": "e.g. the provider's strongest model"
+      },
+      "outputLanguage": "Output language",
+      "outputLanguagePlaceholder": "e.g. German — leave empty to infer from the input",
+      "outputLanguageHint": "Generative surfaces answer in this language when set; left empty, the language follows the conversation."
+    },
+    "providers": {
+      "title": "Providers",
+      "description": "Add a provider, test the connection, then mark one active. Model ids are free text — type whatever your provider offers.",
+      "add": "Add provider",
+      "empty": "No providers configured yet. Until one is active, no AI affordances appear anywhere in the app.",
+      "use": "Use {{label}} for AI",
+      "noKeyNeeded": "no key needed",
+      "keySaved": "key saved",
+      "noApiKey": "no API key",
+      "noModel": "no model set",
+      "testConnection": "Test connection",
+      "connectionOk": "Connection OK.",
+      "edit": "Edit {{label}}",
+      "remove": "Remove {{label}}"
+    },
+    "dialog": {
+      "editTitle": "Edit provider",
+      "addTitle": "Add an AI provider",
+      "description": "Your key is encrypted on this machine and is sent only to the provider you configured, per request.",
+      "providerTypeValue": "Provider type: {{kind}}",
+      "providerType": "Provider type",
+      "name": "Name",
+      "namePlaceholder": "Work Anthropic",
+      "modelId": "Model id",
+      "baseUrl": "Base URL",
+      "baseUrlOptional": "Base URL (optional)",
+      "ollamaHint": "Ollama runs on this machine — requests never leave your computer and no API key is needed.",
+      "apiKey": "API key",
+      "apiKeySaved": "Saved — leave blank to keep the stored key",
+      "apiKeyPlaceholder": "Paste your key (stored encrypted on this machine)",
+      "notFound": "This provider no longer exists.",
+      "saveFailed": "Saving the provider failed.",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes",
+      "add": "Add provider"
+    },
+    "cache": {
+      "title": "Cached AI results",
+      "description": "AI results are cached on this machine, keyed by input content and model, and reused when the same input repeats. Removing an account automatically deletes the results derived from its mail.",
+      "loading": "Loading…",
+      "total_one": "{{count}} cached result",
+      "total_other": "{{count}} cached results",
+      "confirm_one": "Clear all {{count}} cached result?",
+      "confirm_other": "Clear all {{count}} cached results?",
+      "clearAll": "Clear all",
+      "cancel": "Cancel"
+    },
+    "usage": {
+      "title": "Usage",
+      "description": "Requests and token totals per surface, recorded on this machine. Cached results are reused without a request and are not counted.",
+      "loading": "Loading…",
+      "empty": "No usage recorded yet.",
+      "line_one": "{{surface}}: {{count}} request · {{prompt}} prompt · {{completion}} completion · {{total}} total tokens",
+      "line_other": "{{surface}}: {{count}} requests · {{prompt}} prompt · {{completion}} completion · {{total}} total tokens",
+      "lineApprox_one": "{{surface}}: {{count}} request · {{prompt}} prompt · {{completion}} completion · {{total}} total tokens (approx.)",
+      "lineApprox_other": "{{surface}}: {{count}} requests · {{prompt}} prompt · {{completion}} completion · {{total}} total tokens (approx.)",
+      "confirm_one": "Clear the recorded usage ({{count}} request)?",
+      "confirm_other": "Clear the recorded usage ({{count}} requests)?",
+      "clear": "Clear usage",
+      "cancel": "Cancel"
+    },
+    "writingStyle": {
+      "ariaLabel": "Writing style",
+      "title": "Writing style",
+      "description": "Smart replies follow your writing style. Building the profile analyzes your recent sent messages with the active provider — suggestions are always editable drafts; nothing is ever sent automatically.",
+      "rebuild": "Rebuild",
+      "build": "Build profile",
+      "delete": "Delete writing-style profile",
+      "noAccount": "No active account — the profile is built per account from its sent mail.",
+      "built_one": "Built {{when}} · {{count}} sample",
+      "built_other": "Built {{when}} · {{count}} samples",
+      "none": "No profile yet.",
+      "loading": "Loading…",
+      "rebuilt_one": "Profile rebuilt from {{count}} sent message.",
+      "rebuilt_other": "Profile rebuilt from {{count}} sent messages.",
+      "rebuildFailed": "Rebuilding the profile failed.",
+      "deleted": "Writing-style profile deleted.",
+      "failures": {
+        "notConfigured": "AI assistance is not configured.",
+        "noSentMail": "No recent sent messages were found to analyze.",
+        "parse": "The writing style could not be read from the model's reply. Try again.",
+        "provider": "The provider request failed.",
+        "providerWithMessage": "The provider request failed. {{message}}"
+      }
+    }
+  },
+  "semanticSearch": {
+    "title": "Semantic search",
+    "description": "Let the assistant also find threads by MEANING, not just exact words. Runs entirely on this machine: a {{size}} language model is downloaded once from Hugging Face and your mail is never sent anywhere by it.",
+    "loading": "Loading…",
+    "modelReady": "Model downloaded ({{size}}).",
+    "downloading": "Downloading model… {{received}}",
+    "downloadingOf": "Downloading model… {{received}} of {{total}}",
+    "downloadingPercent": "Downloading model… {{received}} of {{total}} ({{percent}}%)",
+    "cancelDownload": "Cancel download",
+    "downloadFailed": "The model download failed ({{error}}). You can retry.",
+    "unknownError": "unknown",
+    "downloadCancelled": "Download cancelled — semantic search stays off until the model is downloaded.",
+    "download": "Download model ({{size}})",
+    "indexing_one": "Indexing your mail… {{indexed}} of {{count}} thread",
+    "indexing_other": "Indexing your mail… {{indexed}} of {{count}} threads",
+    "indexed_one": "Indexed {{indexed}} of {{count}} thread",
+    "indexed_other": "Indexed {{indexed}} of {{count}} threads",
+    "indexedUpToDate_one": "Indexed {{indexed}} of {{count}} thread (up to date)",
+    "indexedUpToDate_other": "Indexed {{indexed}} of {{count}} threads (up to date)",
+    "noneIndexed": "No mail indexed yet.",
+    "spill_one": "This mailbox holds more than the in-memory limit — the {{formatted}} oldest thread is not part of semantic results.",
+    "spill_other": "This mailbox holds more than the in-memory limit — the {{formatted}} oldest threads are not part of semantic results."
+  },
+  "pgp": {
+    "title": "Encryption",
+    "description": "OpenPGP signing and encryption. Keys are generated and stored on this machine only.",
+    "noAccount": "Add an account to manage its encryption keys.",
+    "enable": "Enable OpenPGP",
+    "enableHint": "Per account: {{email}}. Turning it on reveals the key tools below; signing and encrypting stay per-message choices in the composer.",
+    "manager": {
+      "description": "Keys sign and decrypt this account's mail. They never leave this machine; share only the public key.",
+      "import": "Import Key",
+      "generate": "Generate Key Pair",
+      "loading": "Loading encryption keys…",
+      "yourKeys": "Your keys",
+      "noKeys": "No keys yet. Generate a key pair to start signing and encrypting, or import an existing private key.",
+      "publicKeys": "Correspondents' public keys",
+      "noPublicKeys": "No public keys imported yet. Import a correspondent's public key to encrypt mail to them.",
+      "footer": "Signing and encrypting are chosen per message in the composer; the recipient lookup uses the public keys listed here.",
+      "materialMissing": "The public key material is missing.",
+      "copiedFor": "Public key for {{email}} copied to the clipboard",
+      "copiedForThisKey": "Public key for this key copied to the clipboard",
+      "clipboardFailed": "Could not access the clipboard.",
+      "copyFailed": "Could not copy the public key.",
+      "setDefaultFailed": "Could not set the default key."
+    },
+    "row": {
+      "created": "{{fingerprint}} · created {{date}}",
+      "defaultSigningKey": "Default signing key",
+      "default": "Default",
+      "makeDefault": "Make {{email}} the default key",
+      "setDefault": "Set Default",
+      "copyPublicKeyFor": "Copy the public key for {{email}}",
+      "copyPublicKey": "Copy Public Key",
+      "deleteKeyFor": "Delete the key for {{email}}",
+      "deletePublicKeyFor": "Delete the public key for {{email}}",
+      "delete": "Delete",
+      "copy": "Copy",
+      "imported": "Imported",
+      "fromYourKey": "From your key"
+    },
+    "generate": {
+      "title": "Generate Key Pair",
+      "description": "Creates an OpenPGP key pair for this account, protected by the passphrase and stored encrypted on this machine.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Ada Lovelace",
+      "email": "Email",
+      "emailPlaceholder": "e.g. ada@example.com",
+      "passphrase": "Passphrase",
+      "passphraseHint": "Required. Without it the private key cannot be used or recovered — there is no way to reset it.",
+      "confirmPassphrase": "Confirm passphrase",
+      "mismatch": "The passphrases do not match.",
+      "failed": "Could not generate the key pair.",
+      "cancel": "Cancel",
+      "submit": "Generate",
+      "saveTitle": "Save your public key",
+      "saveDescription": "The key pair for {{email}} was generated. Share the public key with your correspondents so they can encrypt to you and verify your signatures.",
+      "publicKey": "Public key",
+      "recoveryWarning": "The private key cannot be recovered without its passphrase — if you lose it, the key and every message encrypted to it become unreadable. There is no server-side backup; keep a copy of this key pair somewhere safe before continuing.",
+      "copyPublicKey": "Copy Public Key",
+      "exportKeyFile": "Export key file",
+      "done": "Done",
+      "copied": "Public key copied to the clipboard",
+      "clipboardFailed": "Could not access the clipboard.",
+      "savedTo": "Public key saved to {{path}}",
+      "exportFailed": "Could not export the public key."
+    },
+    "import": {
+      "title": "Import Key",
+      "description": "Paste an armored OpenPGP key or load it from a file. A private key is re-protected with the passphrase you give here — it must be the key's existing passphrase when the key already has one.",
+      "keyType": "Key type",
+      "publicKey": "Public key",
+      "privateKey": "Private key",
+      "armoredKey": "Armored key",
+      "loadFromFile": "Load armored key from a file",
+      "passphrase": "Passphrase",
+      "passphraseHint": "Validated against the key before anything is stored — keys are never saved without a passphrase you have proven.",
+      "importedPublic": "Public key imported",
+      "importedPrivate": "Private key imported and protected with your passphrase",
+      "failed": "Could not import the key.",
+      "readFileFailed": "Could not read the selected file.",
+      "cancel": "Cancel",
+      "submit": "Import"
+    },
+    "delete": {
+      "titlePrivate": "Delete private key",
+      "titlePublic": "Delete public key",
+      "descriptionPrivate": "Delete the private key for {{label}}? Messages encrypted to it can no longer be decrypted and it can no longer sign mail. This cannot be undone.",
+      "descriptionPublic": "Delete the public key for {{label}}? You will no longer be able to encrypt mail to {{label}} with this key. This cannot be undone.",
+      "deletedPrivate": "Deleted the key for {{label}}",
+      "deletedPublic": "Deleted the public key for {{label}}",
+      "failed": "Could not delete the key.",
+      "cancel": "Cancel",
+      "confirm": "Delete key"
+    }
+  }
+}

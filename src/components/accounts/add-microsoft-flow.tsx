@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ArrowLeft, Loader2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
+import type { TFunction } from "i18next"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -40,11 +42,17 @@ import { HistoryWindowField } from "./history-window-field"
  * so nothing leaks (the add-gmail contract).
  */
 
-const STEP_LABELS: Record<MicrosoftFlowStep, string> = {
-  consent: "Waiting for you to finish in the browser…",
-  exchange: "Signing you in…",
-  profile: "Reading your Microsoft 365 profile…",
-  save: "Saving the account…",
+function stepLabel(t: TFunction, step: MicrosoftFlowStep): string {
+  switch (step) {
+    case "consent":
+      return t("accounts.oauth.steps.consent")
+    case "exchange":
+      return t("accounts.oauth.steps.exchange")
+    case "profile":
+      return t("accounts.oauth.steps.microsoftProfile")
+    case "save":
+      return t("accounts.oauth.steps.save")
+  }
 }
 
 /** Microsoft Entra's app-registration portal, linked from the help text. */
@@ -58,10 +66,10 @@ interface AddMicrosoftFlowProps {
 }
 
 export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
+  const { t } = useTranslation()
   const [clientId, setClientId] = useState("")
   const [validationError, setValidationError] = useState<string | null>(null)
-  const [historyWindow, setHistoryWindow] =
-    useState<HistoryWindowSetting>(null)
+  const [historyWindow, setHistoryWindow] = useState<HistoryWindowSetting>(null)
   const [working, setWorking] = useState(false)
   const [step, setStep] = useState<MicrosoftFlowStep>("consent")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -84,7 +92,7 @@ export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
     event.preventDefault()
     const trimmed = clientId.trim()
     if (!trimmed) {
-      setValidationError("Enter your Microsoft app registration's Client ID to continue.")
+      setValidationError(t("accounts.oauth.enterMicrosoftClientId"))
       return
     }
     setValidationError(null)
@@ -106,7 +114,7 @@ export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Sign-in failed. Please try again."
+          : t("accounts.oauth.signInFailed")
       )
     } finally {
       workingRef.current = false
@@ -118,10 +126,9 @@ export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
     return (
       <>
         <DialogHeader>
-          <DialogTitle>Connect Microsoft 365</DialogTitle>
+          <DialogTitle>{t("accounts.microsoft.title")}</DialogTitle>
           <DialogDescription>
-            A Microsoft sign-in page opened in your browser. Finish there —
-            this window continues automatically.
+            {t("accounts.microsoft.waiting")}
           </DialogDescription>
         </DialogHeader>
         <div
@@ -130,7 +137,7 @@ export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
           className="flex items-center gap-3 py-2 text-sm text-muted-foreground"
         >
           <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
-          {STEP_LABELS[step]}
+          {stepLabel(t, step)}
         </div>
         <div className="flex justify-start">
           <Button
@@ -141,7 +148,7 @@ export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
               void cancelOauthWait().catch(() => {})
             }}
           >
-            Cancel
+            {t("accounts.oauth.cancel")}
           </Button>
         </div>
       </>
@@ -151,41 +158,39 @@ export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Connect Microsoft 365</DialogTitle>
+        <DialogTitle>{t("accounts.microsoft.title")}</DialogTitle>
         <DialogDescription>
-          Emailer has no built-in Microsoft app, so a one-time personal
-          registration is needed. It stays on this device only.
+          {t("accounts.microsoft.description")}
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="grid gap-3">
         <div className="grid gap-2 rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
           <p>
-            In the{" "}
-            <a
-              href={ENTRA_APP_REGISTRATIONS_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-2 hover:text-foreground"
-            >
-              Azure portal
-            </a>{" "}
-            register an app (type “Accounts in any organizational directory
-            and personal Microsoft accounts”), then add the redirect URI
-            <code className="mx-1 rounded bg-muted px-1 py-0.5 font-mono">
-              http://localhost:{OAUTH_LOOPBACK_PORT}
-            </code>
-            as a <em>mobile and desktop</em> platform entry. No client
-            secret is needed.
+            <Trans
+              i18nKey="accounts.microsoft.registerHelp"
+              values={{ port: OAUTH_LOOPBACK_PORT }}
+              components={{
+                link: (
+                  <a
+                    href={ENTRA_APP_REGISTRATIONS_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline underline-offset-2 hover:text-foreground"
+                  />
+                ),
+                code: (
+                  <code className="mx-1 rounded bg-muted px-1 py-0.5 font-mono" />
+                ),
+                em: <em />,
+              }}
+            />
           </p>
-          <p>
-            Work or school account? Your organization may require admin
-            approval for the app registration — if sign-in reports that
-            admin approval is needed, ask your IT administrator to grant
-            it.
-          </p>
+          <p>{t("accounts.microsoft.adminHelp")}</p>
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="microsoft-client-id">Application (client) ID</Label>
+          <Label htmlFor="microsoft-client-id">
+            {t("accounts.oauth.applicationClientId")}
+          </Label>
           <Input
             id="microsoft-client-id"
             autoFocus
@@ -227,9 +232,9 @@ export function AddMicrosoftFlow({ onBack, onSuccess }: AddMicrosoftFlowProps) {
             className="gap-1"
           >
             <ArrowLeft className="size-3.5" aria-hidden />
-            Back
+            {t("accounts.oauth.back")}
           </Button>
-          <Button type="submit">Continue in browser</Button>
+          <Button type="submit">{t("accounts.oauth.continueInBrowser")}</Button>
         </div>
       </form>
     </>

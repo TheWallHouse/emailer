@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { CirclePlus, KeyRound, TriangleAlert } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -105,6 +106,7 @@ export function AccountSwitcher({
   const setActive = useAccountStore((state) => state.setActive)
   const activeAccount = useAccountStore(selectActiveAccount)
   const [reauthTarget, setReauthTarget] = useState<AccountInfo | null>(null)
+  const { t } = useTranslation()
 
   function findAccount(value: string): AccountInfo | null {
     return accounts.find((account) => account.id === value) ?? null
@@ -137,7 +139,7 @@ export function AccountSwitcher({
               render={
                 <SelectTrigger
                   className="flex h-9 w-9 shrink-0 items-center justify-center p-0 [&>svg]:hidden"
-                  aria-label="Select account"
+                  aria-label={t("sidebar.accountSwitcher.selectAccount")}
                 >
                   <AccountAvatar account={activeAccount} />
                 </SelectTrigger>
@@ -152,9 +154,13 @@ export function AccountSwitcher({
               isCollapsed &&
                 "h-9 w-9 shrink-0 justify-center p-0 [&>span]:w-auto [&>svg]:hidden"
             )}
-            aria-label="Select account"
+            aria-label={t("sidebar.accountSwitcher.selectAccount")}
           >
-            <SelectValue placeholder={isCollapsed ? "" : "No accounts"}>
+            <SelectValue
+              placeholder={
+                isCollapsed ? "" : t("sidebar.accountSwitcher.noAccounts")
+              }
+            >
               {activeAccount && (
                 <>
                   <AccountAvatar account={activeAccount} size="sm" />
@@ -176,7 +182,7 @@ export function AccountSwitcher({
                 disabled
                 className="text-muted-foreground"
               >
-                No accounts
+                {t("sidebar.accountSwitcher.noAccounts")}
               </SelectItem>
             ) : (
               accounts.flatMap((account) => [
@@ -187,7 +193,7 @@ export function AccountSwitcher({
                     {account.status === "auth-error" && (
                       <TriangleAlert
                         role="img"
-                        aria-label="Account sign-in error"
+                        aria-label={t("sidebar.accountSwitcher.signInError")}
                         className="size-3.5 shrink-0 text-destructive"
                       />
                     )}
@@ -206,7 +212,7 @@ export function AccountSwitcher({
                   >
                     <div className="flex items-center gap-2">
                       <KeyRound className="size-3.5 shrink-0" aria-hidden />
-                      Re-authenticate…
+                      {t("sidebar.accountSwitcher.reauthenticate")}
                     </div>
                   </SelectItem>
                 ),
@@ -218,7 +224,7 @@ export function AccountSwitcher({
             >
               <div className="flex items-center gap-2">
                 <CirclePlus className="size-3.5 shrink-0" aria-hidden />
-                Add account…
+                {t("sidebar.accountSwitcher.addAccount")}
               </div>
             </SelectItem>
           </SelectGroup>

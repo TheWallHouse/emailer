@@ -1,0 +1,275 @@
+{
+  "header": {
+    "reply": "Reply",
+    "forward": "Forward",
+    "newMessage": "New message",
+    "expand": "Expand composer",
+    "collapse": "Collapse composer",
+    "expandTitle": "Expand to full window",
+    "collapseTitle": "Shrink to centered card",
+    "popOut": "Pop out composer",
+    "popOutTitle": "Open in its own window",
+    "minimize": "Minimize composer",
+    "minimizeTitle": "Minimize to tray{{keys}}",
+    "closeAndSave": "Close and save draft",
+    "saveAndClose": "Save draft and close"
+  },
+  "fields": {
+    "from": "From",
+    "fromAddress": "From address",
+    "accountAddress": "Account address",
+    "to": "To",
+    "cc": "Cc",
+    "bcc": "Bcc",
+    "subject": "Subject"
+  },
+  "body": {
+    "placeholder": "Write your message…",
+    "label": "Message body"
+  },
+  "notice": {
+    "dismiss": "Dismiss"
+  },
+  "signature": {
+    "label": "Signature",
+    "none": "No signature"
+  },
+  "footer": {
+    "attachFile": "Attach file",
+    "discard": "Discard"
+  },
+  "send": {
+    "send": "Send",
+    "sending": "Sending…",
+    "sendTitle": "Send{{keys}}",
+    "moreOptions": "More send options",
+    "sendAndArchive": "Send & Archive",
+    "retry": "Retry",
+    "queued": "Message queued",
+    "sent": "Message sent"
+  },
+  "undoSend": {
+    "sendingIn": "Sending in {{seconds}}s",
+    "undo": "Undo",
+    "attachmentsRemoved": "Some attachments were no longer available and were removed",
+    "failed": "Sending failed",
+    "failedRestored": "Sending failed — your draft was restored"
+  },
+  "schedule": {
+    "scheduleSend": "Schedule send",
+    "pickDateTime": "Pick date & time…",
+    "scheduleFor": "Schedule for",
+    "cancel": "Cancel",
+    "schedule": "Schedule",
+    "scheduledFor": "Scheduled for {{when}}",
+    "pgpUnsupported": "Scheduled sends don't support PGP yet — disable Sign/Encrypt or send directly"
+  },
+  "guards": {
+    "attachment": {
+      "title": "Missing attachment?",
+      "description": "Your message mentions an attachment, but no file is attached.",
+      "fix": "Attach a file"
+    },
+    "emptySubject": {
+      "title": "Send without a subject?",
+      "description": "The subject line is empty. You can still send the message.",
+      "fix": "Add a subject"
+    },
+    "dontAskAgain": "Don't ask again for this account",
+    "sendAnyway": "Send anyway"
+  },
+  "pgp": {
+    "noPrivateKey": "Add a PGP private key for this account before signing messages",
+    "missingKeysTitle": "Missing encryption keys",
+    "missingKeysDescription": "No PGP public key is known for: {{recipients}}. Import their keys in settings, remove the recipients, or send without encryption.",
+    "keepEditing": "Keep editing",
+    "disableEncryption": "Disable encryption and send",
+    "passphraseTitle": "PGP passphrase",
+    "passphraseDescription": "Enter the passphrase of your signing key to sign this message.",
+    "cancel": "Cancel",
+    "signAndSend": "Sign and send"
+  },
+  "discard": {
+    "title": "Discard draft?",
+    "description": "Your message will be deleted.",
+    "cancel": "Cancel",
+    "confirm": "Discard"
+  },
+  "offers": {
+    "draftFromPrompt": "Draft from prompt",
+    "generatedReply": "Generated reply",
+    "applied": "{{label}} applied",
+    "appliedDescription": "The original text was replaced.",
+    "undo": "Undo"
+  },
+  "transform": {
+    "improve": "Improve writing",
+    "shorten": "Shorten",
+    "formalize": "Formalize"
+  },
+  "transformBar": {
+    "transforming": "{{label}} — transforming…",
+    "ready": "Replacement ready. Your text is unchanged until you accept.",
+    "accept": "Accept",
+    "retry": "Retry",
+    "discard": "Discard"
+  },
+  "aiPrompt": {
+    "title": "Draft from prompt",
+    "description": "Describe the message to write. The draft is offered for review before anything enters your message.",
+    "instruction": "Draft instruction",
+    "placeholder": "e.g. A short friendly note asking whether the report can slip to Friday",
+    "cancel": "Cancel",
+    "generate": "Generate"
+  },
+  "toolbar": {
+    "formatting": "Formatting",
+    "undo": "Undo (Cmd/Ctrl+Z)",
+    "redo": "Redo (Cmd/Ctrl+Shift+Z)",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "strikethrough": "Strikethrough (Cmd/Ctrl+Shift+S)",
+    "inlineCode": "Inline code (Cmd/Ctrl+E)",
+    "bulletList": "Bullet list",
+    "numberedList": "Numbered list",
+    "blockquote": "Blockquote (Cmd/Ctrl+Shift+B)",
+    "insertLink": "Insert link",
+    "linkUrl": "Link URL",
+    "removeLink": "Remove link",
+    "applyLink": "Apply link",
+    "alignLeft": "Align left",
+    "alignCenter": "Align center",
+    "alignRight": "Align right",
+    "insertImage": "Insert image",
+    "pgpSign": "Sign (PGP)",
+    "pgpEncrypt": "Encrypt (PGP)",
+    "aiTransform": "AI transform",
+    "ai": "AI",
+    "draftFromPrompt": "Draft from prompt…",
+    "generateReply": "Generate reply"
+  },
+  "snippets": {
+    "insertSnippet": "Insert snippet",
+    "snippet": "Snippet",
+    "empty": "No snippets yet. Add them in Settings → Snippets.",
+    "list": "Snippets",
+    "insertNamed": "Insert {{name}}",
+    "variableHint_one": "{{count}} variable — you'll be asked for any we can't fill",
+    "variableHint_other": "{{count}} variables — you'll be asked for any we can't fill"
+  },
+  "snippetVariables": {
+    "title": "Fill in snippet values",
+    "description": "This snippet uses values the message context doesn't provide. Each value replaces every occurrence of its variable; leave a field empty to keep its placeholder as text.",
+    "cancel": "Cancel",
+    "insert": "Insert",
+    "vars": {
+      "firstName": {
+        "label": "First name",
+        "description": "The recipient's first name, from the display name or derived from the email local-part (jane.doe@… → Jane).",
+        "example": "Jane"
+      },
+      "lastName": {
+        "label": "Last name",
+        "description": "The recipient's last name — only when their name has one; a single-word name prompts instead of guessing.",
+        "example": "Doe"
+      },
+      "fullName": {
+        "label": "Full name",
+        "description": "The recipient's full name, as typed or rebuilt from the email local-part.",
+        "example": "Jane Doe"
+      },
+      "email": {
+        "label": "Recipient email",
+        "description": "The first To recipient's address, exactly as typed in the draft.",
+        "example": "jane.doe@acme.com"
+      },
+      "myName": {
+        "label": "Your name",
+        "description": "The composing account's display name.",
+        "example": "Alex Chen"
+      },
+      "myEmail": {
+        "label": "Your email address",
+        "description": "The composing account's email address.",
+        "example": "alex@chen.dev"
+      },
+      "date": {
+        "label": "Today's date",
+        "description": "Today, resolved at insertion time, in the long date format.",
+        "example": "Friday, September 18th, 2026"
+      }
+    }
+  },
+  "recipients": {
+    "invalidTitle": "{{address}} is not a valid email address",
+    "invalidSr": "(invalid address)",
+    "remove": "Remove {{name}}",
+    "suggestions": "Contact suggestions"
+  },
+  "attachments": {
+    "remove": "Remove {{name}}",
+    "summary_one": "{{count}} file · {{size}} / {{limit}}",
+    "summary_other": "{{count}} files · {{size}} / {{limit}}",
+    "tooLarge": "\"{{name}}\" is {{size}} — files can be at most {{max}}",
+    "overTotal": "\"{{name}}\" would push the attachments over the {{limit}} total limit"
+  },
+  "inlineImage": {
+    "tooLarge": "\"{{name}}\" is too large to embed inline (over {{mb}} MB) — attached as a file instead",
+    "pickerFilter": "Images"
+  },
+  "trayChip": {
+    "newMessage": "New message",
+    "restore": "Restore draft",
+    "draftPrefix": "Draft · ",
+    "closeAndSave": "Close and save draft",
+    "saveAndClose": "Save draft and close"
+  },
+  "dictation": {
+    "dictate": "Dictate",
+    "stop": "Stop dictation",
+    "dictateTitle": "Dictate (speech to text, on-device)",
+    "stopTitle": "Stop and insert the transcript",
+    "cancel": "Cancel dictation",
+    "cancelTitle": "Cancel dictation — discard the recording",
+    "consentTitle": "Enable dictation?",
+    "consentBody": "Dictation runs entirely on this machine with a {{size}} speech model, downloaded once from Hugging Face. Your voice is never uploaded.",
+    "downloading": "Downloading model… {{received}}",
+    "downloadingOf": "Downloading model… {{received}} of {{total}}",
+    "downloadingPercent": "Downloading model… {{received}} of {{total}} ({{percent}}%)",
+    "downloadError": "{{error}} You can retry.",
+    "notNow": "Not now",
+    "downloadAndDictate": "Download and dictate",
+    "startFailed": "Could not start dictation.",
+    "transcriptionFailed": "Transcription failed.",
+    "downloadFailed": "The download failed."
+  },
+  "popout": {
+    "draftMissing": "This draft no longer exists.",
+    "noContext": "No composer window context.",
+    "loading": "Loading…"
+  },
+  "validation": {
+    "missingRecipients": "Add at least one recipient before sending",
+    "invalidRecipients_one": "{{count}} recipient address is not valid",
+    "invalidRecipients_other": "{{count}} recipient addresses are not valid",
+    "emptyMessage": "Write a subject or a message body before sending",
+    "reauthRequired": "{{email}} needs to be signed in again before sending — use “Re-authenticate…” in the account picker.",
+    "missingPgpKeys": "No PGP public key for: {{recipients}}",
+    "passphraseRequired": "Enter your PGP passphrase to sign this message"
+  },
+  "sendAgain": {
+    "attachmentsNotRestored": "Original attachments couldn't be restored",
+    "reopenFailed": "Could not reopen this message"
+  },
+  "outgoing": {
+    "quoteHeader": "On {{date}}, {{writer}} wrote:",
+    "forwardedMessage": "---------- Forwarded message ----------",
+    "from": "From: {{value}}",
+    "date": "Date: {{value}}",
+    "subject": "Subject: {{value}}",
+    "to": "To: {{value}}",
+    "cc": "Cc: {{value}}",
+    "unsubscribeSubject": "Unsubscribe"
+  }
+}

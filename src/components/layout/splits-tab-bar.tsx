@@ -10,6 +10,7 @@ import {
   Settings2,
   Trash2,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -129,6 +130,7 @@ function CategoryTab({
   unread: number
   total: number
 }) {
+  const { t } = useTranslation()
   const label = CATEGORY_LABELS[category]
   return (
     <button
@@ -137,7 +139,7 @@ function CategoryTab({
       aria-selected={active}
       data-testid="category-tab"
       data-category={category}
-      title={`${label} — ${total} ${total === 1 ? "thread" : "threads"}`}
+      title={t("sidebar.splits.categoryTitle", { label, count: total })}
       className={cn(
         "flex min-w-0 items-center gap-1.5 rounded-md py-1 ps-2.5 pe-2 text-sm",
         active ? "bg-muted text-foreground" : "hover:bg-accent/50"
@@ -173,6 +175,7 @@ function CategoryTab({
  * disabling returns the bar to splits-only and leaves the list alone).
  */
 function CategoryTabsMenu() {
+  const { t } = useTranslation()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -180,8 +183,8 @@ function CategoryTabsMenu() {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Category options"
-            title="Category options"
+            aria-label={t("sidebar.splits.categoryOptions")}
+            title={t("sidebar.splits.categoryOptions")}
           >
             <EllipsisVertical />
           </Button>
@@ -190,12 +193,12 @@ function CategoryTabsMenu() {
       <DropdownMenuContent align="start">
         <DropdownMenuItem onClick={() => void categorizeExistingMail()}>
           <Inbox aria-hidden />
-          Categorize existing mail…
+          {t("sidebar.splits.categorizeExisting")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => void setCategoryTabsEnabled(false)}>
           <EyeOff aria-hidden />
-          Hide category tabs
+          {t("sidebar.splits.hideCategoryTabs")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -203,13 +206,16 @@ function CategoryTabsMenu() {
 }
 
 function SplitTabMenu({ split }: { split: SplitConfig }) {
+  const { t } = useTranslation()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <button
             type="button"
-            aria-label={`Options for split ${split.name}`}
+            aria-label={t("sidebar.splits.splitOptionsFor", {
+              name: split.name,
+            })}
             className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
           >
             <EllipsisVertical className="size-3.5 text-muted-foreground" />
@@ -223,7 +229,7 @@ function SplitTabMenu({ split }: { split: SplitConfig }) {
           }}
         >
           <ArrowLeft aria-hidden />
-          Move left
+          {t("sidebar.splits.moveLeft")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
@@ -231,7 +237,7 @@ function SplitTabMenu({ split }: { split: SplitConfig }) {
           }}
         >
           <ArrowRight aria-hidden />
-          Move right
+          {t("sidebar.splits.moveRight")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -240,7 +246,7 @@ function SplitTabMenu({ split }: { split: SplitConfig }) {
           }}
         >
           <EyeOff aria-hidden />
-          Hide
+          {t("sidebar.splits.hide")}
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
@@ -249,7 +255,7 @@ function SplitTabMenu({ split }: { split: SplitConfig }) {
           }}
         >
           <Trash2 aria-hidden />
-          Delete
+          {t("sidebar.splits.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -318,6 +324,7 @@ function CreateSplitDialog({
   initialQuery?: string
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   const accounts = useAccountStore((state) => state.accounts)
   const activeAccounts = useMemo(
     () => accounts.filter((account) => account.status === "active"),
@@ -345,8 +352,8 @@ function CreateSplitDialog({
     setSaving(false)
     setError(
       outcome.error === "name-taken"
-        ? `A split named “${name.trim()}” already exists.`
-        : "Could not create the split."
+        ? t("sidebar.splits.create.nameTaken", { name: name.trim() })
+        : t("sidebar.splits.create.failed")
     )
   }
 
@@ -354,10 +361,9 @@ function CreateSplitDialog({
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New split</DialogTitle>
+          <DialogTitle>{t("sidebar.splits.create.title")}</DialogTitle>
           <DialogDescription>
-            A split is a named operator query shown as a tab above the inbox.
-            The same language as the search field.
+            {t("sidebar.splits.create.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -368,28 +374,34 @@ function CreateSplitDialog({
           }}
         >
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="split-name">Name</Label>
+            <Label htmlFor="split-name">
+              {t("sidebar.splits.create.name")}
+            </Label>
             <Input
               id="split-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Unread from boss"
+              placeholder={t("sidebar.splits.create.namePlaceholder")}
               autoFocus
               disabled={saving}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="split-query">Query</Label>
+            <Label htmlFor="split-query">
+              {t("sidebar.splits.create.query")}
+            </Label>
             <Input
               id="split-query"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="e.g. is:unread from:boss@work.com"
+              placeholder={t("sidebar.splits.create.queryPlaceholder")}
               disabled={saving}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="split-account">Account</Label>
+            <Label htmlFor="split-account">
+              {t("sidebar.splits.create.account")}
+            </Label>
             <Select
               value={accountId}
               onValueChange={(value) => setAccountId(String(value))}
@@ -398,7 +410,9 @@ function CreateSplitDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All accounts</SelectItem>
+                <SelectItem value="">
+                  {t("sidebar.splits.create.allAccounts")}
+                </SelectItem>
                 {activeAccounts.map((account) => (
                   <SelectItem key={account.id} value={account.id}>
                     {account.email}
@@ -419,10 +433,10 @@ function CreateSplitDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("sidebar.splits.create.cancel")}
             </Button>
             <Button type="submit" disabled={saving || !name.trim()}>
-              Create split
+              {t("sidebar.splits.create.submit")}
             </Button>
           </DialogFooter>
         </form>
@@ -443,17 +457,20 @@ function ManageSplitsDialog({
   hiddenSplits: SplitConfig[]
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation()
   return (
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Manage splits</DialogTitle>
+          <DialogTitle>{t("sidebar.splits.manage.title")}</DialogTitle>
           <DialogDescription>
-            Hidden splits stay configured but drop out of the tab bar.
+            {t("sidebar.splits.manage.description")}
           </DialogDescription>
         </DialogHeader>
         {hiddenSplits.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No hidden splits.</p>
+          <p className="text-sm text-muted-foreground">
+            {t("sidebar.splits.manage.empty")}
+          </p>
         ) : (
           <div className="flex flex-col divide-y divide-border">
             {hiddenSplits.map((split) => (
@@ -471,18 +488,22 @@ function ManageSplitsDialog({
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label={`Unhide split ${split.name}`}
+                  aria-label={t("sidebar.splits.manage.unhideAria", {
+                    name: split.name,
+                  })}
                   onClick={() => {
                     void setSplitHiddenById(split.id, false)
                   }}
                 >
                   <Eye aria-hidden />
-                  Unhide
+                  {t("sidebar.splits.manage.unhide")}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={`Delete split ${split.name}`}
+                  aria-label={t("sidebar.splits.manage.deleteAria", {
+                    name: split.name,
+                  })}
                   onClick={() => {
                     void deleteSplitById(split.id)
                   }}
@@ -495,7 +516,7 @@ function ManageSplitsDialog({
         )}
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            {t("sidebar.splits.manage.close")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -504,6 +525,7 @@ function ManageSplitsDialog({
 }
 
 export function SplitsTabBar() {
+  const { t } = useTranslation()
   const splits = useSplits()
   const listScope = useUiStore((state) => state.listScope)
   const categoriesEnabled = useCategoriesEnabled()
@@ -524,7 +546,7 @@ export function SplitsTabBar() {
     <>
       <div
         role="tablist"
-        aria-label="Mailbox tabs"
+        aria-label={t("sidebar.splits.tabBar")}
         data-testid="splits-tab-bar"
         className="flex items-center gap-0.5 border-b px-2 pb-1"
       >
@@ -566,8 +588,8 @@ export function SplitsTabBar() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Split options"
-                title="New split"
+                aria-label={t("sidebar.splits.splitOptions")}
+                title={t("sidebar.splits.newSplit")}
               >
                 <CirclePlus />
               </Button>
@@ -576,11 +598,11 @@ export function SplitsTabBar() {
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => setDialog("create")}>
               <CirclePlus aria-hidden />
-              New split…
+              {t("sidebar.splits.newSplitMenu")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setDialog("manage")}>
               <Settings2 aria-hidden />
-              Manage splits…
+              {t("sidebar.splits.manageMenu")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

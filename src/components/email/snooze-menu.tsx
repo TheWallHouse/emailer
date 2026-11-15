@@ -1,4 +1,5 @@
 import { useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 import { addDays, format, set } from "date-fns"
 
 import { formatSnoozedUntil } from "@/components/layout/use-snoozed-threads"
@@ -13,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getSnoozePresets } from "@/services/email-actions/snooze"
-import { SNOOZE_CUSTOM_LABEL } from "./snooze-flow"
+import { snoozeCustomLabel } from "./snooze-flow"
 
 /**
  * The reusable Snooze menu (task 2.3): the service's presets plus a
@@ -89,6 +90,7 @@ function SnoozeCustomForm({
   onCancel: () => void
   onConfirm: (until: number) => void
 }) {
+  const { t } = useTranslation()
   const [value, setValue] = useState(defaultCustomValue)
   const confirm = (): void => {
     const parsed = new Date(value)
@@ -101,7 +103,7 @@ function SnoozeCustomForm({
         htmlFor="snooze-custom-input"
         className="text-xs font-medium text-muted-foreground"
       >
-        Snooze until
+        {t("threadList.snooze.until")}
       </label>
       <Input
         id="snooze-custom-input"
@@ -112,10 +114,10 @@ function SnoozeCustomForm({
       />
       <div className="flex items-center justify-end gap-1">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          Cancel
+          {t("threadList.snooze.cancel")}
         </Button>
         <Button type="button" size="sm" onClick={confirm}>
-          Snooze
+          {t("threadList.snooze.confirm")}
         </Button>
       </div>
     </>
@@ -136,6 +138,7 @@ interface SnoozeMenuProps {
  * the trigger.
  */
 export function SnoozeMenu({ onPick, children }: SnoozeMenuProps) {
+  useTranslation() // re-render on language change (custom entry label)
   const [customOpen, setCustomOpen] = useState(false)
   const [anchor, setAnchor] = useState<Element | null>(null)
   return (
@@ -153,7 +156,7 @@ export function SnoozeMenu({ onPick, children }: SnoozeMenuProps) {
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setCustomOpen(true)}>
-            {SNOOZE_CUSTOM_LABEL}
+            {snoozeCustomLabel()}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -50,7 +50,8 @@ class ResizeObserverStub {
   unobserve(): void {}
   disconnect(): void {}
 }
-globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver
+globalThis.ResizeObserver =
+  ResizeObserverStub as unknown as typeof ResizeObserver
 Element.prototype.scrollIntoView = () => {}
 
 import {
@@ -62,15 +63,17 @@ import {
   createQuickStep,
   listQuickSteps,
 } from "@/services/settings/quick-steps"
-import { setAccountStoreExecutor, initAccountStore, useAccountStore } from "@/stores/account-store"
+import {
+  setAccountStoreExecutor,
+  initAccountStore,
+  useAccountStore,
+} from "@/stores/account-store"
 import { useThreadListStore } from "@/stores/thread-list-store"
 import type { ThreadRow } from "@/services/db/threads"
 import { DEFAULT_VIEW, useUiStore } from "@/stores/ui-store"
 import { usePaletteStore } from "@/stores/palette-store"
 import { CommandPalette } from "../command-palette"
-import {
-  setPaletteQuickStepsExecutor,
-} from "../use-palette-quick-steps"
+import { setPaletteQuickStepsExecutor } from "../use-palette-quick-steps"
 
 let executor: TestExecutor
 
@@ -123,10 +126,7 @@ async function seedAndOpen(): Promise<void> {
   ])
   await createQuickStep(executor, {
     name: "Cleanup",
-    actions: [
-      { kind: "mark_read", read: true },
-      { kind: "archive" },
-    ],
+    actions: [{ kind: "mark_read", read: true }, { kind: "archive" }],
     shortcut: "2",
   })
   await initAccountStore()
@@ -191,10 +191,7 @@ describe("command palette quick steps (task 3.2)", () => {
 
     await createQuickStep(executor, {
       name: "Toss",
-      actions: [
-        { kind: "star" },
-        { kind: "trash" },
-      ],
+      actions: [{ kind: "star" }, { kind: "trash" }],
     })
     expect((await listQuickSteps(executor)).length).toBe(2)
 

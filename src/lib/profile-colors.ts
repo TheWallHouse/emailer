@@ -11,23 +11,74 @@
  * adjacent profiles.
  */
 
+import { i18next } from "@/i18n"
+
 export type ProfileColor = {
   id: string
-  /** Human-readable label for the picker's aria-labels. */
-  label: string
+  /** Human-readable label for the picker's aria-labels (localized at
+   * read time — a getter). */
+  readonly label: string
   /** CSS hex value stored and rendered verbatim. */
   value: string
 }
 
 export const PROFILE_COLORS: readonly ProfileColor[] = [
-  { id: "blue", label: "Blue", value: "#3b82f6" },
-  { id: "purple", label: "Purple", value: "#8b5cf6" },
-  { id: "green", label: "Green", value: "#22c55e" },
-  { id: "orange", label: "Orange", value: "#f97316" },
-  { id: "pink", label: "Pink", value: "#ec4899" },
-  { id: "teal", label: "Teal", value: "#14b8a6" },
-  { id: "red", label: "Red", value: "#ef4444" },
-  { id: "amber", label: "Amber", value: "#f59e0b" },
+  {
+    id: "blue",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.blue")
+    },
+    value: "#3b82f6",
+  },
+  {
+    id: "purple",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.purple")
+    },
+    value: "#8b5cf6",
+  },
+  {
+    id: "green",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.green")
+    },
+    value: "#22c55e",
+  },
+  {
+    id: "orange",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.orange")
+    },
+    value: "#f97316",
+  },
+  {
+    id: "pink",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.pink")
+    },
+    value: "#ec4899",
+  },
+  {
+    id: "teal",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.teal")
+    },
+    value: "#14b8a6",
+  },
+  {
+    id: "red",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.red")
+    },
+    value: "#ef4444",
+  },
+  {
+    id: "amber",
+    get label() {
+      return i18next.t("settingsMail.profiles.colors.amber")
+    },
+    value: "#f59e0b",
+  },
 ]
 
 /** A new profile starts on the first palette entry. */

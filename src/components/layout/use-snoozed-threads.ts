@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { format, fromUnixTime, isToday, isTomorrow } from "date-fns"
 
+import { i18next } from "@/i18n"
 import type { SqlExecutor } from "@/services/db/executor"
 import { getExecutor } from "@/services/db/executor"
 import type { ThreadRow } from "@/services/db/threads"
@@ -52,9 +53,12 @@ export function notifySnoozedThreadsChanged(): void {
  * date-time for anything further out. */
 export function formatSnoozedUntil(until: number): string {
   const date = fromUnixTime(until)
-  if (isToday(date)) return format(date, "'Today' h:mm a")
-  if (isTomorrow(date)) return format(date, "'Tomorrow' h:mm a")
-  return format(date, "EEE, MMM d, h:mm a")
+  const time = () => format(date, i18next.t("sidebar.dates.time"))
+  if (isToday(date)) return i18next.t("sidebar.dates.todayAt", { time: time() })
+  if (isTomorrow(date)) {
+    return i18next.t("sidebar.dates.tomorrowAt", { time: time() })
+  }
+  return format(date, i18next.t("sidebar.dates.dayDateTime"))
 }
 
 /**

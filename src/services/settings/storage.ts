@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core"
 
+import { i18next } from "@/i18n"
+
 import { closeDatabase, initDatabase } from "../db/connection"
 
 /**
@@ -33,19 +35,35 @@ export interface StorageUsage {
 
 /** UI copy per kind (fixed Rust-side order; unknown kinds fall through
  * to a raw label so an older UI never crashes on a newer command). */
+// Getters: labels follow the active interface language (see src/i18n).
 export const KIND_LABELS: Record<StorageKind, string> = {
-  attachments: "Attachments",
-  databases: "Databases & indexes",
-  keys: "Sealed credentials",
-  other: "Other files",
+  get attachments() {
+    return i18next.t("settings.storage.kinds.attachments.label")
+  },
+  get databases() {
+    return i18next.t("settings.storage.kinds.databases.label")
+  },
+  get keys() {
+    return i18next.t("settings.storage.kinds.keys.label")
+  },
+  get other() {
+    return i18next.t("settings.storage.kinds.other.label")
+  },
 }
 
 export const KIND_DESCRIPTIONS: Record<StorageKind, string> = {
-  attachments: "Downloaded attachment copies, cached by hash",
-  databases:
-    "The local mail database — message bodies, AI cache, calendar and task data, contacts, preferences",
-  keys: "The key file that seals account credentials on this device",
-  other: "Support files, such as logs",
+  get attachments() {
+    return i18next.t("settings.storage.kinds.attachments.description")
+  },
+  get databases() {
+    return i18next.t("settings.storage.kinds.databases.description")
+  },
+  get keys() {
+    return i18next.t("settings.storage.kinds.keys.description")
+  },
+  get other() {
+    return i18next.t("settings.storage.kinds.other.description")
+  },
 }
 
 function isStorageKind(value: string): value is StorageKind {

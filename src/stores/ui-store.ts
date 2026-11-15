@@ -1,5 +1,7 @@
 import { create } from "zustand"
 
+import { i18next } from "@/i18n"
+
 import type { SpecialUse } from "@/services/db/labels"
 import type { Category } from "@/services/categorization/classify"
 
@@ -110,17 +112,6 @@ export const DEFAULT_VIEW: ViewSelection = {
 }
 
 /** Display titles for special-use roles (token-free constants, not data). */
-const SPECIAL_USE_DISPLAY: Record<SpecialUse, string> = {
-  inbox: "Inbox",
-  sent: "Sent",
-  drafts: "Drafts",
-  archive: "Archive",
-  spam: "Spam",
-  trash: "Trash",
-  all: "All mail",
-  flagged: "Flagged",
-}
-
 /**
  * Human title for a view, used by the mailbox pane header. Label views
  * carry their own name; a bare folder.labelId has no name in the shape
@@ -130,23 +121,25 @@ const SPECIAL_USE_DISPLAY: Record<SpecialUse, string> = {
 export function viewDisplayName(view: ViewSelection): string {
   switch (view.kind) {
     case "folder":
-      if (view.folder.kind === "starred") return "Starred"
+      if (view.folder.kind === "starred") {
+        return i18next.t("common.folders.starred")
+      }
       if (view.folder.kind === "specialUse") {
-        return SPECIAL_USE_DISPLAY[view.folder.specialUse]
+        return i18next.t(`common.folders.${view.folder.specialUse}`)
       }
       return view.folder.labelId
     case "label":
       return view.name
     case "search":
-      return `Search: ${view.query}`
+      return i18next.t("common.views.search", { query: view.query })
     case "contacts":
-      return "Contacts"
+      return i18next.t("common.views.contacts")
     case "attachments":
-      return "Attachments"
+      return i18next.t("common.views.attachments")
     case "calendar":
-      return "Calendar"
+      return i18next.t("common.views.calendar")
     case "settings":
-      return "Settings"
+      return i18next.t("common.views.settings")
   }
 }
 

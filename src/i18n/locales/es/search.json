@@ -1,0 +1,67 @@
+{
+  "field": {
+    "assistant": "Asistente de IA",
+    "placeholder": "Buscar correo…",
+    "label": "Buscar correo",
+    "clear": "Borrar búsqueda"
+  },
+  "palette": {
+    "groups": {
+      "actions": "Acciones",
+      "quickSteps": "Pasos rápidos",
+      "folders": "Carpetas",
+      "labels": "Etiquetas",
+      "accounts": "Cuentas"
+    },
+    "compose": "Redactar mensaje nuevo",
+    "search": "Buscar correo",
+    "settings": "Abrir ajustes",
+    "help": "Abrir el centro de ayuda",
+    "assistant": "Abrir el asistente de IA",
+    "runQuickStep": "Ejecutar paso rápido: {{name}}",
+    "switchAccount": "Cambiar a {{email}}",
+    "placeholder": "Busca correo o ve a una carpeta, etiqueta, cuenta…",
+    "empty": "Ningún comando coincide",
+    "hintNavigate": "↑↓ navegar",
+    "hintSelect": "↵ seleccionar",
+    "hintClose": "esc cerrar"
+  },
+  "askInbox": {
+    "title": "Pregunta a tu bandeja",
+    "providerUnreachable": "No se ha podido conectar con el proveedor de IA.",
+    "description": "Haz una pregunta sobre tu correo con tus propias palabras. Tu pregunta y la sintaxis de búsqueda se envían al proveedor de IA; tus mensajes no salen de este equipo.",
+    "retry": "Reintentar",
+    "refineQuestion": "Precisa tu pregunta",
+    "yourQuestion": "Tu pregunta",
+    "questionPlaceholder": "p. ej., adjuntos de maria desde el lunes",
+    "interpretedQuery": "Consulta interpretada",
+    "editHint": "Corrige la consulta si a la traducción se le ha escapado algo y luego busca.",
+    "search": "Buscar",
+    "askAgain": "Volver a preguntar",
+    "cancel": "Cancelar",
+    "asking": "Preguntando…",
+    "ask": "Preguntar"
+  },
+  "createFilter": {
+    "label": "Crear filtro con esta búsqueda"
+  },
+  "saveAsSplit": {
+    "label": "Guardar como pestaña",
+    "nameTaken": "Ya existe una pestaña llamada «{{name}}».",
+    "createFailed": "No se ha podido crear la pestaña.",
+    "description": "La consulta se convierte en una pestaña con nombre encima de la bandeja de entrada; al guardarla, se abre al momento. Las pestañas se guardan en local.",
+    "name": "Nombre",
+    "namePlaceholder": "p. ej., Correo del jefe",
+    "query": "Consulta",
+    "cancel": "Cancelar",
+    "create": "Crear pestaña"
+  },
+  "saveSearch": {
+    "label": "Guardar búsqueda",
+    "description": "La consulta <query>{{query}}</query> se guarda en local y se vuelve a ejecutar desde la sección Búsquedas guardadas de la barra lateral.",
+    "name": "Nombre",
+    "namePlaceholder": "p. ej., No leídos del cliente",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  }
+}

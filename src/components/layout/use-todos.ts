@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import type { SqlExecutor } from "@/services/db/executor"
 import { getExecutor } from "@/services/db/executor"
 import {
@@ -118,7 +119,7 @@ export async function addThreadToTodos(
     return
   }
   notifyTodosChanged()
-  toast.success("Added to Todos")
+  toast.success(i18next.t("sidebar.todos.added"))
 }
 
 /**

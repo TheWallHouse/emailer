@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { i18next } from "@/i18n"
 import { getExecutor } from "@/services/db/executor"
 import type { LabelRow } from "@/services/db/labels"
 import type { AccountType } from "@/services/email/types"
@@ -66,11 +68,11 @@ const NO_PARENT = "none"
 function titleFor(state: LabelDialogState): string {
   switch (state.mode) {
     case "create":
-      return "New label"
+      return i18next.t("labels.dialog.titles.create")
     case "rename":
-      return "Rename label"
+      return i18next.t("labels.dialog.titles.rename")
     case "color":
-      return "Change color"
+      return i18next.t("labels.dialog.titles.color")
   }
 }
 
@@ -80,6 +82,7 @@ export function LabelDialog({
   parentOptions,
   onOpenChange,
 }: LabelDialogProps) {
+  const { t } = useTranslation()
   const mode = state?.mode ?? "create"
   const edited = state?.label
   // Initial values come from the edited label; the sidebar keys this
@@ -139,7 +142,7 @@ export function LabelDialog({
       onOpenChange(false)
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Could not save the label."
+        error instanceof Error ? error.message : t("labels.dialog.saveFailed")
       )
     } finally {
       setSaving(false)
@@ -158,21 +161,25 @@ export function LabelDialog({
           <DialogTitle>{titleFor(state)}</DialogTitle>
           {mode === "create" && (
             <DialogDescription>
-              Labels nest through "/" in the name — pick a parent or type the
-              full path yourself.
+              {t("labels.dialog.createDescription")}
             </DialogDescription>
           )}
           {mode === "rename" && edited && (
             <DialogDescription>
-              Renaming <span className="font-medium">{edited.name}</span>{" "}
-              updates the label locally and on the server.
+              <Trans
+                i18nKey="labels.dialog.renameDescription"
+                values={{ name: edited.name }}
+                components={{ name: <span className="font-medium" /> }}
+              />
             </DialogDescription>
           )}
           {mode === "color" && edited && (
             <DialogDescription>
-              Pick a display color for{" "}
-              <span className="font-medium">{edited.name}</span>. The color is
-              stored locally; server colors are imported from Gmail when set.
+              <Trans
+                i18nKey="labels.dialog.colorDescription"
+                values={{ name: edited.name }}
+                components={{ name: <span className="font-medium" /> }}
+              />
             </DialogDescription>
           )}
         </DialogHeader>
@@ -186,7 +193,9 @@ export function LabelDialog({
         >
           {mode !== "color" && (
             <div className="flex flex-col gap-1.5">
-              <FormLabel htmlFor="label-name">Name</FormLabel>
+              <FormLabel htmlFor="label-name">
+                {t("labels.dialog.name")}
+              </FormLabel>
               <Input
                 id="label-name"
                 value={name}
@@ -199,7 +208,11 @@ export function LabelDialog({
                 fullName.length > 0 &&
                 fullName !== name && (
                   <p className="text-xs text-muted-foreground">
-                    Full name: <span className="font-medium">{fullName}</span>
+                    <Trans
+                      i18nKey="labels.dialog.fullName"
+                      values={{ name: fullName }}
+                      components={{ name: <span className="font-medium" /> }}
+                    />
                   </p>
                 )}
             </div>
@@ -207,7 +220,9 @@ export function LabelDialog({
 
           {mode === "create" && (
             <div className="flex flex-col gap-1.5">
-              <FormLabel htmlFor="label-parent">Parent label</FormLabel>
+              <FormLabel htmlFor="label-parent">
+                {t("labels.dialog.parent")}
+              </FormLabel>
               <Select
                 value={parentId}
                 onValueChange={(value) => setParentId(String(value))}
@@ -217,7 +232,9 @@ export function LabelDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NO_PARENT}>No parent</SelectItem>
+                  <SelectItem value={NO_PARENT}>
+                    {t("labels.dialog.noParent")}
+                  </SelectItem>
                   {parentOptions.map((option) => (
                     <SelectItem key={option.id} value={option.id}>
                       {option.name}
@@ -230,7 +247,7 @@ export function LabelDialog({
 
           {mode !== "rename" && (
             <div className="flex flex-col gap-1.5">
-              <FormLabel>Color</FormLabel>
+              <FormLabel>{t("labels.dialog.color")}</FormLabel>
               <LabelColorPicker
                 value={color}
                 onChange={setColor}
@@ -252,7 +269,7 @@ export function LabelDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("labels.dialog.cancel")}
             </Button>
             <Button
               type="submit"
@@ -261,7 +278,9 @@ export function LabelDialog({
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              {mode === "create" ? "Create label" : "Save"}
+              {mode === "create"
+                ? t("labels.dialog.create")
+                : t("labels.dialog.save")}
             </Button>
           </DialogFooter>
         </form>

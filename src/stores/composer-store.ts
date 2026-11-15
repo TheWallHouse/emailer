@@ -1,6 +1,8 @@
 import { create } from "zustand"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
+
 import {
   clearAttachmentBytes,
   deleteAttachmentBytes,
@@ -426,7 +428,7 @@ function restoreSnapshot(snapshot: UndoSendSnapshot): Partial<ComposerState> {
     (attachment) => getAttachmentBytes(attachment.id) !== undefined
   )
   if (restorable.length < snapshot.attachments.length) {
-    toast.warning("Some attachments were no longer available and were removed")
+    toast.warning(i18next.t("composer.undoSend.attachmentsRemoved"))
   }
   return {
     open: true,
@@ -477,8 +479,7 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
 
   close: () => set({ open: false, minimized: false }),
 
-  minimize: () =>
-    set((state) => (state.open ? { minimized: true } : {})),
+  minimize: () => set((state) => (state.open ? { minimized: true } : {})),
 
   restore: () => set((state) => (state.minimized ? { minimized: false } : {})),
 
@@ -536,12 +537,12 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
       // result is still ours to surface.
       void superseded.controller.result.then((result) => {
         if (result === null) {
-          toast.error("Sending failed")
+          toast.error(i18next.t("composer.undoSend.failed"))
         } else if (result.status === "queued") {
           if (result.queuedOffline) {
-            toast.info("Message queued")
+            toast.info(i18next.t("composer.send.queued"))
           } else {
-            toast.success("Message sent")
+            toast.success(i18next.t("composer.send.sent"))
           }
         } else {
           toast.error(result.error)
@@ -588,7 +589,7 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
         // was transmitted: put the draft back into the composer and say
         // so, unless the user already started a new compose.
         if (!get().open) set(restoreSnapshot(snapshot))
-        toast.error("Sending failed — your draft was restored")
+        toast.error(i18next.t("composer.undoSend.failedRestored"))
         return
       }
       if (result.status === "queued") {
@@ -598,9 +599,9 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
         // are theirs.
         if (!get().open) set(dropDraft())
         if (result.queuedOffline) {
-          toast.info("Message queued")
+          toast.info(i18next.t("composer.send.queued"))
         } else {
-          toast.success("Message sent")
+          toast.success(i18next.t("composer.send.sent"))
         }
       } else {
         // The local enqueue path failed — nothing was transmitted, so

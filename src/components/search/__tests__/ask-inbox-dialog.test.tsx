@@ -23,8 +23,8 @@ vi.mock("@/services/db/executor", () => ({
 vi.mock("@/services/ai/settings", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/services/ai/settings")>()),
   isAiConfigured: vi.fn(async () => true),
-  isSurfaceEnabled: vi.fn(async (_executor: unknown, surface: string) =>
-    surface === "askInbox"
+  isSurfaceEnabled: vi.fn(
+    async (_executor: unknown, surface: string) => surface === "askInbox"
   ),
 }))
 
@@ -34,10 +34,7 @@ vi.mock("@/services/ai/client", async (importOriginal) => ({
 }))
 
 import { AiProviderError, aiChat } from "@/services/ai/client"
-import {
-  isAiConfigured,
-  isSurfaceEnabled,
-} from "@/services/ai/settings"
+import { isAiConfigured, isSurfaceEnabled } from "@/services/ai/settings"
 import { DEFAULT_VIEW, useUiStore } from "@/stores/ui-store"
 import { AskInboxButton } from "../ask-inbox-dialog"
 
@@ -84,9 +81,7 @@ afterEach(() => {
 
 async function openDialog(): Promise<void> {
   render(<AskInboxButton />)
-  fireEvent.click(
-    await screen.findByTestId("ask-inbox-button")
-  )
+  fireEvent.click(await screen.findByTestId("ask-inbox-button"))
   await screen.findByRole("dialog")
 }
 
@@ -111,10 +106,9 @@ describe("AskInboxDialog (task 4.7, design D3)", () => {
   it("shows the interpreted query prefilled and searchable", async () => {
     await openDialog()
 
-    fireEvent.change(
-      screen.getByLabelText("Your question"),
-      { target: { value: QUESTION } }
-    )
+    fireEvent.change(screen.getByLabelText("Your question"), {
+      target: { value: QUESTION },
+    })
     fireEvent.click(screen.getByRole("button", { name: "Ask" }))
 
     // The translation comes back as an EDITABLE input, pre-filled.
@@ -131,18 +125,15 @@ describe("AskInboxDialog (task 4.7, design D3)", () => {
 
     // Search runs the query through the normal search seam and closes.
     fireEvent.click(screen.getByTestId("ask-inbox-search"))
-    await waitFor(() =>
-      expect(screen.queryByRole("dialog")).toBeNull()
-    )
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
     expect(useUiStore.getState().view).toEqual({ kind: "search", query: QUERY })
   })
 
   it("runs the EDITED query, not the original translation", async () => {
     await openDialog()
-    fireEvent.change(
-      screen.getByLabelText("Your question"),
-      { target: { value: QUESTION } }
-    )
+    fireEvent.change(screen.getByLabelText("Your question"), {
+      target: { value: QUESTION },
+    })
     fireEvent.click(screen.getByRole("button", { name: "Ask" }))
     const queryInput = await screen.findByLabelText("Interpreted query")
 
@@ -152,9 +143,7 @@ describe("AskInboxDialog (task 4.7, design D3)", () => {
       target: { value: "from:maria has:attachment after:2026-09-07" },
     })
     fireEvent.click(screen.getByTestId("ask-inbox-search"))
-    await waitFor(() =>
-      expect(screen.queryByRole("dialog")).toBeNull()
-    )
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
     expect(useUiStore.getState().view).toEqual({
       kind: "search",
       query: "from:maria has:attachment after:2026-09-07",
@@ -165,10 +154,9 @@ describe("AskInboxDialog (task 4.7, design D3)", () => {
     // Once only: the refined re-ask falls back to the QUERY default.
     aiChatMock.mockResolvedValueOnce("CLARIFY: Which sender did you mean?")
     await openDialog()
-    fireEvent.change(
-      screen.getByLabelText("Your question"),
-      { target: { value: "maria" } }
-    )
+    fireEvent.change(screen.getByLabelText("Your question"), {
+      target: { value: "maria" },
+    })
     fireEvent.click(screen.getByRole("button", { name: "Ask" }))
 
     // The model's question is shown; no interpreted query appears.
@@ -178,10 +166,9 @@ describe("AskInboxDialog (task 4.7, design D3)", () => {
     expect(screen.queryByLabelText("Interpreted query")).toBeNull()
 
     // The input stays for refining; asking again re-translates.
-    fireEvent.change(
-      screen.getByLabelText("Refine your question"),
-      { target: { value: "attachments from maria reyes" } }
-    )
+    fireEvent.change(screen.getByLabelText("Refine your question"), {
+      target: { value: "attachments from maria reyes" },
+    })
     fireEvent.click(screen.getByRole("button", { name: "Ask" }))
     expect(await screen.findByLabelText("Interpreted query")).toBeTruthy()
     expect(aiChatMock).toHaveBeenCalledTimes(2)
@@ -195,10 +182,9 @@ describe("AskInboxDialog (task 4.7, design D3)", () => {
       new AiProviderError("network", "Provider unreachable")
     )
     await openDialog()
-    fireEvent.change(
-      screen.getByLabelText("Your question"),
-      { target: { value: QUESTION } }
-    )
+    fireEvent.change(screen.getByLabelText("Your question"), {
+      target: { value: QUESTION },
+    })
     fireEvent.click(screen.getByRole("button", { name: "Ask" }))
 
     expect(

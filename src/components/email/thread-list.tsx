@@ -3,6 +3,7 @@ import { useDraggable } from "@dnd-kit/core"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { formatDistanceToNow } from "date-fns"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 import {
   Archive,
   ArrowUpDown,
@@ -28,6 +29,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
+import { i18next } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { isTauriRuntime, openThreadInPopout } from "@/services/desktop/popout"
 import type { ContactRef } from "@/services/db/messages"
@@ -51,10 +53,7 @@ import type { ThreadActionKind } from "@/services/email-actions/thread-actions"
 import type { BlockedSenderAction } from "@/services/db/blocked-senders"
 import type { SqlExecutor } from "@/services/db/executor"
 import type { DigestScope } from "@/services/ai/folder-digest"
-import {
-  isAiConfigured,
-  isSurfaceEnabled,
-} from "@/services/ai/settings"
+import { isAiConfigured, isSurfaceEnabled } from "@/services/ai/settings"
 import {
   getThreadListExecutor,
   refreshThreadList,
@@ -82,10 +81,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import type { ThreadSortOption } from "@/services/db/thread-sort"
 import { THREAD_SORT_OPTIONS } from "@/services/db/thread-sort"
-import {
-  parseSearchQuery,
-  usesOperators,
-} from "@/services/search"
+import { parseSearchQuery, usesOperators } from "@/services/search"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AccountBadge } from "./account-badge"
@@ -296,35 +292,41 @@ function emptyStateForView(view: ViewSelection): {
       const operatorQuery = usesOperators(parseSearchQuery(view.query))
       return {
         icon: SearchXIcon,
-        title: `No results for "${view.query}"`,
+        title: i18next.t("threadList.emptyState.noResults", {
+          query: view.query,
+        }),
         hint: operatorQuery
-          ? "Operators like from:, to:, subject:, is: and -term are matched exactly as written. Check their values, or remove one to widen the search."
-          : "No thread matched every term. Try different keywords, or operators like from:someone@example.com, subject:meeting or is:unread.",
+          ? i18next.t("threadList.emptyState.searchOperatorsHint")
+          : i18next.t("threadList.emptyState.searchHint"),
       }
     }
     case "label":
       return {
         icon: TagIcon,
-        title: `Nothing in ${view.name}`,
-        hint: "Threads carrying this label will appear here once they sync.",
+        title: i18next.t("threadList.emptyState.nothingIn", {
+          name: view.name,
+        }),
+        hint: i18next.t("threadList.emptyState.labelHint"),
       }
     case "folder":
       return {
         icon: InboxIcon,
-        title: `Nothing in ${viewDisplayName(view)}`,
+        title: i18next.t("threadList.emptyState.nothingIn", {
+          name: viewDisplayName(view),
+        }),
         hint:
           view.folder.kind === "starred"
-            ? "Star a thread and it will show up here."
+            ? i18next.t("threadList.emptyState.starredHint")
             : view.folder.kind === "specialUse" &&
                 view.folder.specialUse === "drafts"
-              ? "Messages you start writing are saved here automatically."
-              : "Messages synced into this folder will appear here.",
+              ? i18next.t("threadList.emptyState.draftsHint")
+              : i18next.t("threadList.emptyState.folderHint"),
       }
     case "settings":
       return {
         icon: InboxIcon,
-        title: "Nothing to list",
-        hint: "Settings replaces the mailbox panes.",
+        title: i18next.t("threadList.emptyState.nothingToList"),
+        hint: i18next.t("threadList.emptyState.settingsHint"),
       }
     case "contacts":
       // Unreachable today (the contacts pane owns its own listing), kept
@@ -358,10 +360,12 @@ function emptyStateForView(view: ViewSelection): {
  * still a folder/label/search selection, so without this branch the
  * empty copy would name the wrong place — the aggregation is the list.
  */
-const UNIFIED_EMPTY_STATE = {
-  icon: LayersIcon,
-  title: "Unified inbox is empty",
-  hint: "Inbox threads from every active account appear here as they sync.",
+function unifiedEmptyState() {
+  return {
+    icon: LayersIcon,
+    title: i18next.t("threadList.emptyState.unifiedTitle"),
+    hint: i18next.t("threadList.emptyState.unifiedHint"),
+  }
 }
 
 /**
@@ -371,10 +375,12 @@ const UNIFIED_EMPTY_STATE = {
  * inbox threads whose newest sender classifies important; everything else
  * stays reachable in the ordinary inbox.
  */
-const PRIORITY_EMPTY_STATE = {
-  icon: ZapIcon,
-  title: "Priority inbox is empty",
-  hint: "Threads from senders you reply to or that address you directly show up here as mail arrives.",
+function priorityEmptyState() {
+  return {
+    icon: ZapIcon,
+    title: i18next.t("threadList.emptyState.priorityTitle"),
+    hint: i18next.t("threadList.emptyState.priorityHint"),
+  }
 }
 
 /**
@@ -384,10 +390,12 @@ const PRIORITY_EMPTY_STATE = {
  * lists the threads the detection query finds; nothing to answer right
  * now is the good case.
  */
-const NUDGES_EMPTY_STATE = {
-  icon: BellRingIcon,
-  title: "No nudges right now",
-  hint: "Threads waiting on your reply will gather here once they sit unanswered past your nudge threshold.",
+function nudgesEmptyState() {
+  return {
+    icon: BellRingIcon,
+    title: i18next.t("threadList.emptyState.nudgesTitle"),
+    hint: i18next.t("threadList.emptyState.nudgesHint"),
+  }
 }
 
 /**
@@ -400,8 +408,8 @@ const NUDGES_EMPTY_STATE = {
 function splitEmptyState(name: string) {
   return {
     icon: Columns2Icon,
-    title: `No threads in "${name}"`,
-    hint: "Threads matching this split's search will appear here as they sync.",
+    title: i18next.t("threadList.emptyState.splitTitle", { name }),
+    hint: i18next.t("threadList.emptyState.splitHint"),
   }
 }
 
@@ -413,8 +421,8 @@ function splitEmptyState(name: string) {
 function categoryEmptyState(name: string) {
   return {
     icon: InboxIcon,
-    title: `Nothing in ${name}`,
-    hint: "New mail the categorization engine files here will appear as it arrives.",
+    title: i18next.t("threadList.emptyState.nothingIn", { name }),
+    hint: i18next.t("threadList.emptyState.categoryHint"),
   }
 }
 
@@ -510,14 +518,14 @@ function groupTargetsByAccount(targetIds: string[]): Map<string, string[]> {
   return groups
 }
 
-/** Human labels for the five sort options (task 4.1), in selector order. */
-const THREAD_SORT_LABELS: Record<ThreadSortOption, string> = {
-  date_desc: "Newest first",
-  date_asc: "Oldest first",
-  sender: "Sender",
-  subject: "Subject",
-  unread_first: "Unread first",
-}
+/** Catalog keys of the five sort options' labels (task 4.1). */
+const THREAD_SORT_LABEL_KEYS = {
+  date_desc: "threadList.sort.options.dateDesc",
+  date_asc: "threadList.sort.options.dateAsc",
+  sender: "threadList.sort.options.sender",
+  subject: "threadList.sort.options.subject",
+  unread_first: "threadList.sort.options.unreadFirst",
+} as const satisfies Record<ThreadSortOption, string>
 
 /**
  * Sort selector (task 4.1): a compact icon + label dropdown in the list
@@ -527,6 +535,7 @@ const THREAD_SORT_LABELS: Record<ThreadSortOption, string> = {
  * checked entry mirrors the store's effective `sort`.
  */
 function SortSelector() {
+  const { t } = useTranslation()
   const sort = useThreadListStore((state) => state.sort)
   const setSort = useThreadListStore((state) => state.setSort)
   return (
@@ -536,12 +545,12 @@ function SortSelector() {
           <Button
             variant="ghost"
             size="sm"
-            aria-label="Sort threads"
+            aria-label={t("threadList.sort.label")}
             data-testid="thread-sort-selector"
             className="gap-1 text-xs font-normal text-muted-foreground"
           >
             <ArrowUpDown className="size-3.5" />
-            {THREAD_SORT_LABELS[sort]}
+            {t(THREAD_SORT_LABEL_KEYS[sort])}
             <ChevronDownIcon className="size-3.5" />
           </Button>
         }
@@ -555,7 +564,7 @@ function SortSelector() {
               className="text-xs"
               onClick={() => setSort(option)}
             >
-              {THREAD_SORT_LABELS[option]}
+              {t(THREAD_SORT_LABEL_KEYS[option])}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
@@ -581,14 +590,15 @@ function GroupBySenderToggle({
   enabled: boolean
   onToggle: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <Button
       variant="ghost"
       size="sm"
-      aria-label="Group by sender"
+      aria-label={t("threadList.groupBySender.label")}
       aria-pressed={enabled}
       data-testid="group-by-sender-toggle"
-      title="Group consecutive threads from the same sender"
+      title={t("threadList.groupBySender.title")}
       className={cn(
         "gap-1 text-xs font-normal",
         enabled ? "text-foreground" : "text-muted-foreground"
@@ -596,7 +606,7 @@ function GroupBySenderToggle({
       onClick={onToggle}
     >
       <LayersIcon className="size-3.5" />
-      Group
+      {t("threadList.groupBySender.button")}
     </Button>
   )
 }
@@ -653,6 +663,7 @@ function CatchMeUpButton({
   scope: ThreadListScope | null
   hasUnread: boolean
 }) {
+  const { t } = useTranslation()
   const digestScope = useMemo(
     () => (scope === null ? null : digestScopeFor(scope)),
     [scope]
@@ -690,14 +701,14 @@ function CatchMeUpButton({
       <Button
         variant="ghost"
         size="sm"
-        aria-label="Catch me up"
+        aria-label={t("threadList.catchMeUp.label")}
         data-testid="catch-me-up-button"
-        title="Summarize this view's unread threads with AI"
+        title={t("threadList.catchMeUp.title")}
         className="gap-1 text-xs font-normal text-muted-foreground"
         onClick={() => setOpenScope(digestScope)}
       >
         <Sparkles className="size-3.5" />
-        Catch me up
+        {t("threadList.catchMeUp.label")}
       </Button>
       {openScope !== null && (
         <FolderDigestDialog
@@ -712,6 +723,7 @@ function CatchMeUpButton({
 }
 
 export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
+  const { t } = useTranslation()
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
   const view = useUiStore((state) => state.view)
   const listScope = useUiStore((state) => state.listScope)
@@ -1107,7 +1119,7 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
         (candidate) => candidate.id === stepId
       )
       if (!step) {
-        toast.error("That quick step no longer exists")
+        toast.error(t("threadList.toasts.quickStepMissing"))
         return
       }
       const ran = await runQuickStepWithConfirm(step, targetIds)
@@ -1143,7 +1155,11 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
         console.warn("[thread-list] category move failed", error)
         return
       }
-      toast.success(`Moved to ${CATEGORY_LABELS[category]}`)
+      toast.success(
+        t("threadList.toasts.movedToCategory", {
+          category: CATEGORY_LABELS[category],
+        })
+      )
       await refreshThreadList()
     })()
   }
@@ -1163,9 +1179,9 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
         return
       }
       toast.success(
-        `Future messages from this sender will be filed under ${
-          CATEGORY_LABELS[category]
-        }`
+        t("threadList.toasts.alwaysFromSender", {
+          category: CATEGORY_LABELS[category],
+        })
       )
       await refreshThreadList()
     })()
@@ -1265,24 +1281,26 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
   if (!activeAccountId) {
     return (
       <p className="p-8 text-center text-sm text-muted-foreground">
-        No account connected
+        {t("threadList.noAccount")}
       </p>
     )
   }
   if (loading && !loaded) {
     return (
-      <p className="p-8 text-center text-sm text-muted-foreground">Loading…</p>
+      <p className="p-8 text-center text-sm text-muted-foreground">
+        {t("threadList.loading")}
+      </p>
     )
   }
   // An empty Drafts folder may still hold local drafts — only a view with
   // neither rows nor drafts shows the empty state.
   if (loaded && threads.length === 0 && drafts.length === 0) {
     const empty = unified
-      ? UNIFIED_EMPTY_STATE
+      ? unifiedEmptyState()
       : priority
-        ? PRIORITY_EMPTY_STATE
+        ? priorityEmptyState()
         : nudges
-          ? NUDGES_EMPTY_STATE
+          ? nudgesEmptyState()
           : splitScope
             ? splitEmptyState(splitScope.name)
             : categoryScope
@@ -1314,10 +1332,10 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
           <Badge
             variant="secondary"
             data-testid="search-relaxed-badge"
-            title='No thread matched every term — showing threads matching any single term of the query, best matches first. Press Enter to re-run the exact search.'
+            title={t("threadList.header.relaxedTitle")}
             className="shrink-0 font-normal"
           >
-            Showing broader results
+            {t("threadList.header.relaxedBadge")}
           </Badge>
         )}
         <span className="ms-auto flex items-center gap-1">
@@ -1342,7 +1360,11 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
           className="flex shrink-0 flex-wrap items-center gap-x-2 gap-y-1 border-b bg-muted/50 px-3 py-1"
         >
           <Checkbox
-            aria-label={allSelected ? "Clear selection" : "Select all"}
+            aria-label={
+              allSelected
+                ? t("threadList.selection.clearSelection")
+                : t("threadList.selection.selectAll")
+            }
             checked={allSelected}
             onClick={() => {
               const store = useThreadListStore.getState()
@@ -1354,7 +1376,7 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
             }}
           />
           <span className="text-xs text-muted-foreground tabular-nums">
-            {selectedIds.size} selected
+            {t("threadList.selection.count", { count: selectedIds.size })}
           </span>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-x-0.5 gap-y-1">
             <Button
@@ -1362,21 +1384,21 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
               size="sm"
               onClick={() => runThreadAction("archive", orderedSelection)}
             >
-              Archive
+              {t("threadList.actions.archive")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => runThreadAction("trash", orderedSelection)}
             >
-              Trash
+              {t("threadList.actions.trash")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => runThreadAction("read", orderedSelection)}
             >
-              Mark read
+              {t("threadList.actions.markRead")}
             </Button>
             {/* Local-only states (task 3.3): the bar offers the positive
                 action for the whole selection — the inverses live in the
@@ -1386,28 +1408,28 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
               size="sm"
               onClick={() => applyStateToTargets("mute", orderedSelection)}
             >
-              Mute
+              {t("threadList.actions.mute")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => applyStateToTargets("pin", orderedSelection)}
             >
-              Pin
+              {t("threadList.actions.pin")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => applyStateToTargets("done", orderedSelection)}
             >
-              Done
+              {t("threadList.actions.done")}
             </Button>
             {userLabels.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
                     <Button variant="ghost" size="sm">
-                      Labels
+                      {t("threadList.actions.labels")}
                       <ChevronDownIcon className="size-3.5 text-muted-foreground" />
                     </Button>
                   }
@@ -1446,14 +1468,14 @@ export function ThreadList({ onStarToggle, onReply }: ThreadListProps) {
                 useThreadListStore.getState().clearThreadSelection()
               }
             >
-              Clear
+              {t("threadList.selection.clear")}
             </Button>
           </div>
         </div>
       )}
       {unreadOnly && threads.length > 0 && visibleThreads.length === 0 ? (
         <p className="p-8 text-center text-sm text-muted-foreground">
-          No unread messages
+          {t("threadList.noUnread")}
         </p>
       ) : (
         <div
@@ -1608,6 +1630,7 @@ function ThreadRow({
   onStarToggle,
   bundleMember,
 }: ThreadRowProps) {
+  const { t } = useTranslation()
   const unread = thread.unread_count > 0
   const starred = thread.is_starred === 1
   // Local-only states (task 3.3) — rendered as subtle state indicators.
@@ -1720,7 +1743,9 @@ function ThreadRow({
                   <Checkbox
                     checked={checked}
                     tabIndex={-1}
-                    aria-label={`Select ${thread.subject || "(no subject)"}`}
+                    aria-label={t("threadList.row.select", {
+                      subject: thread.subject || t("threadList.noSubject"),
+                    })}
                   />
                 </span>
                 <span
@@ -1729,11 +1754,11 @@ function ThreadRow({
                     unread ? "font-semibold" : "text-muted-foreground"
                   )}
                 >
-                  {participants || "Unknown sender"}
+                  {participants || t("threadList.row.unknownSender")}
                 </span>
                 {unread && (
                   <span
-                    aria-label="Unread"
+                    aria-label={t("threadList.row.unread")}
                     className="size-2 shrink-0 rounded-full bg-primary"
                   />
                 )}
@@ -1748,31 +1773,31 @@ function ThreadRow({
                       and search views (pinned shows everywhere). */}
                   {muted && (
                     <BellOff
-                      aria-label="Muted"
+                      aria-label={t("threadList.row.muted")}
                       className="size-3.5 text-muted-foreground"
                     />
                   )}
                   {pinned && (
                     <Pin
-                      aria-label="Pinned"
+                      aria-label={t("threadList.row.pinned")}
                       className="size-3.5 text-muted-foreground"
                     />
                   )}
                   {done && (
                     <Check
-                      aria-label="Done"
+                      aria-label={t("threadList.row.done")}
                       className="size-3.5 text-muted-foreground"
                     />
                   )}
                   {hasNote && (
                     <StickyNote
-                      aria-label="Has note"
+                      aria-label={t("threadList.row.hasNote")}
                       className="size-3.5 text-muted-foreground"
                     />
                   )}
                   {thread.has_attachments === 1 && (
                     <Paperclip
-                      aria-label="Has attachments"
+                      aria-label={t("threadList.row.hasAttachments")}
                       className="size-3.5 text-muted-foreground"
                     />
                   )}
@@ -1794,7 +1819,7 @@ function ThreadRow({
                     >
                       <button
                         type="button"
-                        aria-label="Snooze"
+                        aria-label={t("threadList.actions.snooze")}
                         className="rounded-sm p-0.5 hover:bg-accent"
                       >
                         <Clock className="size-3.5 text-muted-foreground" />
@@ -1803,7 +1828,11 @@ function ThreadRow({
                   </span>
                   <button
                     type="button"
-                    aria-label={starred ? "Starred" : "Not starred"}
+                    aria-label={
+                      starred
+                        ? t("threadList.row.starred")
+                        : t("threadList.row.notStarred")
+                    }
                     aria-pressed={starred}
                     className="rounded-sm p-0.5 hover:bg-accent"
                     onClick={(event) => {
@@ -1843,7 +1872,7 @@ function ThreadRow({
                   !unread && "font-normal text-foreground/90"
                 )}
               >
-                {thread.subject || "(no subject)"}
+                {thread.subject || t("threadList.noSubject")}
               </div>
               <div className="line-clamp-2 text-xs text-muted-foreground">
                 {thread.snippet}
@@ -1931,6 +1960,7 @@ function BundleRow({
   onMarkRead,
   onSnooze,
 }: BundleRowProps) {
+  const { t } = useTranslation()
   const count = bundle.members.length
   return (
     <div
@@ -1942,7 +1972,10 @@ function BundleRow({
       role="button"
       tabIndex={0}
       aria-expanded={expanded}
-      aria-label={`Bundle of ${count} threads from ${bundle.sender.name}`}
+      aria-label={t("threadList.bundle.label", {
+        count,
+        sender: bundle.sender.name,
+      })}
       className="absolute inset-x-0 top-0 px-2 pb-(--density-row) outline-hidden"
       style={{ transform: `translateY(${translateY}px)` }}
       onClick={() => onToggle(bundle)}
@@ -1972,10 +2005,10 @@ function BundleRow({
           data-bundle-count-chip="true"
           className="shrink-0 rounded-full bg-muted px-1.5 py-px text-xs text-muted-foreground tabular-nums"
         >
-          {count} {count === 1 ? "thread" : "threads"}
+          {t("threadList.bundle.count", { count })}
         </span>
         <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
-          {bundle.latest.subject || "(no subject)"}
+          {bundle.latest.subject || t("threadList.noSubject")}
         </span>
         <span
           className="ml-auto flex shrink-0 items-center gap-0.5"
@@ -1988,7 +2021,7 @@ function BundleRow({
             onClick={() => onArchive(bundle)}
           >
             <Archive className="size-3.5" />
-            Archive
+            {t("threadList.actions.archive")}
           </Button>
           <Button
             variant="ghost"
@@ -1997,7 +2030,7 @@ function BundleRow({
             onClick={() => onTrash(bundle)}
           >
             <Trash2 className="size-3.5" />
-            Trash
+            {t("threadList.actions.trash")}
           </Button>
           <Button
             variant="ghost"
@@ -2006,12 +2039,12 @@ function BundleRow({
             onClick={() => onMarkRead(bundle)}
           >
             <Check className="size-3.5" />
-            Mark read
+            {t("threadList.actions.markRead")}
           </Button>
           <SnoozeMenu onPick={(until, label) => onSnooze(bundle, until, label)}>
             <button
               type="button"
-              aria-label="Snooze bundle"
+              aria-label={t("threadList.bundle.snooze")}
               className="rounded-sm p-0.5 hover:bg-accent"
             >
               <Clock className="size-3.5 text-muted-foreground" />
@@ -2031,10 +2064,12 @@ function BundleRow({
  * and the composer's Recipient are structurally identical. */
 function draftRecipientPreview(to: ContactRef[]): string {
   const first = to[0]
-  if (!first) return "No recipients"
+  if (!first) return i18next.t("threadList.draft.noRecipients")
   const label = first.name ? `${first.name} <${first.email}>` : first.email
   const rest = to.length - 1
-  return rest > 0 ? `To: ${label}, +${rest}` : `To: ${label}`
+  return rest > 0
+    ? i18next.t("threadList.draft.toMore", { recipient: label, more: rest })
+    : i18next.t("threadList.draft.to", { recipient: label })
 }
 
 interface DraftRowProps {
@@ -2062,6 +2097,7 @@ function DraftRow({
   draft,
   onResume,
 }: DraftRowProps) {
+  const { t } = useTranslation()
   return (
     <div
       ref={measureRef}
@@ -2070,7 +2106,9 @@ function DraftRow({
       data-draft-key={draft.draftKey ?? undefined}
       role="button"
       tabIndex={0}
-      aria-label={`Resume draft ${draft.subject || "(no subject)"}`}
+      aria-label={t("threadList.draft.resume", {
+        subject: draft.subject || t("threadList.noSubject"),
+      })}
       className="absolute inset-x-0 top-0 px-2 pb-2 outline-hidden"
       style={{ transform: `translateY(${translateY}px)` }}
       onClick={() => onResume(draft.id)}
@@ -2084,7 +2122,7 @@ function DraftRow({
           className="size-3.5 shrink-0 text-muted-foreground"
         />
         <span className="min-w-0 flex-1 truncate text-foreground/90">
-          {draft.subject || "(no subject)"}
+          {draft.subject || t("threadList.noSubject")}
         </span>
         <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
           {draftRecipientPreview(draft.to)}
@@ -2094,7 +2132,7 @@ function DraftRow({
             data-draft-badge="true"
             className="rounded-full bg-muted px-1.5 py-px text-xs font-medium text-muted-foreground"
           >
-            Draft
+            {t("threadList.draft.badge")}
           </span>
           <span className="shrink-0 text-xs whitespace-nowrap text-muted-foreground">
             {formatDistanceToNow(new Date(draft.updatedAt * 1000), {

@@ -1,4 +1,6 @@
-import { addDays, addWeeks, isBefore, set } from "date-fns"
+import { addDays, addWeeks, format, isBefore, set } from "date-fns"
+
+import { i18next } from "@/i18n"
 
 import type { SqlExecutor } from "../db/executor"
 import type { ThreadRow } from "../db/threads"
@@ -127,7 +129,8 @@ export async function listSnoozedThreads(
 export interface SnoozePreset {
   /** Stable menu key (tests, keyboard, analytics-safe identity). */
   id: "later_today" | "tomorrow" | "next_week"
-  /** Ready-to-render menu label (matches the spec's preset names). */
+  /** Ready-to-render menu label (matches the spec's preset names),
+   * localized when the presets are computed. */
   label: string
   /** Wake-up time, unix epoch seconds (threads.snoozed_until units). */
   until: number
@@ -176,19 +179,24 @@ export function getSnoozePresets(now: Date = new Date()): SnoozePickerData {
   if (isBefore(now, laterToday)) {
     presets.push({
       id: "later_today",
-      label: "Later today",
+      label: i18next.t("snooze.presets.laterToday"),
       until: toUnixSeconds(laterToday),
     })
   }
+  const tomorrowMorning = atMorningHour(addDays(now, 1))
   presets.push(
     {
       id: "tomorrow",
-      label: "Tomorrow 8:00",
-      until: toUnixSeconds(atMorningHour(addDays(now, 1))),
+      // The shared "Tomorrow {{time}}" pattern with a 24-hour time, so the
+      // English label stays "Tomorrow 8:00" and Spanish reads "Mañana, 8:00".
+      label: i18next.t("sidebar.dates.tomorrowAt", {
+        time: format(tomorrowMorning, "H:mm"),
+      }),
+      until: toUnixSeconds(tomorrowMorning),
     },
     {
       id: "next_week",
-      label: "Next week",
+      label: i18next.t("snooze.presets.nextWeek"),
       until: toUnixSeconds(atMorningHour(addWeeks(now, 1))),
     }
   )

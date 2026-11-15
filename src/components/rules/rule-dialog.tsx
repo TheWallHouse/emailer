@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { CirclePlus, Loader2, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -34,7 +35,7 @@ import { createRule, parseActionsJson, updateRule } from "@/services/rules"
 import {
   ACTION_TYPE_OPTIONS,
   CATEGORY_LABELS,
-  CRITERIA_HELP,
+  criteriaHelp,
   queryFromCriteriaJson,
 } from "./rule-actions-ui"
 import {
@@ -152,6 +153,7 @@ export function RuleDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const { t } = useTranslation()
   const editing = target.mode === "edit" ? target.rule : null
   const [name, setName] = useState(editing?.name ?? initialName)
   const initial = initialCriteriaState(
@@ -162,9 +164,7 @@ export function RuleDialog({
   const [advanced, setAdvanced] = useState(initial.advanced)
   const [drafts, setDrafts] = useState<ActionDraft[]>(() =>
     draftsFromActions(
-      editing
-        ? parseActionsJson(editing.actions_json)
-        : (initialActions ?? [])
+      editing ? parseActionsJson(editing.actions_json) : (initialActions ?? [])
     )
   )
   const [enabled, setEnabled] = useState(editing ? editing.enabled === 1 : true)
@@ -245,7 +245,9 @@ export function RuleDialog({
           actions,
           enabled,
         })
-        toast.success(`Rule “${name.trim()}” updated`)
+        toast.success(
+          t("settingsMail.ruleDialog.updated", { name: name.trim() })
+        )
       } else {
         await createRule(executor, {
           accountId,
@@ -254,13 +256,17 @@ export function RuleDialog({
           actions,
           enabled,
         })
-        toast.success(`Rule “${name.trim()}” created`)
+        toast.success(
+          t("settingsMail.ruleDialog.created", { name: name.trim() })
+        )
       }
       onSaved()
       onOpenChange(false)
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Could not save the rule."
+        error instanceof Error
+          ? error.message
+          : t("settingsMail.ruleDialog.saveFailed")
       )
       setSaving(false)
     }
@@ -269,52 +275,60 @@ export function RuleDialog({
   const criteriaRows = (
     <>
       <div className="grid grid-cols-[7rem_1fr] items-center gap-2">
-        <Label htmlFor="crit-from">From</Label>
+        <Label htmlFor="crit-from">{t("settingsMail.ruleDialog.from")}</Label>
         <Input
           id="crit-from"
           value={fields.from}
           onChange={(event) => updateFields({ from: event.target.value })}
-          placeholder="e.g. news@x.com"
+          placeholder={t("settingsMail.ruleDialog.fromPlaceholder")}
         />
       </div>
       <div className="grid grid-cols-[7rem_1fr] items-center gap-2">
-        <Label htmlFor="crit-to">To</Label>
+        <Label htmlFor="crit-to">{t("settingsMail.ruleDialog.to")}</Label>
         <Input
           id="crit-to"
           value={fields.to}
           onChange={(event) => updateFields({ to: event.target.value })}
-          placeholder="e.g. me@x.com"
+          placeholder={t("settingsMail.ruleDialog.toPlaceholder")}
         />
       </div>
       <div className="grid grid-cols-[7rem_1fr] items-center gap-2">
-        <Label htmlFor="crit-subject">Subject</Label>
+        <Label htmlFor="crit-subject">
+          {t("settingsMail.ruleDialog.subject")}
+        </Label>
         <Input
           id="crit-subject"
           value={fields.subject}
           onChange={(event) => updateFields({ subject: event.target.value })}
-          placeholder="e.g. digest"
+          placeholder={t("settingsMail.ruleDialog.subjectPlaceholder")}
         />
       </div>
       <div className="grid grid-cols-[7rem_1fr] items-center gap-2">
-        <Label htmlFor="crit-has-words">Has the words</Label>
+        <Label htmlFor="crit-has-words">
+          {t("settingsMail.ruleDialog.hasWords")}
+        </Label>
         <Input
           id="crit-has-words"
           value={fields.hasWords}
           onChange={(event) => updateFields({ hasWords: event.target.value })}
-          placeholder="e.g. invoice total"
+          placeholder={t("settingsMail.ruleDialog.hasWordsPlaceholder")}
         />
       </div>
       <div className="grid grid-cols-[7rem_1fr] items-center gap-2">
-        <Label htmlFor="crit-doesnt-have">Doesn't have</Label>
+        <Label htmlFor="crit-doesnt-have">
+          {t("settingsMail.ruleDialog.doesntHave")}
+        </Label>
         <Input
           id="crit-doesnt-have"
           value={fields.doesntHave}
           onChange={(event) => updateFields({ doesntHave: event.target.value })}
-          placeholder="e.g. unsubscribe"
+          placeholder={t("settingsMail.ruleDialog.doesntHavePlaceholder")}
         />
       </div>
       <div className="grid grid-cols-[7rem_1fr] items-center gap-2">
-        <Label htmlFor="crit-size-value">Size</Label>
+        <Label htmlFor="crit-size-value">
+          {t("settingsMail.ruleDialog.size")}
+        </Label>
         <div className="flex items-center gap-2">
           <Select
             value={fields.sizeDirection}
@@ -324,12 +338,19 @@ export function RuleDialog({
               })
             }
           >
-            <SelectTrigger aria-label="Size comparison" className="w-36">
+            <SelectTrigger
+              aria-label={t("settingsMail.ruleDialog.sizeComparison")}
+              className="w-36"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="larger">greater than</SelectItem>
-              <SelectItem value="smaller">less than</SelectItem>
+              <SelectItem value="larger">
+                {t("settingsMail.ruleDialog.greaterThan")}
+              </SelectItem>
+              <SelectItem value="smaller">
+                {t("settingsMail.ruleDialog.lessThan")}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Input
@@ -341,7 +362,7 @@ export function RuleDialog({
               updateFields({ sizeValue: event.target.value })
             }
             className="w-24"
-            aria-label="Size value"
+            aria-label={t("settingsMail.ruleDialog.sizeValue")}
           />
           <Select
             value={fields.sizeUnit}
@@ -349,7 +370,10 @@ export function RuleDialog({
               updateFields({ sizeUnit: value === "kb" ? "kb" : "mb" })
             }
           >
-            <SelectTrigger aria-label="Size unit" className="w-20">
+            <SelectTrigger
+              aria-label={t("settingsMail.ruleDialog.sizeUnit")}
+              className="w-20"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -360,7 +384,9 @@ export function RuleDialog({
         </div>
       </div>
       <div className="grid grid-cols-[7rem_1fr] items-center gap-2">
-        <Label htmlFor="crit-date-value">Arrived</Label>
+        <Label htmlFor="crit-date-value">
+          {t("settingsMail.ruleDialog.arrived")}
+        </Label>
         <div className="flex items-center gap-2">
           <Select
             value={fields.dateDirection}
@@ -370,12 +396,19 @@ export function RuleDialog({
               })
             }
           >
-            <SelectTrigger aria-label="Date direction" className="w-36">
+            <SelectTrigger
+              aria-label={t("settingsMail.ruleDialog.dateDirection")}
+              className="w-36"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="before">before</SelectItem>
-              <SelectItem value="after">after</SelectItem>
+              <SelectItem value="before">
+                {t("settingsMail.ruleDialog.before")}
+              </SelectItem>
+              <SelectItem value="after">
+                {t("settingsMail.ruleDialog.after")}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Input
@@ -385,7 +418,7 @@ export function RuleDialog({
             onChange={(event) =>
               updateFields({ dateValue: event.target.value })
             }
-            aria-label="Date"
+            aria-label={t("settingsMail.ruleDialog.date")}
           />
         </div>
       </div>
@@ -397,7 +430,9 @@ export function RuleDialog({
             updateFields({ hasAttachment: checked === true })
           }}
         />
-        <Label htmlFor="crit-has-attachment">Has attachment</Label>
+        <Label htmlFor="crit-has-attachment">
+          {t("settingsMail.ruleDialog.hasAttachment")}
+        </Label>
       </div>
     </>
   )
@@ -409,9 +444,13 @@ export function RuleDialog({
           dialog, clipping the right-hand controls. */}
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{editing ? "Edit Rule" : "Add Rule"}</DialogTitle>
+          <DialogTitle>
+            {editing
+              ? t("settingsMail.ruleDialog.editTitle")
+              : t("settingsMail.ruleDialog.addTitle")}
+          </DialogTitle>
           <DialogDescription>
-            Rules run on each new message this account receives, top to bottom.
+            {t("settingsMail.ruleDialog.description")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -422,12 +461,14 @@ export function RuleDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="rule-name">Name</Label>
+            <Label htmlFor="rule-name">
+              {t("settingsMail.ruleDialog.name")}
+            </Label>
             <Input
               id="rule-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. File newsletters"
+              placeholder={t("settingsMail.ruleDialog.namePlaceholder")}
               autoFocus
             />
           </div>
@@ -440,26 +481,32 @@ export function RuleDialog({
                   toggleAdvanced(checked === true)
                 }}
               />
-              <Label htmlFor="rule-advanced">Advanced query</Label>
+              <Label htmlFor="rule-advanced">
+                {t("settingsMail.ruleDialog.advanced")}
+              </Label>
             </div>
             {advanced ? (
               <div className="grid gap-2">
-                <Label htmlFor="rule-criteria">When a message matches</Label>
+                <Label htmlFor="rule-criteria">
+                  {t("settingsMail.ruleDialog.whenMatches")}
+                </Label>
                 <Input
                   id="rule-criteria"
                   value={criteria}
                   onChange={(event) => setCriteria(event.target.value)}
-                  placeholder="e.g. from:news@x.com subject:digest"
+                  placeholder={t("settingsMail.ruleDialog.criteriaPlaceholder")}
                   className="font-mono"
                 />
-                <p className="text-xs text-muted-foreground">{CRITERIA_HELP}</p>
+                <p className="text-xs text-muted-foreground">
+                  {criteriaHelp()}
+                </p>
               </div>
             ) : (
               criteriaRows
             )}
           </div>
           <div className="grid gap-2">
-            <Label>Then</Label>
+            <Label>{t("settingsMail.ruleDialog.then")}</Label>
             {drafts.map((draft, index) => (
               <div key={draft.key} className="flex items-start gap-2">
                 <Select
@@ -471,7 +518,9 @@ export function RuleDialog({
                   }
                 >
                   <SelectTrigger
-                    aria-label={`Action ${index + 1} type`}
+                    aria-label={t("settingsMail.ruleDialog.actionType", {
+                      index: index + 1,
+                    })}
                     className="w-44 shrink-0"
                   >
                     <SelectValue />
@@ -487,22 +536,26 @@ export function RuleDialog({
                 {(draft.type === "add_labels" ||
                   draft.type === "remove_labels") && (
                   <Input
-                    aria-label={`Action ${index + 1} labels`}
+                    aria-label={t("settingsMail.ruleDialog.actionLabels", {
+                      index: index + 1,
+                    })}
                     value={draft.labels}
                     onChange={(event) =>
                       updateDraft(draft.key, { labels: event.target.value })
                     }
-                    placeholder="Label names, comma-separated"
+                    placeholder={t("settingsMail.ruleDialog.labelsPlaceholder")}
                   />
                 )}
                 {draft.type === "move" && (
                   <Input
-                    aria-label={`Action ${index + 1} folder`}
+                    aria-label={t("settingsMail.ruleDialog.actionFolder", {
+                      index: index + 1,
+                    })}
                     value={draft.folder}
                     onChange={(event) =>
                       updateDraft(draft.key, { folder: event.target.value })
                     }
-                    placeholder="Folder path, e.g. Archive/2024"
+                    placeholder={t("settingsMail.ruleDialog.folderPlaceholder")}
                   />
                 )}
                 {draft.type === "set_category" && (
@@ -516,7 +569,9 @@ export function RuleDialog({
                     }
                   >
                     <SelectTrigger
-                      aria-label={`Action ${index + 1} category`}
+                      aria-label={t("settingsMail.ruleDialog.actionCategory", {
+                        index: index + 1,
+                      })}
                       className="w-40 shrink-0"
                     >
                       <SelectValue />
@@ -534,7 +589,9 @@ export function RuleDialog({
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={`Remove action ${index + 1}`}
+                  aria-label={t("settingsMail.ruleDialog.removeAction", {
+                    index: index + 1,
+                  })}
                   onClick={() => removeDraft(draft.key)}
                 >
                   <Trash2 />
@@ -551,7 +608,7 @@ export function RuleDialog({
                 }
               >
                 <CirclePlus />
-                Add Action
+                {t("settingsMail.ruleDialog.addAction")}
               </Button>
             </div>
           </div>
@@ -563,7 +620,9 @@ export function RuleDialog({
                 setEnabled(checked === true)
               }}
             />
-            <Label htmlFor="rule-enabled">Enabled</Label>
+            <Label htmlFor="rule-enabled">
+              {t("settingsMail.ruleDialog.enabled")}
+            </Label>
           </div>
           {errorMessage && (
             <p role="alert" className="text-sm text-destructive">
@@ -577,13 +636,15 @@ export function RuleDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settingsMail.ruleDialog.cancel")}
             </Button>
             <Button type="submit" disabled={!canSave}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              {editing ? "Save Changes" : "Create Rule"}
+              {editing
+                ? t("settingsMail.ruleDialog.saveChanges")
+                : t("settingsMail.ruleDialog.create")}
             </Button>
           </DialogFooter>
         </form>

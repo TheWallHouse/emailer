@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 import { Loader2, RefreshCw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -40,15 +42,15 @@ import {
  * some files must not present itself as exact.
  */
 
-const REMOVED_ITEMS = [
-  "every account's local mail — message bodies and their read states",
-  "downloaded attachments",
-  "the AI cache",
-  "calendar and task data",
+const REMOVED_ITEM_KEYS = [
+  "mail",
+  "attachments",
+  "aiCache",
+  "calendar",
   "contacts",
-  "preferences and settings",
-  "sealed credential slots — you will be signed out of every account",
-]
+  "preferences",
+  "credentials",
+] as const
 
 function DeleteAllDataDialog({
   deleting,
@@ -62,6 +64,7 @@ function DeleteAllDataDialog({
   // Step 1 states the scope; step 2 is the explicit final confirm. The
   // dialog is mounted fresh for every open (keyed remount — the same
   // pattern as the rules' AddRuleDialog), so the step always starts at 1.
+  const { t } = useTranslation()
   const [confirmedOnce, setConfirmedOnce] = useState(false)
 
   return (
@@ -70,11 +73,11 @@ function DeleteAllDataDialog({
         {confirmedOnce ? (
           <>
             <DialogHeader>
-              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogTitle>
+                {t("settings.storage.deleteDialog.confirmTitle")}
+              </DialogTitle>
               <DialogDescription>
-                This cannot be undone. Everything listed will be removed
-                from this device and Emailer will restart as if freshly
-                installed. Your mail servers keep every message.
+                {t("settings.storage.deleteDialog.confirmDescription")}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -83,7 +86,7 @@ function DeleteAllDataDialog({
                 onClick={() => setConfirmedOnce(false)}
                 disabled={deleting}
               >
-                Back
+                {t("settings.storage.deleteDialog.back")}
               </Button>
               <Button
                 variant="destructive"
@@ -94,31 +97,32 @@ function DeleteAllDataDialog({
                 {deleting && (
                   <Loader2 className="size-3.5 animate-spin" aria-hidden />
                 )}
-                Delete everything
+                {t("settings.storage.deleteDialog.deleteEverything")}
               </Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Delete all local data?</DialogTitle>
+              <DialogTitle>
+                {t("settings.storage.deleteDialog.title")}
+              </DialogTitle>
               <DialogDescription>
-                This removes from THIS device, for every account:
+                {t("settings.storage.deleteDialog.description")}
               </DialogDescription>
             </DialogHeader>
             <ul
               data-testid="delete-all-data-scope"
               className="list-disc space-y-1 pl-5 text-sm text-foreground"
             >
-              {REMOVED_ITEMS.map((item) => (
-                <li key={item}>{item}</li>
+              {REMOVED_ITEM_KEYS.map((item) => (
+                <li key={item}>
+                  {t(`settings.storage.deleteDialog.items.${item}`)}
+                </li>
               ))}
             </ul>
             <p className="text-sm text-muted-foreground">
-              Your mail servers are not touched — every message stays on the
-              server. After the reset Emailer restarts in its first-run
-              state, and your mail syncs back down once you add your
-              accounts again.
+              {t("settings.storage.deleteDialog.serversNote")}
             </p>
             <DialogFooter>
               <Button
@@ -126,13 +130,13 @@ function DeleteAllDataDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={deleting}
               >
-                Cancel
+                {t("settings.storage.deleteDialog.cancel")}
               </Button>
               <Button
                 data-testid="delete-all-data-continue"
                 onClick={() => setConfirmedOnce(true)}
               >
-                Continue
+                {t("settings.storage.deleteDialog.continue")}
               </Button>
             </DialogFooter>
           </>
@@ -143,6 +147,7 @@ function DeleteAllDataDialog({
 }
 
 export function StorageSection() {
+  const { t } = useTranslation()
   const [usage, setUsage] = useState<StorageUsage | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -159,9 +164,7 @@ export function StorageSection() {
       })
       .catch((cause) => {
         console.warn("[settings] failed to load storage usage", cause)
-        setError(
-          "Could not measure local storage. Check that the app was started from its desktop build and try again."
-        )
+        setError(i18next.t("settings.storage.loadFailed"))
       })
       .finally(() => {
         setLoading(false)
@@ -189,20 +192,24 @@ export function StorageSection() {
       console.warn("[settings] delete all local data failed", cause)
       setDeleting(false)
       setDeleteOpen(false)
-      toast.error("Could not finish deleting local data", {
-        description:
-          "Some local data may already be gone. Your mail servers are untouched — restart Emailer and try again.",
+      toast.error(i18next.t("settings.storage.deleteFailed.title"), {
+        description: i18next.t("settings.storage.deleteFailed.description"),
       })
     }
   }
 
   return (
-    <section aria-label="Storage" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.storage.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Storage</h2>
+          <h2 className="text-base font-semibold text-foreground">
+            {t("settings.storage.title")}
+          </h2>
           <p className="text-sm text-muted-foreground">
-            What Emailer keeps on this device.
+            {t("settings.storage.description")}
           </p>
         </div>
         <Button
@@ -219,7 +226,7 @@ export function StorageSection() {
           ) : (
             <RefreshCw />
           )}
-          Refresh
+          {t("settings.storage.refresh")}
         </Button>
       </div>
 
@@ -229,7 +236,7 @@ export function StorageSection() {
         </p>
       ) : loading && !usage ? (
         <p className="text-sm text-muted-foreground" aria-live="polite">
-          Calculating…
+          {t("settings.storage.calculating")}
         </p>
       ) : usage ? (
         <>
@@ -248,15 +255,17 @@ export function StorageSection() {
                     {KIND_DESCRIPTIONS[kind.kind] ?? ""}
                   </p>
                 </div>
-                <p className="shrink-0 whitespace-nowrap pl-4 text-right text-sm tabular-nums text-foreground">
+                <p className="shrink-0 pl-4 text-right text-sm whitespace-nowrap text-foreground tabular-nums">
                   {formatStorageSize(kind.bytes)}
                 </p>
               </div>
             ))}
             <div className="flex items-center justify-between gap-6 py-3">
-              <p className="text-sm font-semibold text-foreground">Total</p>
+              <p className="text-sm font-semibold text-foreground">
+                {t("settings.storage.total")}
+              </p>
               <p
-                className="text-sm font-semibold tabular-nums text-foreground"
+                className="text-sm font-semibold text-foreground tabular-nums"
                 data-testid="storage-total"
               >
                 {formatStorageSize(usage.total)}
@@ -265,7 +274,7 @@ export function StorageSection() {
           </div>
           {usage.unreadableEntries > 0 && (
             <p className="text-xs text-muted-foreground">
-              Some files could not be read, so these sizes are a lower bound.
+              {t("settings.storage.approximate")}
             </p>
           )}
         </>
@@ -276,11 +285,10 @@ export function StorageSection() {
       <div className="flex items-center justify-between gap-6">
         <div className="grid gap-0.5">
           <h3 className="text-sm font-medium text-foreground">
-            Delete all local data
+            {t("settings.storage.deleteAll.title")}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Remove everything Emailer keeps on this device and start over.
-            Your mail servers are not touched.
+            {t("settings.storage.deleteAll.hint")}
           </p>
         </div>
         <Button
@@ -291,7 +299,7 @@ export function StorageSection() {
           onClick={() => setDeleteOpen(true)}
         >
           <Trash2 />
-          Delete all…
+          {t("settings.storage.deleteAll.button")}
         </Button>
       </div>
 

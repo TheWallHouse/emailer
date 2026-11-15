@@ -1,0 +1,32 @@
+{
+  "groups": {
+    "navigation": "Navegación",
+    "actions": "Acciones",
+    "compose": "Redactar",
+    "search": "Búsqueda",
+    "general": "General"
+  },
+  "descriptions": {
+    "nextThread": "Seleccionar la conversación siguiente",
+    "previousThread": "Seleccionar la conversación anterior",
+    "openThread": "Abrir la conversación seleccionada",
+    "archive": "Archivar la conversación seleccionada",
+    "trash": "Mover la conversación seleccionada a la Papelera",
+    "toggleRead": "Marcar como leído / no leído",
+    "toggleStar": "Destacar / quitar destacado",
+    "snooze": "Posponer la conversación seleccionada hasta mañana",
+    "reply": "Responder a la conversación seleccionada",
+    "compose": "Redactar un mensaje nuevo",
+    "sendMessage": "Enviar el mensaje que estás redactando",
+    "refresh": "Sincronizar ahora todas las cuentas",
+    "focusSearch": "Ir al cuadro de búsqueda",
+    "findInMessage": "Buscar en el mensaje abierto",
+    "palette": "Abrir o cerrar la paleta de comandos",
+    "assistant": "Abrir el asistente de IA",
+    "printThread": "Imprimir la conversación abierta",
+    "help": "Mostrar esta lista de atajos",
+    "toggleSidebar": "Contraer o expandir la barra lateral",
+    "dismiss": "Cerrar la lista de atajos",
+    "closeComposer": "Minimizar la ventana de redacción (el borrador se sigue guardando solo)"
+  }
+}

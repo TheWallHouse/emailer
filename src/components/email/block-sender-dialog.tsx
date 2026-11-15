@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -49,6 +50,7 @@ export function BlockSenderDialog({
   onOpenChange,
   onConfirm,
 }: BlockSenderDialogProps) {
+  const { t } = useTranslation()
   const [action, setAction] = useState<BlockedSenderAction>("trash")
   const [applyToExisting, setApplyToExisting] = useState(false)
   /** Existing-conversation count for the cleanup offer; null until the
@@ -71,14 +73,19 @@ export function BlockSenderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="block-sender-dialog">
         <DialogHeader>
-          <DialogTitle>Block {sender}</DialogTitle>
+          <DialogTitle>{t("reader.blockSender.title", { sender })}</DialogTitle>
           <DialogDescription>
-            Future mail from this address will be marked as read and moved out
-            of the inbox automatically, without notifications.
+            {t("reader.blockSender.description")}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-3" role="radiogroup" aria-label="Action">
-          <Label className="text-sm font-medium">Then future mail is</Label>
+        <div
+          className="grid gap-3"
+          role="radiogroup"
+          aria-label={t("reader.blockSender.action")}
+        >
+          <Label className="text-sm font-medium">
+            {t("reader.blockSender.thenFutureMail")}
+          </Label>
           <label className="flex items-center gap-2 text-sm">
             <input
               type="radio"
@@ -87,7 +94,7 @@ export function BlockSenderDialog({
               checked={action === "trash"}
               onChange={() => setAction("trash")}
             />
-            Moved to Trash
+            {t("reader.blockSender.movedToTrash")}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -97,7 +104,7 @@ export function BlockSenderDialog({
               checked={action === "archive"}
               onChange={() => setAction("archive")}
             />
-            Archived
+            {t("reader.blockSender.archived")}
           </label>
         </div>
         <div className="flex items-center gap-2">
@@ -110,28 +117,28 @@ export function BlockSenderDialog({
           />
           <Label htmlFor="block-apply-existing" className="font-normal">
             {existingCount === null
-              ? "Also move existing conversations from this sender"
-              : `Also move ${existingCount} existing conversation${
-                  existingCount === 1 ? "" : "s"
-                } from this sender`}
+              ? t("reader.blockSender.moveExisting")
+              : t("reader.blockSender.moveExistingCount", {
+                  count: existingCount,
+                })}
           </Label>
         </div>
         <DialogFooter>
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            aria-label="Cancel block"
+            aria-label={t("reader.blockSender.cancelLabel")}
           >
-            Cancel
+            {t("reader.blockSender.cancel")}
           </Button>
           <Button
             onClick={() => {
               onOpenChange(false)
               onConfirm(action, applyToExisting)
             }}
-            aria-label={`Confirm block ${sender}`}
+            aria-label={t("reader.blockSender.confirmLabel", { sender })}
           >
-            Block
+            {t("reader.blockSender.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { create } from "zustand"
 
 import {
@@ -78,7 +79,15 @@ export function getEffectiveShortcuts(): ShortcutBinding[] {
 /** The effective binding table, reactive — for rendering consumers. */
 export function useEffectiveShortcuts(): ShortcutBinding[] {
   const overrides = useShortcutBindingsStore((state) => state.overrides)
-  return useMemo(() => mergeShortcuts(overrides), [overrides])
+  // mergeShortcuts copies rebound bindings, which snapshots their localized
+  // description getter — so the merge must re-run on a language change too.
+  const { i18n } = useTranslation()
+  const language = i18n.language
+  return useMemo(
+    () => mergeShortcuts(overrides),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- language is a re-run trigger
+    [overrides, language]
+  )
 }
 
 /**

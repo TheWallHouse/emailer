@@ -1,3 +1,4 @@
+import { i18next } from "@/i18n"
 import type { Category, RuleAction, RuleActionType } from "@/services/rules"
 
 /**
@@ -7,57 +8,125 @@ import type { Category, RuleAction, RuleActionType } from "@/services/rules"
  * operator set) and services/rules/actions.ts (the closed action union).
  */
 
-export const CRITERIA_HELP =
-  "Same language as the search box: from: to: subject: label: " +
-  "has:attachment is:unread is:starred larger: smaller: before: after:, " +
-  "a leading - negates (e.g. -from:boss@x.com), plus plain words that must " +
-  "appear in the subject or the snippet. Values of the same operator match " +
-  "either value; different operators must all match."
+/** The criteria help line under the advanced query input. A function, so
+ * it follows the active language. */
+export function criteriaHelp(): string {
+  return i18next.t("settingsMail.ruleActions.criteriaHelp")
+}
 
-export const ACTION_TYPE_OPTIONS: { value: RuleActionType; label: string }[] = [
-  { value: "archive", label: "Archive" },
-  { value: "trash", label: "Trash" },
-  { value: "mark_as_spam", label: "Mark as spam" },
-  { value: "mark_read", label: "Mark read" },
-  { value: "star", label: "Star" },
-  { value: "add_labels", label: "Add labels" },
-  { value: "remove_labels", label: "Remove labels" },
-  { value: "move", label: "Move to folder (imap)" },
+/** Action-type dropdown options; labels are getters (localized at read
+ * time, never frozen at import). */
+export const ACTION_TYPE_OPTIONS: readonly {
+  readonly value: RuleActionType
+  readonly label: string
+}[] = [
+  {
+    value: "archive",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.archive")
+    },
+  },
+  {
+    value: "trash",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.trash")
+    },
+  },
+  {
+    value: "mark_as_spam",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.markAsSpam")
+    },
+  },
+  {
+    value: "mark_read",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.markRead")
+    },
+  },
+  {
+    value: "star",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.star")
+    },
+  },
+  {
+    value: "add_labels",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.addLabels")
+    },
+  },
+  {
+    value: "remove_labels",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.removeLabels")
+    },
+  },
+  {
+    value: "move",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.move")
+    },
+  },
   // Task 3.4 (design D4): names a category for the categorization pass —
   // no delivery effect (the executor ignores it; no announcement change).
-  { value: "set_category", label: "Set category" },
+  {
+    value: "set_category",
+    get label() {
+      return i18next.t("settingsMail.ruleActions.types.setCategory")
+    },
+  },
 ]
 
 /** Category values as the UI shows them (the storage values are
- * lowercase; the tabs are titled with the capitalized forms). */
-export const CATEGORY_LABELS: Record<Category, string> = {
-  primary: "Primary",
-  updates: "Updates",
-  promotions: "Promotions",
-  social: "Social",
-  newsletters: "Newsletters",
+ * lowercase; the tabs are titled with the capitalized forms). Getters
+ * reuse the sidebar's category names, so they follow the language. */
+export const CATEGORY_LABELS: Readonly<Record<Category, string>> = {
+  get primary() {
+    return i18next.t("sidebar.categories.primary")
+  },
+  get updates() {
+    return i18next.t("sidebar.categories.updates")
+  },
+  get promotions() {
+    return i18next.t("sidebar.categories.promotions")
+  },
+  get social() {
+    return i18next.t("sidebar.categories.social")
+  },
+  get newsletters() {
+    return i18next.t("sidebar.categories.newsletters")
+  },
 }
 
 export function actionChipLabel(action: RuleAction): string {
   switch (action.type) {
     case "archive":
-      return "Archive"
+      return i18next.t("settingsMail.ruleActions.types.archive")
     case "trash":
-      return "Trash"
+      return i18next.t("settingsMail.ruleActions.types.trash")
     case "mark_as_spam":
-      return "Mark as spam"
+      return i18next.t("settingsMail.ruleActions.types.markAsSpam")
     case "mark_read":
-      return "Mark read"
+      return i18next.t("settingsMail.ruleActions.types.markRead")
     case "star":
-      return "Star"
+      return i18next.t("settingsMail.ruleActions.types.star")
     case "add_labels":
-      return `Label: ${(action.labels ?? []).join(", ")}`
+      return i18next.t("settingsMail.ruleActions.chips.label", {
+        labels: (action.labels ?? []).join(", "),
+      })
     case "remove_labels":
-      return `Remove: ${(action.labels ?? []).join(", ")}`
+      return i18next.t("settingsMail.ruleActions.chips.remove", {
+        labels: (action.labels ?? []).join(", "),
+      })
     case "move":
-      return `Move: ${action.folder ?? ""}`
+      return i18next.t("settingsMail.ruleActions.chips.move", {
+        folder: action.folder ?? "",
+      })
     case "set_category":
-      return `Category: ${CATEGORY_LABELS[action.category ?? "primary"]}`
+      return i18next.t("settingsMail.ruleActions.chips.category", {
+        category: CATEGORY_LABELS[action.category ?? "primary"],
+      })
   }
 }
 

@@ -1,0 +1,32 @@
+{
+  "groups": {
+    "navigation": "Navigation",
+    "actions": "Actions",
+    "compose": "Compose",
+    "search": "Search",
+    "general": "General"
+  },
+  "descriptions": {
+    "nextThread": "Select next thread",
+    "previousThread": "Select previous thread",
+    "openThread": "Open the selected thread",
+    "archive": "Archive the selected thread",
+    "trash": "Move the selected thread to Trash",
+    "toggleRead": "Toggle read / unread",
+    "toggleStar": "Toggle star",
+    "snooze": "Snooze the selected thread until tomorrow",
+    "reply": "Reply to the selected thread",
+    "compose": "Compose a new message",
+    "sendMessage": "Send the message being composed",
+    "refresh": "Sync all accounts now",
+    "focusSearch": "Focus the search input",
+    "findInMessage": "Find in the open message",
+    "palette": "Toggle the command palette",
+    "assistant": "Open the AI assistant",
+    "printThread": "Print the open thread",
+    "help": "Show this shortcuts reference",
+    "toggleSidebar": "Collapse or expand the sidebar",
+    "dismiss": "Dismiss the shortcuts reference",
+    "closeComposer": "Minimize the composer (the draft keeps autosaving)"
+  }
+}

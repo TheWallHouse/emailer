@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { ThreadView } from "@/components/email/thread-view"
 
@@ -18,6 +19,7 @@ interface ReadingPaneProps {
 }
 
 export function ReadingPane({ onBack }: ReadingPaneProps) {
+  const { t } = useTranslation()
   return (
     <div className="flex h-full min-h-0 flex-col">
       {onBack && (
@@ -29,7 +31,7 @@ export function ReadingPane({ onBack }: ReadingPaneProps) {
               onClick={onBack}
             >
               <ArrowLeft className="size-4" />
-              Back to list
+              {t("reader.readingPane.backToList")}
             </button>
           </div>
           <div className="border-b border-border" />

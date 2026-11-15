@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -42,11 +43,8 @@ export interface ApplyRuleDialogProps {
   onDone?: (result: ApplyRuleNowResult) => void
 }
 
-function threadsLabel(count: number): string {
-  return `${count.toLocaleString()} ${count === 1 ? "thread" : "threads"}`
-}
-
 export function ApplyRuleDialog({ rule, onDone }: ApplyRuleDialogProps) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [matched, setMatched] = useState<number | null>(null)
   const [applying, setApplying] = useState(false)
@@ -63,13 +61,13 @@ export function ApplyRuleDialog({ rule, onDone }: ApplyRuleDialogProps) {
       .catch((error) => {
         console.error("[rules] apply-now: count failed", error)
         if (!cancelled) {
-          toast.error("Could not count the matching threads.")
+          toast.error(t("settingsMail.applyRule.countFailed"))
         }
       })
     return () => {
       cancelled = true
     }
-  }, [open, rule.account_id, rule.criteria_json])
+  }, [open, rule.account_id, rule.criteria_json, t])
 
   const handleConfirm = useCallback(async () => {
     if (applying) return
@@ -78,16 +76,21 @@ export function ApplyRuleDialog({ rule, onDone }: ApplyRuleDialogProps) {
       const result = await applyRuleNow(getExecutor(), rule.account_id, rule, {
         confirmed: true,
       })
-      toast.success(`Applied to ${threadsLabel(result.applied)}`)
+      toast.success(
+        t("settingsMail.applyRule.applied", {
+          count: result.applied,
+          n: result.applied.toLocaleString(),
+        })
+      )
       setOpen(false)
       onDone?.(result)
     } catch (error) {
       console.error("[rules] apply-now failed", error)
-      toast.error("Could not apply the rule.")
+      toast.error(t("settingsMail.applyRule.applyFailed"))
     } finally {
       setApplying(false)
     }
-  }, [applying, onDone, rule])
+  }, [applying, onDone, rule, t])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -100,17 +103,22 @@ export function ApplyRuleDialog({ rule, onDone }: ApplyRuleDialogProps) {
           setOpen(true)
         }}
       >
-        Apply now
+        {t("settingsMail.applyRule.applyNow")}
       </Button>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Apply “{rule.name}” now?</DialogTitle>
+          <DialogTitle>
+            {t("settingsMail.applyRule.title", { name: rule.name })}
+          </DialogTitle>
           <DialogDescription>
             {matched === null
-              ? "Counting matching threads…"
+              ? t("settingsMail.applyRule.counting")
               : matched === 0
-                ? "This rule doesn’t match any threads."
-                : `This rule matches ${threadsLabel(matched)}. Its actions will apply to every matched thread, as if the rule had run when the mail arrived. This cannot be undone in one step.`}
+                ? t("settingsMail.applyRule.noMatches")
+                : t("settingsMail.applyRule.matches", {
+                    count: matched,
+                    n: matched.toLocaleString(),
+                  })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -119,7 +127,7 @@ export function ApplyRuleDialog({ rule, onDone }: ApplyRuleDialogProps) {
             disabled={applying}
             onClick={() => setOpen(false)}
           >
-            Cancel
+            {t("settingsMail.applyRule.cancel")}
           </Button>
           <Button
             data-testid="apply-rule-confirm"
@@ -127,10 +135,13 @@ export function ApplyRuleDialog({ rule, onDone }: ApplyRuleDialogProps) {
             onClick={() => void handleConfirm()}
           >
             {applying
-              ? "Applying…"
+              ? t("settingsMail.applyRule.applying")
               : matched === null || matched === 0
-                ? "Apply"
-                : `Apply to ${threadsLabel(matched)}`}
+                ? t("settingsMail.applyRule.apply")
+                : t("settingsMail.applyRule.applyTo", {
+                    count: matched,
+                    n: matched.toLocaleString(),
+                  })}
           </Button>
         </DialogFooter>
       </DialogContent>

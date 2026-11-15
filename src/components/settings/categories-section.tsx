@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -9,6 +11,14 @@ import {
   useCategoriesEnabled,
   useCategoryBackfillProgress,
 } from "@/components/layout/use-categories"
+
+const CATEGORY_NAME_KEYS = [
+  "primary",
+  "updates",
+  "promotions",
+  "social",
+  "newsletters",
+] as const
 
 /**
  * Settings "Categories" section (task 3.5, design D4, mailbox-ui spec
@@ -24,25 +34,35 @@ import {
  * the done summary as a toast).
  */
 export function CategoriesSection() {
+  const { t } = useTranslation()
   const enabled = useCategoriesEnabled()
   const progress = useCategoryBackfillProgress()
 
   return (
-    <section aria-label="Categories" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.categories.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Categories</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settings.categories.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Automatic inbox categories (Primary, Updates, Promotions, Social,
-          Newsletters) shown as tabs above the thread list.
+          {t("settings.categories.description", {
+            names: CATEGORY_NAME_KEYS.map((key) =>
+              t(`sidebar.categories.${key}`)
+            ).join(", "),
+          })}
         </p>
       </div>
       <div className="divide-y divide-border">
         <div className="flex items-center justify-between gap-6 py-3">
           <div className="grid gap-0.5">
-            <Label htmlFor="categories-enabled">Category tabs</Label>
+            <Label htmlFor="categories-enabled">
+              {t("settings.categories.tabs.label")}
+            </Label>
             <p className="text-xs text-muted-foreground">
-              Show the category tabs above the inbox, with unread counts per
-              category. Your folders and split tabs are unaffected.
+              {t("settings.categories.tabs.hint")}
             </p>
           </div>
           <Switch
@@ -58,12 +78,10 @@ export function CategoriesSection() {
           <div className="flex flex-col gap-2 py-3">
             <div className="grid gap-0.5">
               <Label htmlFor="categorize-existing">
-                Categorize existing mail
+                {t("settings.categories.existing.label")}
               </Label>
               <p className="text-xs text-muted-foreground">
-                Classify messages already in your mailbox with the same local
-                engine new mail uses. Already-categorized threads are left
-                alone.
+                {t("settings.categories.existing.hint")}
               </p>
             </div>
             <div>
@@ -75,7 +93,7 @@ export function CategoriesSection() {
                 disabled={isBackfillActive(progress)}
                 onClick={() => void categorizeExistingMail()}
               >
-                Categorize existing mail
+                {t("settings.categories.existing.button")}
               </Button>
             </div>
             {/* The running job's progress line — the exact surface the

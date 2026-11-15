@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { format } from "date-fns"
 import {
   CalendarClock,
   ChevronDown,
@@ -7,6 +8,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +32,7 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { getExecutor } from "@/services/db/executor"
+import { i18next } from "@/i18n"
 import type {
   DeliverySchedule,
   DeliveryScheduleMatch,
@@ -62,32 +65,44 @@ import { useActiveAccount } from "@/stores/account-store"
  * the two controls express and no timezone math belongs in the form.
  */
 
-const WEEKDAY_NAMES = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-]
+/** Weekday ids in Date.getDay() order (0 = Sunday); names are localized
+ * at read time through weekdayName(). */
+const WEEKDAY_KEYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const
+
+function weekdayName(dayOfWeek: number): string {
+  const key = WEEKDAY_KEYS[dayOfWeek] ?? "sunday"
+  return i18next.t(`settingsMail.deliverySchedules.weekdays.${key}`)
+}
 
 function pad2(value: number): string {
   return String(value).padStart(2, "0")
 }
 
-/** "8:05 PM"-style clock string from the window's local hour/minute
- * (12-hour with a preserved midnight/noon special case). */
+/** "8:05 PM"-style clock string from the window's local hour/minute —
+ * the localized sidebar time pattern (English "h:mm a": 12-hour with
+ * midnight/noon as 12; Spanish 24-hour). */
 function formatWindowTime(hour: number, minute: number): string {
-  const period = hour < 12 ? "AM" : "PM"
-  const twelveHour = hour % 12 === 0 ? 12 : hour % 12
-  return `${twelveHour}:${pad2(minute)} ${period}`
+  return format(
+    new Date(2000, 0, 1, hour, minute),
+    i18next.t("sidebar.dates.time")
+  )
 }
 
 /** "Saturdays 8:00 AM" — the human string for the weekly window (0 =
  * Sunday, the Date.getDay() convention the service shares). */
 function weeklyWindowLabel(window: DeliveryScheduleWindow): string {
-  return `${WEEKDAY_NAMES[window.dayOfWeek]}s ${formatWindowTime(window.hour, window.minute)}`
+  const key = WEEKDAY_KEYS[window.dayOfWeek] ?? "sunday"
+  return i18next.t(`settingsMail.deliverySchedules.weekly.${key}`, {
+    time: formatWindowTime(window.hour, window.minute),
+  })
 }
 
 /** The row title for an unnamed schedule: the window itself ("Saturdays
@@ -99,8 +114,12 @@ function scheduleTitle(schedule: DeliverySchedule): string {
 
 function matchChipLabel(match: DeliveryScheduleMatch): string {
   return match.kind === "sender"
-    ? `Sender: ${match.value}`
-    : `Label: ${match.value}`
+    ? i18next.t("settingsMail.deliverySchedules.senderChip", {
+        value: match.value,
+      })
+    : i18next.t("settingsMail.deliverySchedules.labelChip", {
+        value: match.value,
+      })
 }
 
 function ScheduleRowItem({
@@ -118,6 +137,7 @@ function ScheduleRowItem({
   onEdit: (schedule: DeliverySchedule) => void
   onDelete: (schedule: DeliverySchedule) => void
 }) {
+  const { t } = useTranslation()
   const title = scheduleTitle(schedule)
   return (
     <div
@@ -138,7 +158,7 @@ function ScheduleRowItem({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Move ${title} up`}
+        aria-label={t("settingsMail.deliverySchedules.moveUp", { title })}
         disabled={isFirst}
         onClick={() => onMove(schedule, -1)}
       >
@@ -147,7 +167,7 @@ function ScheduleRowItem({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Move ${title} down`}
+        aria-label={t("settingsMail.deliverySchedules.moveDown", { title })}
         disabled={isLast}
         onClick={() => onMove(schedule, 1)}
       >
@@ -156,20 +176,20 @@ function ScheduleRowItem({
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Edit ${title}`}
+        aria-label={t("settingsMail.deliverySchedules.editAria", { title })}
         onClick={() => onEdit(schedule)}
       >
         <Pencil />
-        Edit
+        {t("settingsMail.deliverySchedules.edit")}
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        aria-label={`Delete ${title}`}
+        aria-label={t("settingsMail.deliverySchedules.deleteAria", { title })}
         onClick={() => onDelete(schedule)}
       >
         <Trash2 />
-        Delete
+        {t("settingsMail.deliverySchedules.delete")}
       </Button>
     </div>
   )
@@ -208,6 +228,7 @@ function ScheduleDialog({
   onOpenChange: (open: boolean) => void
   onSaved: () => void
 }) {
+  const { t } = useTranslation()
   const editing = target.mode === "edit" ? target.schedule : null
   const [name, setName] = useState(editing?.name ?? "")
   const [matchKind, setMatchKind] = useState<DeliveryScheduleMatchKind>(
@@ -250,14 +271,14 @@ function ScheduleDialog({
           match: { kind: matchKind, value: trimmedValue },
           window,
         })
-        toast.success(`Delivery schedule “${title}” updated`)
+        toast.success(t("settingsMail.deliverySchedules.updated", { title }))
       } else {
         await createDeliverySchedule(executor, accountId, {
           ...(trimmedName !== "" ? { name: trimmedName } : {}),
           match: { kind: matchKind, value: trimmedValue },
           window,
         })
-        toast.success(`Delivery schedule “${title}” created`)
+        toast.success(t("settingsMail.deliverySchedules.created", { title }))
       }
       onSaved()
       onOpenChange(false)
@@ -265,7 +286,7 @@ function ScheduleDialog({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Could not save the delivery schedule."
+          : t("settingsMail.deliverySchedules.saveFailed")
       )
       setSaving(false)
     }
@@ -276,11 +297,12 @@ function ScheduleDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {editing ? "Edit Delivery Schedule" : "Add Delivery Schedule"}
+            {editing
+              ? t("settingsMail.deliverySchedules.editTitle")
+              : t("settingsMail.deliverySchedules.addTitle")}
           </DialogTitle>
           <DialogDescription>
-            Hold matching new mail until a recurring weekly delivery window
-            opens.
+            {t("settingsMail.deliverySchedules.dialogDescription")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -291,20 +313,27 @@ function ScheduleDialog({
           }}
         >
           <div className="grid gap-2">
-            <Label htmlFor="delivery-schedule-name">Name</Label>
+            <Label htmlFor="delivery-schedule-name">
+              {t("settingsMail.deliverySchedules.name")}
+            </Label>
             <Input
               id="delivery-schedule-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Optional, e.g. Weekend digests"
+              placeholder={t("settingsMail.deliverySchedules.namePlaceholder")}
               autoFocus
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="delivery-schedule-match-type">Match by</Label>
+            <Label htmlFor="delivery-schedule-match-type">
+              {t("settingsMail.deliverySchedules.matchBy")}
+            </Label>
             <Select
               value={matchKind}
-              items={{ sender: "Sender address", label: "Label" }}
+              items={{
+                sender: t("settingsMail.deliverySchedules.senderAddress"),
+                label: t("settingsMail.deliverySchedules.label"),
+              }}
               onValueChange={(value) =>
                 setMatchKind(String(value) as DeliveryScheduleMatchKind)
               }
@@ -313,48 +342,59 @@ function ScheduleDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sender">Sender address</SelectItem>
-                <SelectItem value="label">Label</SelectItem>
+                <SelectItem value="sender">
+                  {t("settingsMail.deliverySchedules.senderAddress")}
+                </SelectItem>
+                <SelectItem value="label">
+                  {t("settingsMail.deliverySchedules.label")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="delivery-schedule-match-value">
-              {matchKind === "sender" ? "Sender address" : "Label name"}
+              {matchKind === "sender"
+                ? t("settingsMail.deliverySchedules.senderAddress")
+                : t("settingsMail.deliverySchedules.labelName")}
             </Label>
             <Input
               id="delivery-schedule-match-value"
               value={matchValue}
               onChange={(event) => setMatchValue(event.target.value)}
               placeholder={
-                matchKind === "sender" ? "e.g. news@x.com" : "e.g. Newsletters"
+                matchKind === "sender"
+                  ? t("settingsMail.deliverySchedules.senderPlaceholder")
+                  : t("settingsMail.deliverySchedules.labelPlaceholder")
               }
             />
           </div>
           <div className="grid gap-2">
-            <Label>Delivery window</Label>
+            <Label>{t("settingsMail.deliverySchedules.window")}</Label>
             <p className="text-xs text-muted-foreground">
-              Repeats weekly — matching mail waits for the next opening.
+              {t("settingsMail.deliverySchedules.windowHelp")}
             </p>
             <div className="flex items-center gap-2">
               <Select
                 value={String(dayOfWeek)}
                 items={Object.fromEntries(
-                  WEEKDAY_NAMES.map((day, index) => [String(index), day])
+                  WEEKDAY_KEYS.map((_, index) => [
+                    String(index),
+                    weekdayName(index),
+                  ])
                 )}
                 onValueChange={(value) => setDayOfWeek(Number(value))}
               >
                 <SelectTrigger
                   id="delivery-schedule-day"
-                  aria-label="Delivery day"
+                  aria-label={t("settingsMail.deliverySchedules.day")}
                   className="w-36 shrink-0"
                 >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {WEEKDAY_NAMES.map((day, index) => (
+                  {WEEKDAY_KEYS.map((day, index) => (
                     <SelectItem key={day} value={String(index)}>
-                      {day}
+                      {weekdayName(index)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -362,7 +402,7 @@ function ScheduleDialog({
               <Input
                 id="delivery-schedule-time"
                 type="time"
-                aria-label="Delivery time"
+                aria-label={t("settingsMail.deliverySchedules.time")}
                 value={time}
                 onChange={(event) => setTime(event.target.value)}
                 className="w-28 shrink-0"
@@ -381,13 +421,15 @@ function ScheduleDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              Cancel
+              {t("settingsMail.deliverySchedules.cancel")}
             </Button>
             <Button type="submit" disabled={!canSave}>
               {saving && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              {editing ? "Save Changes" : "Create Schedule"}
+              {editing
+                ? t("settingsMail.deliverySchedules.saveChanges")
+                : t("settingsMail.deliverySchedules.create")}
             </Button>
           </DialogFooter>
         </form>
@@ -397,6 +439,7 @@ function ScheduleDialog({
 }
 
 export function DeliverySchedulesSection() {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   const [schedules, setSchedules] = useState<DeliverySchedule[]>([])
   const [dialog, setDialog] = useState<DialogTarget | null>(null)
@@ -463,16 +506,21 @@ export function DeliverySchedulesSection() {
   }
 
   return (
-    <section aria-label="Delivery schedules" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.deliverySchedules.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-semibold text-foreground">
-            Delivery schedules
+            {t("settingsMail.deliverySchedules.title")}
           </h2>
           <p className="text-sm text-muted-foreground">
             {account
-              ? `Batch deliveries for ${account.email}.`
-              : "Batch deliveries on a weekly window."}
+              ? t("settingsMail.deliverySchedules.subtitleAccount", {
+                  email: account.email,
+                })
+              : t("settingsMail.deliverySchedules.subtitle")}
           </p>
         </div>
         <Button
@@ -481,21 +529,20 @@ export function DeliverySchedulesSection() {
           onClick={() => setDialog({ mode: "add" })}
         >
           <CalendarClock />
-          Add Schedule
+          {t("settingsMail.deliverySchedules.add")}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        New mail matching a schedule is held until its window opens, then
-        delivered together at the top of the inbox.
+        {t("settingsMail.deliverySchedules.help")}
       </p>
       <Separator />
       {!account ? (
         <p className="text-sm text-muted-foreground">
-          Add an account to manage its delivery schedules.
+          {t("settingsMail.deliverySchedules.noAccount")}
         </p>
       ) : schedules.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No schedules yet. New mail is delivered as it arrives.
+          {t("settingsMail.deliverySchedules.empty")}
         </p>
       ) : (
         <div className="divide-y divide-border">

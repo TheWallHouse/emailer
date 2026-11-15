@@ -1,3 +1,12 @@
+// Tests assert the English strings: pin the interface language before the
+// i18n module initialises (it reads this preference synchronously).
+try {
+  localStorage.setItem("emailer-language", "en")
+} catch {
+  // node-environment suites have no localStorage; they fall back to English.
+}
+await import("./src/i18n")
+
 // jsdom implements getClientRects/getBoundingClientRect on Element and
 // Text, but NOT on Range or the base Node/Document types. ProseMirror's
 // coordsAtPos measures a reused DOM Range (textRange → singleRect) whenever

@@ -1,7 +1,9 @@
 import { useEffect, useState, useSyncExternalStore } from "react"
 import { formatDistanceToNow, fromUnixTime } from "date-fns"
 import { Loader2, RefreshCw, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -65,23 +67,21 @@ function formatBytes(bytes: number): string {
 /** Human copy for a typed learn failure (the WritingStyleBlock voice). */
 function learnFailureCopy(
   reason:
-    | "not-configured"
-    | "no-sent-mail"
-    | "not-enough-mail"
-    | "parse"
-    | "provider"
+    "not-configured" | "no-sent-mail" | "not-enough-mail" | "parse" | "provider"
 ): string {
   switch (reason) {
     case "not-configured":
-      return "AI assistance is not configured."
+      return i18next.t("settings.voice.learnFailure.notConfigured")
     case "no-sent-mail":
-      return "No sent messages were found to analyze."
+      return i18next.t("settings.voice.learnFailure.noSentMail")
     case "not-enough-mail":
-      return `Not enough sent mail yet — at least ${MIN_SENT_SAMPLES} sent messages are needed.`
+      return i18next.t("settings.voice.learnFailure.notEnoughMail", {
+        min: MIN_SENT_SAMPLES,
+      })
     case "parse":
-      return "The writing voice could not be read from the model's reply. Try again."
+      return i18next.t("settings.voice.learnFailure.parse")
     case "provider":
-      return "The provider request failed."
+      return i18next.t("settings.voice.learnFailure.provider")
   }
 }
 
@@ -90,7 +90,17 @@ function learnFailureCopy(
  * persistence boundary). */
 const AUTO_LANGUAGE = "auto"
 
+/** Localized name of a dictation language ("" = auto-detect); the
+ * service's English label is the fallback for codes without a key. */
+function dictationLanguageLabel(option: { code: string; label: string }) {
+  const key = `settings.voice.languages.${option.code || AUTO_LANGUAGE}`
+  return i18next.exists(key)
+    ? i18next.t(key as "settings.voice.languages.auto")
+    : option.label
+}
+
 export function VoiceSection() {
+  const { t } = useTranslation()
   // ---- Dictation: model + language ----
   const [modelPresent, setModelPresent] = useState<boolean | null>(null)
   const [starting, setStarting] = useState(false)
@@ -190,9 +200,9 @@ export function VoiceSection() {
         setProfile(stored)
         setNotice({
           ok: true,
-          text: `Writing voice learned from ${result.messageCount} sent message${
-            result.messageCount === 1 ? "" : "s"
-          }.`,
+          text: i18next.t("settings.voice.learned", {
+            count: result.messageCount,
+          }),
         })
       } else {
         setNotice({
@@ -205,7 +215,7 @@ export function VoiceSection() {
       }
     } catch (error) {
       console.warn("[settings] voice profile learn failed", error)
-      setNotice({ ok: false, text: "Learning the writing voice failed." })
+      setNotice({ ok: false, text: i18next.t("settings.voice.learnFailed") })
     } finally {
       setLearning(false)
     }
@@ -215,7 +225,7 @@ export function VoiceSection() {
     try {
       await deleteVoiceProfile(getExecutor())
       setProfile(null)
-      setNotice({ ok: true, text: "Writing-voice profile deleted." })
+      setNotice({ ok: true, text: i18next.t("settings.voice.deleted") })
     } catch (error) {
       console.warn("[settings] voice profile delete failed", error)
     }
@@ -230,29 +240,32 @@ export function VoiceSection() {
   // The learn gate (spec: "with a configured AI provider and enough sent
   // mail"): both conditions visible as disabled-state copy.
   const learnDisabled =
-    learning || aiReady !== true || (sentCount !== null && sentCount < MIN_SENT_SAMPLES)
+    learning ||
+    aiReady !== true ||
+    (sentCount !== null && sentCount < MIN_SENT_SAMPLES)
   const learnDisabledCopy =
     aiReady === false
-      ? "Connect and activate an AI provider first."
+      ? t("settings.voice.learnDisabled.noProvider")
       : sentCount !== null && sentCount < MIN_SENT_SAMPLES
-        ? `Needs at least ${MIN_SENT_SAMPLES} sent messages to learn from.`
+        ? t("settings.voice.learnDisabled.notEnoughMail", {
+            min: MIN_SENT_SAMPLES,
+          })
         : null
 
   return (
     <div
       data-testid="voice-section"
       className="flex flex-col gap-2"
-      aria-label="Voice"
+      aria-label={t("settings.voice.ariaLabel")}
     >
       {/* ---- Dictation ---- */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <Label>Dictation</Label>
+          <Label>{t("settings.voice.dictation.label")}</Label>
           <p className="text-xs text-muted-foreground">
-            The composer&apos;s mic turns speech into text entirely on this
-            machine — a {formatBytes(WHISPER_TOTAL_BYTES)} speech model is
-            downloaded once from Hugging Face and your voice is never
-            uploaded.
+            {t("settings.voice.dictation.hint", {
+              size: formatBytes(WHISPER_TOTAL_BYTES),
+            })}
           </p>
         </div>
       </div>
@@ -260,14 +273,16 @@ export function VoiceSection() {
       {loading ? (
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="size-3 animate-spin" aria-hidden />
-          Loading…
+          {t("settings.voice.loading")}
         </p>
       ) : modelPresent ? (
         <p
           data-testid="dictation-model-ready"
           className="text-xs text-muted-foreground"
         >
-          Speech model downloaded ({formatBytes(WHISPER_TOTAL_BYTES)}).
+          {t("settings.voice.dictation.modelReady", {
+            size: formatBytes(WHISPER_TOTAL_BYTES),
+          })}
         </p>
       ) : downloading ? (
         <div className="flex flex-col gap-1">
@@ -276,11 +291,20 @@ export function VoiceSection() {
             role="status"
             className="text-xs text-muted-foreground"
           >
-            Downloading model… {formatBytes(download.received)}
-            {download.total !== null
-              ? ` of ${formatBytes(download.total)}`
-              : ""}
-            {downloadPercent !== null ? ` (${downloadPercent}%)` : ""}
+            {download.total === null
+              ? t("settings.voice.dictation.downloading", {
+                  received: formatBytes(download.received),
+                })
+              : downloadPercent === null
+                ? t("settings.voice.dictation.downloadingOf", {
+                    received: formatBytes(download.received),
+                    total: formatBytes(download.total),
+                  })
+                : t("settings.voice.dictation.downloadingPercent", {
+                    received: formatBytes(download.received),
+                    total: formatBytes(download.total),
+                    percent: downloadPercent,
+                  })}
           </p>
           {downloadPercent !== null && (
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -299,7 +323,7 @@ export function VoiceSection() {
                 void cancelWhisperModelDownload()
               }}
             >
-              Cancel download
+              {t("settings.voice.dictation.cancelDownload")}
             </Button>
           </div>
         </div>
@@ -311,14 +335,15 @@ export function VoiceSection() {
               role="alert"
               className="text-xs text-destructive"
             >
-              The model download failed ({download.error ?? "unknown"}). You
-              can retry.
+              {t("settings.voice.dictation.downloadFailed", {
+                error:
+                  download.error ?? t("settings.voice.dictation.unknownError"),
+              })}
             </p>
           )}
           {download.state === "cancelled" && (
             <p className="text-xs text-muted-foreground">
-              Download cancelled — dictation stays unavailable until the
-              model is downloaded.
+              {t("settings.voice.dictation.downloadCancelled")}
             </p>
           )}
           <div>
@@ -331,21 +356,27 @@ export function VoiceSection() {
                 void startDownload()
               }}
             >
-              {starting ? <Loader2 className="animate-spin" aria-hidden /> : null}
-              Download speech model ({formatBytes(WHISPER_TOTAL_BYTES)})
+              {starting ? (
+                <Loader2 className="animate-spin" aria-hidden />
+              ) : null}
+              {t("settings.voice.dictation.download", {
+                size: formatBytes(WHISPER_TOTAL_BYTES),
+              })}
             </Button>
           </div>
         </div>
       )}
 
       <div className="grid gap-2">
-        <Label htmlFor="dictation-language">Dictation language</Label>
+        <Label htmlFor="dictation-language">
+          {t("settings.voice.language.label")}
+        </Label>
         <Select
           value={(language ?? "") === "" ? AUTO_LANGUAGE : (language ?? "")}
           items={Object.fromEntries(
             DICTATION_LANGUAGES.map((option) => [
               option.code === "" ? AUTO_LANGUAGE : option.code,
-              option.label,
+              dictationLanguageLabel(option),
             ])
           )}
           onValueChange={(value) => {
@@ -365,14 +396,13 @@ export function VoiceSection() {
                 key={option.code || AUTO_LANGUAGE}
                 value={option.code === "" ? AUTO_LANGUAGE : option.code}
               >
-                {option.label}
+                {dictationLanguageLabel(option)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          Auto-detect lets the model recognize the spoken language; a fixed
-          language pins transcription to it.
+          {t("settings.voice.language.hint")}
         </p>
       </div>
 
@@ -380,14 +410,10 @@ export function VoiceSection() {
       <div className="flex items-start justify-between gap-4 pt-2">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-foreground">
-            Writing voice
+            {t("settings.voice.writing.title")}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Learn how you typically write from your recent sent messages (up
-            to 30) with one AI call — voiced drafts, proofreads and smart
-            replies then follow your voice. Learning runs only when you
-            click, and nothing about the messages is stored — only the
-            distilled style.
+            {t("settings.voice.writing.hint")}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -406,7 +432,9 @@ export function VoiceSection() {
             ) : (
               <RefreshCw aria-hidden />
             )}
-            {profile ? "Refresh" : "Learn my writing voice"}
+            {profile
+              ? t("settings.voice.writing.refresh")
+              : t("settings.voice.writing.learn")}
           </Button>
           {profile ? (
             <Button
@@ -414,7 +442,7 @@ export function VoiceSection() {
               variant="ghost"
               data-testid="voice-profile-delete"
               disabled={learning}
-              aria-label="Delete writing-voice profile"
+              aria-label={t("settings.voice.writing.delete")}
               onClick={() => {
                 void remove()
               }}
@@ -426,18 +454,21 @@ export function VoiceSection() {
       </div>
 
       {!profileLoaded ? (
-        <p className="text-xs text-muted-foreground">Loading…</p>
+        <p className="text-xs text-muted-foreground">
+          {t("settings.voice.loading")}
+        </p>
       ) : profile ? (
         <>
           <p
             data-testid="voice-profile-status"
             className="text-sm text-foreground"
           >
-            Learned {formatDistanceToNow(fromUnixTime(profile.learnedAt), {
-              addSuffix: true,
-            })}{" "}
-            · {profile.messageCount} message
-            {profile.messageCount === 1 ? "" : "s"}
+            {t("settings.voice.writing.status", {
+              when: formatDistanceToNow(fromUnixTime(profile.learnedAt), {
+                addSuffix: true,
+              }),
+              count: profile.messageCount,
+            })}
           </p>
           <div
             data-testid="voice-profile-display"
@@ -450,17 +481,23 @@ export function VoiceSection() {
             </div>
             {profile.profile.vocabulary !== "" && (
               <p className="text-xs text-muted-foreground">
-                Vocabulary: {profile.profile.vocabulary}
+                {t("settings.voice.writing.vocabulary", {
+                  value: profile.profile.vocabulary,
+                })}
               </p>
             )}
             {profile.profile.greetingStyle !== "" && (
               <p className="text-xs text-muted-foreground">
-                Opens: {profile.profile.greetingStyle}
+                {t("settings.voice.writing.opens", {
+                  value: profile.profile.greetingStyle,
+                })}
               </p>
             )}
             {profile.profile.signoffStyle !== "" && (
               <p className="text-xs text-muted-foreground">
-                Closes: {profile.profile.signoffStyle}
+                {t("settings.voice.writing.closes", {
+                  value: profile.profile.signoffStyle,
+                })}
               </p>
             )}
             {profile.profile.quirks.length > 0 && (
@@ -473,12 +510,13 @@ export function VoiceSection() {
           </div>
         </>
       ) : (
-        <p data-testid="voice-profile-status" className="text-sm text-foreground">
+        <p
+          data-testid="voice-profile-status"
+          className="text-sm text-foreground"
+        >
           {sentCount !== null && sentCount > 0
-            ? `No writing voice learned yet — ${sentCount} sent message${
-                sentCount === 1 ? "" : "s"
-              } available.`
-            : "No writing voice learned yet."}
+            ? t("settings.voice.writing.noneWithSent", { count: sentCount })
+            : t("settings.voice.writing.none")}
         </p>
       )}
 

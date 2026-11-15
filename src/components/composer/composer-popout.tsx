@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Toaster } from "@/components/ui/sonner"
+import { i18next } from "@/i18n"
 import {
   composerPopoutDraftKey,
   forceClosePopout,
@@ -49,6 +51,7 @@ const Composer = lazy(() =>
  * composer closes that way, this surface closes the window with it.
  */
 export function ComposerPopoutApp() {
+  const { t } = useTranslation()
   const draftKey = composerPopoutDraftKey()
   const [booted, setBooted] = useState(false)
   const [bootError, setBootError] = useState<string | null>(null)
@@ -70,7 +73,7 @@ export function ComposerPopoutApp() {
         const draft = await getDraftByKey(executor, draftKey)
         if (cancelled) return
         if (!draft) {
-          setBootError("This draft no longer exists.")
+          setBootError(i18next.t("composer.popout.draftMissing"))
           return
         }
         let restored: RestoredDraftAttachment[] = []
@@ -146,7 +149,7 @@ export function ComposerPopoutApp() {
     // Only reachable outside a composer pop-out window (dev curiosity).
     return (
       <div className="flex h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        No composer window context.
+        {t("composer.popout.noContext")}
       </div>
     )
   }
@@ -162,7 +165,7 @@ export function ComposerPopoutApp() {
   if (!booted) {
     return (
       <div className="flex h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        Loading…
+        {t("composer.popout.loading")}
       </div>
     )
   }

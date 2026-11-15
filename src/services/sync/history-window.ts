@@ -1,3 +1,5 @@
+import { i18next } from "@/i18n"
+
 import type { SqlExecutor } from "../db/executor"
 import { getSetting, setSetting } from "../db/settings"
 
@@ -201,16 +203,28 @@ export async function isBoundedNoticeDismissed(
 /** Select values are strings; "all" is the sentinel for the null setting. */
 export const ALL_HISTORY_VALUE = "all"
 
-/** The picker's items — value → human label, shared by every window pick. */
-export const WINDOW_ITEM_LABELS: Record<
-  HistoryWindow | typeof ALL_HISTORY_VALUE,
-  string
+/**
+ * The picker's items — value → human label, shared by every window pick.
+ * Getters, so each read follows the active interface language.
+ */
+export const WINDOW_ITEM_LABELS: Readonly<
+  Record<HistoryWindow | typeof ALL_HISTORY_VALUE, string>
 > = {
-  "1m": "Last month",
-  "3m": "Last 3 months",
-  "6m": "Last 6 months",
-  "1y": "Last year",
-  all: "All history",
+  get "1m"() {
+    return i18next.t("accounts.historyWindow.lastMonth")
+  },
+  get "3m"() {
+    return i18next.t("accounts.historyWindow.last3Months")
+  },
+  get "6m"() {
+    return i18next.t("accounts.historyWindow.last6Months")
+  },
+  get "1y"() {
+    return i18next.t("accounts.historyWindow.lastYear")
+  },
+  get all() {
+    return i18next.t("accounts.historyWindow.all")
+  },
 }
 
 /** Human label for a stored setting (accounts row, confirm dialogs). */

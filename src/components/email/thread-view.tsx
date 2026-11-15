@@ -32,6 +32,7 @@ import {
   Trash2,
   WandSparkles,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +43,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { i18next } from "@/i18n"
 import { isAiConfigured, isSurfaceEnabled } from "@/services/ai/settings"
 import { getThreadSummary } from "@/services/ai/summaries"
 import { isTauriRuntime, openThreadInPopout } from "@/services/desktop/popout"
@@ -132,7 +134,7 @@ import { FindSession, FindSessionContext } from "./find-session"
  * via services/email-actions/thread-actions + store refreshes, plus the
  * local-only states mute/pin/done (task 3.3) through the shared state
  * flow, all disabled while a mutation is in flight. The local-only
- * additions join them: "Add to Todos" (task 15.2, the shared todos flow
+ * additions join them: t("reader.toolbar.addToTodos") (task 15.2, the shared todos flow
  * in layout/use-todos — idempotent via UNIQUE(thread_id)) and the private
  * note toggle (task 15.1) revealing the auto-saving ThreadNotes editor
  * pinned under the toolbar. "Create task" (task 5.7, tasks spec "Task
@@ -211,6 +213,7 @@ import { FindSession, FindSessionContext } from "./find-session"
  */
 
 export function ThreadView() {
+  const { t } = useTranslation()
   const activeThread = useUiStore((state) => state.activeThread)
   const activeAccountId = useAccountStore((state) => state.activeAccountId)
   // Bumped by the cross-window bridge (1.9) when the open thread changes
@@ -231,7 +234,7 @@ export function ThreadView() {
     return (
       <div data-testid="thread-empty" className="flex h-full min-h-0 flex-col">
         <div className="p-8 text-center text-muted-foreground">
-          No message selected
+          {t("reader.thread.noMessageSelected")}
         </div>
       </div>
     )
@@ -269,6 +272,7 @@ function ThreadViewContent({
   contactSidebarOpen: boolean
   onToggleContactSidebar: () => void
 }) {
+  const { t } = useTranslation()
   const [state, setState] = useState<ThreadViewState>({
     loaded: null,
     loading: true,
@@ -799,7 +803,7 @@ function ThreadViewContent({
   }
 
   /**
-   * Toolbar "Add to Todos" (task 15.2): the shared todos flow (service
+   * Toolbar t("reader.toolbar.addToTodos") (task 15.2): the shared todos flow (service
    * write + section notify + toast) under the same pendingAction guard as
    * the other toolbar actions. Idempotent by UNIQUE(thread_id): when the
    * thread is already pending, adding again moves it to the bottom.
@@ -853,7 +857,7 @@ function ThreadViewContent({
           data-testid="thread-loading"
           className="p-8 text-center text-sm text-muted-foreground"
         >
-          Loading thread…
+          {t("reader.thread.loading")}
         </div>
       )
     }
@@ -863,7 +867,7 @@ function ThreadViewContent({
           data-testid="thread-not-found"
           className="p-8 text-center text-muted-foreground"
         >
-          Message not found
+          {t("reader.thread.notFound")}
         </div>
       )
     }
@@ -874,7 +878,7 @@ function ThreadViewContent({
             data-testid="thread-subject"
             className="px-6 pt-4 text-base font-semibold"
           >
-            {thread.subject || "(no subject)"}
+            {thread.subject || t("threadList.noSubject")}
           </h2>
           {/* Task 4.4: the AI summary panel sits between the subject and
               the message list, exists only while toggled open, and loads
@@ -950,10 +954,10 @@ function ThreadViewContent({
                     size="icon"
                     data-testid="toolbar-print"
                     disabled={disabled}
-                    title="Print"
+                    title={t("reader.toolbar.print")}
                   >
                     <Printer className="size-4" />
-                    <span className="sr-only">Print</span>
+                    <span className="sr-only">{t("reader.toolbar.print")}</span>
                   </Button>
                 }
               />
@@ -969,7 +973,7 @@ function ThreadViewContent({
                     }
                   }}
                 >
-                  Print this message
+                  {t("reader.toolbar.printMessage")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
@@ -978,7 +982,7 @@ function ThreadViewContent({
                     )
                   }}
                 >
-                  Print whole thread
+                  {t("reader.toolbar.printThread")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -989,11 +993,13 @@ function ThreadViewContent({
               size="icon"
               data-testid="toolbar-open-in-window"
               disabled={disabled}
-              title="Open in new window"
+              title={t("threadList.contextMenu.openInNewWindow")}
               onClick={() => openThreadInPopout(threadId)}
             >
               <AppWindow className="size-4" />
-              <span className="sr-only">Open in new window</span>
+              <span className="sr-only">
+                {t("threadList.contextMenu.openInNewWindow")}
+              </span>
             </Button>
           )}
           <Button
@@ -1001,7 +1007,7 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-archive"
             disabled={disabled}
-            title="Archive"
+            title={t("threadList.actions.archive")}
             onClick={() =>
               runThreadAction("archive", (executor) =>
                 archiveThread(executor, owningAccountId, threadId)
@@ -1009,14 +1015,14 @@ function ThreadViewContent({
             }
           >
             <Archive className="size-4" />
-            <span className="sr-only">Archive</span>
+            <span className="sr-only">{t("threadList.actions.archive")}</span>
           </Button>
           <Button
             variant="ghost"
             size="icon"
             data-testid="toolbar-trash"
             disabled={disabled}
-            title="Move to trash"
+            title={t("reader.toolbar.moveToTrash")}
             className="text-destructive hover:text-destructive focus-visible:text-destructive"
             onClick={() =>
               runThreadAction("trash", (executor) =>
@@ -1025,7 +1031,7 @@ function ThreadViewContent({
             }
           >
             <Trash2 className="size-4" />
-            <span className="sr-only">Move to trash</span>
+            <span className="sr-only">{t("reader.toolbar.moveToTrash")}</span>
           </Button>
           <SnoozeMenu onPick={snoozeFromToolbar}>
             <Button
@@ -1033,10 +1039,10 @@ function ThreadViewContent({
               size="icon"
               data-testid="toolbar-snooze"
               disabled={disabled}
-              title="Snooze"
+              title={t("threadList.actions.snooze")}
             >
               <Clock className="size-4" />
-              <span className="sr-only">Snooze</span>
+              <span className="sr-only">{t("threadList.actions.snooze")}</span>
             </Button>
           </SnoozeMenu>
           <Separator orientation="vertical" className="mx-1 h-6" />
@@ -1045,7 +1051,9 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-star"
             disabled={disabled}
-            title={isStarred ? "Unstar thread" : "Star thread"}
+            title={
+              isStarred ? t("reader.toolbar.unstar") : t("reader.toolbar.star")
+            }
             onClick={() => {
               const next = !isStarred
               runThreadAction(
@@ -1058,7 +1066,9 @@ function ThreadViewContent({
           >
             <Star className={isStarred ? "size-4 fill-current" : "size-4"} />
             <span className="sr-only">
-              {isStarred ? "Unstar thread" : "Star thread"}
+              {isStarred
+                ? t("reader.toolbar.unstar")
+                : t("reader.toolbar.star")}
             </span>
           </Button>
           <Button
@@ -1066,7 +1076,11 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-read-toggle"
             disabled={disabled}
-            title={hasUnread ? "Mark as read" : "Mark as unread"}
+            title={
+              hasUnread
+                ? t("reader.toolbar.markRead")
+                : t("reader.toolbar.markUnread")
+            }
             onClick={() => {
               const next = hasUnread
               runThreadAction(
@@ -1085,7 +1099,9 @@ function ThreadViewContent({
               <MailOpen className="size-4" />
             )}
             <span className="sr-only">
-              {hasUnread ? "Mark as read" : "Mark as unread"}
+              {hasUnread
+                ? t("reader.toolbar.markRead")
+                : t("reader.toolbar.markUnread")}
             </span>
           </Button>
           <Button
@@ -1093,14 +1109,16 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-mute"
             disabled={disabled}
-            title={isMuted ? "Unmute thread" : "Mute thread"}
+            title={
+              isMuted ? t("reader.toolbar.unmute") : t("reader.toolbar.mute")
+            }
             onClick={() => toggleThreadState(isMuted ? "unmute" : "mute")}
           >
             <BellOff
               className={isMuted ? "size-4 text-foreground" : "size-4"}
             />
             <span className="sr-only">
-              {isMuted ? "Unmute thread" : "Mute thread"}
+              {isMuted ? t("reader.toolbar.unmute") : t("reader.toolbar.mute")}
             </span>
           </Button>
           <Button
@@ -1108,12 +1126,14 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-pin"
             disabled={disabled}
-            title={isPinned ? "Unpin thread" : "Pin thread"}
+            title={
+              isPinned ? t("reader.toolbar.unpin") : t("reader.toolbar.pin")
+            }
             onClick={() => toggleThreadState(isPinned ? "unpin" : "pin")}
           >
             <Pin className={isPinned ? "size-4 fill-current" : "size-4"} />
             <span className="sr-only">
-              {isPinned ? "Unpin thread" : "Pin thread"}
+              {isPinned ? t("reader.toolbar.unpin") : t("reader.toolbar.pin")}
             </span>
           </Button>
           <Button
@@ -1121,12 +1141,18 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-done"
             disabled={disabled}
-            title={isDone ? "Mark not done" : "Mark done"}
+            title={
+              isDone
+                ? t("threadList.actions.markNotDone")
+                : t("threadList.actions.markDone")
+            }
             onClick={() => toggleThreadState(isDone ? "undone" : "done")}
           >
             <Check className="size-4" />
             <span className="sr-only">
-              {isDone ? "Mark not done" : "Mark done"}
+              {isDone
+                ? t("threadList.actions.markNotDone")
+                : t("threadList.actions.markDone")}
             </span>
           </Button>
           {/* Task 15.2: add the thread to the cross-account Todos list.
@@ -1138,7 +1164,9 @@ function ThreadViewContent({
             data-testid="toolbar-add-todo"
             disabled={disabled}
             title={
-              isTodo ? "In Todos — click to move to the bottom" : "Add to Todos"
+              isTodo
+                ? t("reader.toolbar.inTodosTitle")
+                : t("reader.toolbar.addToTodos")
             }
             onClick={addTodoFromToolbar}
           >
@@ -1146,7 +1174,9 @@ function ThreadViewContent({
               className={isTodo ? "size-4 text-foreground" : "size-4"}
             />
             <span className="sr-only">
-              {isTodo ? "In Todos" : "Add to Todos"}
+              {isTodo
+                ? t("reader.toolbar.inTodos")
+                : t("reader.toolbar.addToTodos")}
             </span>
           </Button>
           {/* Task 5.7: convert the thread into a task (tasks spec "Task
@@ -1160,11 +1190,13 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-create-task"
             disabled={disabled}
-            title="Create task"
+            title={t("threadList.contextMenu.createTask")}
             onClick={() => setCreateTaskOpen(true)}
           >
             <ListPlus className="size-4" />
-            <span className="sr-only">Create task</span>
+            <span className="sr-only">
+              {t("threadList.contextMenu.createTask")}
+            </span>
           </Button>
           {/* Task 15.1: toggle the private note editor. Emphasized while a
               note exists so a closed editor is still discoverable. */}
@@ -1174,14 +1206,20 @@ function ThreadViewContent({
             data-testid="toolbar-note"
             disabled={disabled}
             aria-pressed={notesOpen}
-            title={hasNote ? "Edit note" : "Add a note"}
+            title={
+              hasNote
+                ? t("reader.toolbar.editNote")
+                : t("reader.toolbar.addNote")
+            }
             onClick={() => setNotesOpen((open) => !open)}
           >
             <StickyNote
               className={hasNote ? "size-4 fill-current" : "size-4"}
             />
             <span className="sr-only">
-              {hasNote ? "Edit note" : "Add a note"}
+              {hasNote
+                ? t("reader.toolbar.editNote")
+                : t("reader.toolbar.addNote")}
             </span>
           </Button>
           {/* Task 4.8: AI task suggestions (ai-assistance spec "Task
@@ -1196,11 +1234,13 @@ function ThreadViewContent({
               size="icon"
               data-testid="toolbar-extract-tasks"
               disabled={disabled}
-              title="Suggest tasks"
+              title={t("reader.toolbar.suggestTasks")}
               onClick={() => setExtractOpen(true)}
             >
               <ListChecks className="size-4" />
-              <span className="sr-only">Suggest tasks</span>
+              <span className="sr-only">
+                {t("reader.toolbar.suggestTasks")}
+              </span>
             </Button>
           )}
           {/* Task 3.3: AI event suggestions (add-ai-surfaces spec "Event
@@ -1216,11 +1256,13 @@ function ThreadViewContent({
               size="icon"
               data-testid="toolbar-extract-events"
               disabled={disabled}
-              title="Suggest events"
+              title={t("reader.toolbar.suggestEvents")}
               onClick={() => setEventsOpen(true)}
             >
               <CalendarPlus className="size-4" />
-              <span className="sr-only">Suggest events</span>
+              <span className="sr-only">
+                {t("reader.toolbar.suggestEvents")}
+              </span>
             </Button>
           )}
           {/* Task 4.4: AI thread summary (ai-assistance spec "Thread
@@ -1236,11 +1278,11 @@ function ThreadViewContent({
               data-testid="toolbar-summarize"
               disabled={disabled}
               aria-pressed={summaryOpen}
-              title="Summarize thread"
+              title={t("reader.toolbar.summarize")}
               onClick={() => setSummaryOpen((open) => !open)}
             >
               <ScrollText className="size-4" />
-              <span className="sr-only">Summarize thread</span>
+              <span className="sr-only">{t("reader.toolbar.summarize")}</span>
             </Button>
           )}
           {/* Task 4.5: AI smart reply (ai-assistance spec "Writing-style
@@ -1257,11 +1299,11 @@ function ThreadViewContent({
               size="icon"
               data-testid="toolbar-smart-reply"
               disabled={disabled}
-              title="Smart reply"
+              title={t("reader.smartReply.title")}
               onClick={() => setSmartReplyOpen(true)}
             >
               <WandSparkles className="size-4" />
-              <span className="sr-only">Smart reply</span>
+              <span className="sr-only">{t("reader.smartReply.title")}</span>
             </Button>
           )}
           {/* Task 2.7: toggle the reading-pane contact sidebar. A view
@@ -1274,11 +1316,13 @@ function ThreadViewContent({
             data-testid="toolbar-contact-sidebar"
             disabled={disabled}
             aria-pressed={contactSidebarOpen}
-            title="Contact sidebar"
+            title={t("reader.toolbar.contactSidebar")}
             onClick={onToggleContactSidebar}
           >
             <PanelRight className="size-4" />
-            <span className="sr-only">Contact sidebar</span>
+            <span className="sr-only">
+              {t("reader.toolbar.contactSidebar")}
+            </span>
           </Button>
           {/* Task 18.2: the reading-pane Block sender entry (the mail-
               security spec's "Block from the reading pane" scenario) —
@@ -1291,14 +1335,16 @@ function ThreadViewContent({
               size="icon"
               data-testid="toolbar-block-sender"
               disabled={disabled}
-              title="Block sender"
+              title={t("threadList.contextMenu.blockSender")}
               onClick={() => {
                 if (pendingAction !== null) return
                 setBlockOpen(true)
               }}
             >
               <Ban className="size-4" />
-              <span className="sr-only">Block sender</span>
+              <span className="sr-only">
+                {t("threadList.contextMenu.blockSender")}
+              </span>
             </Button>
           )}
         </div>
@@ -1309,11 +1355,11 @@ function ThreadViewContent({
             size="icon"
             data-testid="toolbar-reply"
             disabled={disabled}
-            title="Reply"
+            title={t("threadList.contextMenu.reply")}
             onClick={() => openReplyComposer(false)}
           >
             <Reply className="size-4" />
-            <span className="sr-only">Reply</span>
+            <span className="sr-only">{t("threadList.contextMenu.reply")}</span>
           </Button>
         </div>
       </div>
@@ -1444,7 +1490,7 @@ function firstNameOf(fromName: string | null, fromAddress: string | null) {
   if (name) return name.split(/\s+/)[0]
   const address = fromAddress?.trim()
   if (address) return address.split("@")[0]
-  return "participants"
+  return i18next.t("reader.inlineReply.participants")
 }
 
 /**
@@ -1477,6 +1523,7 @@ function InlineReply({
   disabled: boolean
   onOpenComposer: (replyAll: boolean) => void
 }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
 
   const composerAccount = useMemo(
@@ -1507,7 +1554,9 @@ function InlineReply({
         >
           <Reply className="size-4 shrink-0" aria-hidden="true" />
           <span>
-            Reply to {firstNameOf(message.from_name, message.from_address)}…
+            {t("reader.inlineReply.replyTo", {
+              name: firstNameOf(message.from_name, message.from_address),
+            })}
           </span>
         </button>
       </div>
@@ -1522,21 +1571,27 @@ function InlineReply({
       >
         <div className="grid gap-1 text-xs">
           <div data-testid="inline-reply-to" className="min-w-0">
-            <span className="font-medium text-muted-foreground">To:</span>{" "}
+            <span className="font-medium text-muted-foreground">
+              {t("reader.inlineReply.to")}
+            </span>{" "}
             <span className="text-muted-foreground">
               {formatRecipients(summary.to)}
             </span>
           </div>
           {summary.cc.length > 0 && (
             <div data-testid="inline-reply-cc" className="min-w-0">
-              <span className="font-medium text-muted-foreground">Cc:</span>{" "}
+              <span className="font-medium text-muted-foreground">
+                {t("reader.inlineReply.cc")}
+              </span>{" "}
               <span className="text-muted-foreground">
                 {formatRecipients(summary.cc)}
               </span>
             </div>
           )}
           <div data-testid="inline-reply-subject" className="min-w-0">
-            <span className="font-medium text-muted-foreground">Subject:</span>{" "}
+            <span className="font-medium text-muted-foreground">
+              {t("reader.inlineReply.subject")}
+            </span>{" "}
             <span>{summary.subject}</span>
           </div>
         </div>
@@ -1548,7 +1603,7 @@ function InlineReply({
             onClick={() => onOpenComposer(false)}
           >
             <Reply className="size-3.5" />
-            Reply
+            {t("threadList.contextMenu.reply")}
           </Button>
           <Button
             size="sm"
@@ -1557,7 +1612,7 @@ function InlineReply({
             disabled={disabled}
             onClick={() => onOpenComposer(true)}
           >
-            Reply all
+            {t("reader.inlineReply.replyAll")}
           </Button>
           <Button
             size="sm"
@@ -1565,10 +1620,10 @@ function InlineReply({
             data-testid="inline-reply-cancel"
             onClick={() => setExpanded(false)}
           >
-            Cancel
+            {t("reader.inlineReply.cancel")}
           </Button>
           <span className="ml-auto text-xs text-muted-foreground">
-            Opens the full editor
+            {t("reader.inlineReply.opensEditor")}
           </span>
         </div>
       </div>
@@ -1625,6 +1680,7 @@ function ThreadNotes({
    * (and thus the thread row's, via the list refresh) stays current. */
   onHasNoteChange: (hasNote: boolean) => void
 }) {
+  const { t } = useTranslation()
   const [value, setValue] = useState(initialNote ?? "")
   const [savedRecently, setSavedRecently] = useState(false)
   // latest-ref pattern: timer callbacks persist the newest keystrokes
@@ -1710,26 +1766,26 @@ function ThreadNotes({
             className="size-3.5 text-muted-foreground"
           />
           <span className="text-xs font-medium text-muted-foreground">
-            Note
+            {t("reader.notes.title")}
           </span>
           <span className="text-xs text-muted-foreground/70">
-            Private — stored only on this device
+            {t("reader.notes.private")}
           </span>
           {savedRecently && (
             <span
               data-testid="thread-note-saved"
               className="ml-auto text-xs text-muted-foreground"
             >
-              Saved
+              {t("reader.notes.saved")}
             </span>
           )}
         </div>
         <Textarea
           data-testid="thread-note-input"
-          aria-label="Thread note"
+          aria-label={t("reader.notes.label")}
           value={value}
           rows={3}
-          placeholder="Add a private note…"
+          placeholder={t("reader.notes.placeholder")}
           className="resize-y bg-transparent text-sm"
           onChange={(event) => handleChange(event.target.value)}
           onBlur={() => {
@@ -1796,6 +1852,7 @@ function ThreadSummaryPanel({
    * staleness hint compares these with the summary's. */
   currentMessageIds: string[]
 }) {
+  const { t } = useTranslation()
   const [state, setState] = useState<ThreadSummaryPhase>({ phase: "loading" })
   const [collapsed, setCollapsed] = useState(false)
   // Monotonic request id: only the newest load may land (a slow first
@@ -1841,8 +1898,8 @@ function ThreadSummaryPanel({
               phase: "error",
               message:
                 result.reason === "not-configured"
-                  ? "AI assistance is not configured."
-                  : "The summaries surface is disabled.",
+                  ? i18next.t("reader.smartReply.errors.notConfigured")
+                  : i18next.t("reader.summary.disabled"),
               retryable: false,
             })
           } else {
@@ -1902,12 +1959,13 @@ function ThreadSummaryPanel({
             className="text-xs font-medium text-muted-foreground hover:text-foreground"
             onClick={() => setCollapsed((value) => !value)}
           >
-            AI summary
+            {t("reader.summary.title")}
           </button>
           {state.phase === "shown" && (
             <span className="min-w-0 truncate text-xs text-muted-foreground/70">
-              Generated by {state.model}
-              {state.cached ? " · cached" : ""} — AI-generated, may be imperfect
+              {state.cached
+                ? t("reader.summary.generatedByCached", { model: state.model })
+                : t("reader.summary.generatedBy", { model: state.model })}
             </span>
           )}
           <span className="ml-auto flex items-center gap-0.5">
@@ -1917,25 +1975,33 @@ function ThreadSummaryPanel({
                 size="icon"
                 data-testid="thread-summary-regenerate"
                 className="size-6"
-                title="Regenerate summary"
+                title={t("reader.summary.regenerate")}
                 onClick={() => load(true)}
               >
                 <RefreshCw className="size-3.5" />
-                <span className="sr-only">Regenerate summary</span>
+                <span className="sr-only">
+                  {t("reader.summary.regenerate")}
+                </span>
               </Button>
             )}
             <Button
               variant="ghost"
               size="icon"
               className="size-6"
-              title={collapsed ? "Expand summary" : "Collapse summary"}
+              title={
+                collapsed
+                  ? t("reader.summary.expand")
+                  : t("reader.summary.collapse")
+              }
               onClick={() => setCollapsed((value) => !value)}
             >
               <ChevronDown
                 className={collapsed ? "size-3.5" : "size-3.5 rotate-180"}
               />
               <span className="sr-only">
-                {collapsed ? "Expand summary" : "Collapse summary"}
+                {collapsed
+                  ? t("reader.summary.expand")
+                  : t("reader.summary.collapse")}
               </span>
             </Button>
           </span>
@@ -1947,7 +2013,7 @@ function ThreadSummaryPanel({
                 data-testid="thread-summary-loading"
                 className="text-sm text-muted-foreground"
               >
-                Summarizing the conversation…
+                {t("reader.summary.loading")}
               </div>
             )}
             {state.phase === "shown" && (
@@ -1957,8 +2023,7 @@ function ThreadSummaryPanel({
                     data-testid="thread-summary-stale"
                     className="pb-2 text-xs text-muted-foreground"
                   >
-                    The thread changed since this summary — Regenerate for the
-                    latest messages.
+                    {t("reader.summary.stale")}
                   </div>
                 )}
                 <p
@@ -1974,7 +2039,7 @@ function ThreadSummaryPanel({
                 data-testid="thread-summary-empty"
                 className="text-sm text-muted-foreground"
               >
-                No messages to summarize.
+                {t("reader.summary.empty")}
               </div>
             )}
             {state.phase === "error" && (
@@ -1992,7 +2057,7 @@ function ThreadSummaryPanel({
                     data-testid="thread-summary-retry"
                     onClick={() => load(false)}
                   >
-                    Retry
+                    {t("reader.summary.retry")}
                   </Button>
                 )}
               </div>
@@ -2056,7 +2121,10 @@ function markThreadReadOnOpen(
     try {
       enabled = await getMarkReadOnOpen(executor)
     } catch (error) {
-      console.warn("[thread-view] mark-read-on-open preference read failed", error)
+      console.warn(
+        "[thread-view] mark-read-on-open preference read failed",
+        error
+      )
     }
     if (!enabled) {
       guard.current?.delete(guardKey)

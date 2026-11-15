@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next"
+
 import {
   Dialog,
   DialogContent,
@@ -48,14 +50,15 @@ export function ShortcutsOverlay({
   open,
   onOpenChange,
 }: ShortcutsOverlayProps) {
+  const { t } = useTranslation()
   const bindings = useEffectiveShortcuts()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="shortcuts-overlay" className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Keyboard shortcuts</DialogTitle>
+          <DialogTitle>{t("sidebar.shortcuts.title")}</DialogTitle>
           <DialogDescription>
-            Press ? anytime to reopen this reference; Esc dismisses it.
+            {t("sidebar.shortcuts.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">

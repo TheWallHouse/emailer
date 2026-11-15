@@ -1,5 +1,6 @@
 import { useEffect, useState, type KeyboardEvent, type Ref } from "react"
 import { X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -71,6 +72,7 @@ export function RecipientField({
   inputRef,
   accountId,
 }: RecipientFieldProps) {
+  const { t } = useTranslation()
   const [draft, setDraft] = useState("")
   /** Results of the last completed suggestion query, tagged with the
    * query they answer so results for a superseded segment never render. */
@@ -193,7 +195,9 @@ export function RecipientField({
             key={`${recipient.email}-${index}`}
             data-invalid={invalid || undefined}
             title={
-              invalid ? `${chipLabel} is not a valid email address` : chipLabel
+              invalid
+                ? t("composer.recipients.invalidTitle", { address: chipLabel })
+                : chipLabel
             }
             className={cn(
               "inline-flex max-w-full items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs",
@@ -216,11 +220,13 @@ export function RecipientField({
             )}
             <span className="truncate">{chipLabel}</span>
             {invalid ? (
-              <span className="sr-only">(invalid address)</span>
+              <span className="sr-only">
+                {t("composer.recipients.invalidSr")}
+              </span>
             ) : null}
             <button
               type="button"
-              aria-label={`Remove ${chipLabel}`}
+              aria-label={t("composer.recipients.remove", { name: chipLabel })}
               onClick={() => onChange(recipients.filter((_, i) => i !== index))}
               className="shrink-0 rounded-sm p-0.5 outline-none hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring/50"
             >
@@ -251,7 +257,7 @@ export function RecipientField({
         <div
           id={suggestionListId}
           role="listbox"
-          aria-label="Contact suggestions"
+          aria-label={t("composer.recipients.suggestions")}
           className="absolute top-full left-0 z-50 mt-1 flex max-h-56 w-72 min-w-full flex-col overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
         >
           {suggestions.map((row, index) => (

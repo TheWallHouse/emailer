@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { getCurrentWindow } from "@tauri-apps/api/window"
 
+import { i18next } from "@/i18n"
 import { bootstrapPopout } from "@/services/bootstrap"
 import {
   forceClosePopout,
@@ -56,6 +58,7 @@ import {
 let printDialogInvoked = false
 
 export function PrintApp() {
+  const { t } = useTranslation()
   const [context] = useState<PrintWindowContext | null>(() =>
     printWindowContext()
   )
@@ -77,7 +80,7 @@ export function PrintApp() {
         const loaded = await loadPrintPayload(context.threadId, context.scope)
         if (cancelled) return
         if (loaded === null || loaded.messages.length === 0) {
-          setBootError("Nothing to print — this message no longer exists.")
+          setBootError(i18next.t("reader.print.gone"))
           return
         }
         setPayload(loaded)
@@ -156,7 +159,8 @@ export function PrintApp() {
   // The print job name = the subject (what the OS dialog and spooler show).
   useEffect(() => {
     if (payload !== null) {
-      document.title = payload.subject ?? "Emailer print"
+      document.title =
+        payload.subject ?? i18next.t("reader.print.documentTitle")
     }
   }, [payload])
 
@@ -164,7 +168,7 @@ export function PrintApp() {
     // Only reachable outside a print window (dev curiosity).
     return (
       <div className="flex h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        No print window context.
+        {t("reader.print.noContext")}
       </div>
     )
   }
@@ -182,7 +186,7 @@ export function PrintApp() {
     // ready) — this is the boot frame.
     return (
       <div className="flex h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-        Loading…
+        {t("reader.print.loading")}
       </div>
     )
   }

@@ -1,0 +1,354 @@
+{
+  "readingPane": {
+    "backToList": "Back to list"
+  },
+  "findBar": {
+    "find": "Find in message",
+    "previous": "Previous match",
+    "next": "Next match",
+    "close": "Close find",
+    "noMatches": "0 matches",
+    "position": "{{current}} of {{total}}",
+    "collapsed_one": "{{count}} in collapsed messages",
+    "collapsed_other": "{{count}} in collapsed messages"
+  },
+  "frame": {
+    "title": "Email content"
+  },
+  "meeting": {
+    "untitled": "(untitled meeting)",
+    "cancelled": "Cancelled",
+    "organizer": "Organizer: {{person}}",
+    "joinWith": "Join — {{label}}",
+    "joinWithout": "Join ({{label}})",
+    "respondTo": "Respond to:",
+    "wholeSeries": "Whole series",
+    "thisOccurrence": "This occurrence",
+    "accept": "Accept",
+    "tentative": "Tentative",
+    "decline": "Decline",
+    "noCalendar": "No connected calendar for this event — your answer is sent to the organizer by email.",
+    "toasts": {
+      "acceptedUpdated": "Response accepted — calendar updated, reply queued",
+      "declinedUpdated": "Response declined — calendar updated, reply queued",
+      "tentativeUpdated": "Response marked tentative — calendar updated, reply queued",
+      "writeBackFailed": "Reply to the organizer queued, but the calendar update failed: {{message}}",
+      "replyQueued": "Reply to the organizer queued",
+      "replyFailed": "The response mail could not be queued: {{message}}",
+      "sendFailed": "The response could not be sent."
+    }
+  },
+  "quickReplies": {
+    "label": "Quick replies",
+    "chipTitle": "Open as a draft reply"
+  },
+  "translate": {
+    "failed": "Translation failed.",
+    "unavailable": "Translation is unavailable.",
+    "hide": "Hide translation",
+    "translating": "Translating…",
+    "translate": "Translate",
+    "translatedTo": "Translated to {{language}}",
+    "retry": "Retry"
+  },
+  "contactSidebar": {
+    "label": "Contact {{name}}",
+    "compose": "Compose to {{name}}",
+    "recentThreads": "Recent threads",
+    "noRecent": "No recent threads with this contact."
+  },
+  "replyOpener": {
+    "attachmentDropped": "Attachment \"{{name}}\" couldn't be restored and was removed",
+    "attachmentsDropped": "Some attachments couldn't be restored and were removed: {{names}}"
+  },
+  "blockSender": {
+    "toast": "Blocked {{sender}}",
+    "toastMoved_one": "Blocked {{sender}} — moved {{count}} conversation",
+    "toastMoved_other": "Blocked {{sender}} — moved {{count}} conversations",
+    "title": "Block {{sender}}",
+    "description": "Future mail from this address will be marked as read and moved out of the inbox automatically, without notifications.",
+    "action": "Action",
+    "thenFutureMail": "Then future mail is",
+    "movedToTrash": "Moved to Trash",
+    "archived": "Archived",
+    "moveExisting": "Also move existing conversations from this sender",
+    "moveExistingCount_one": "Also move {{count}} existing conversation from this sender",
+    "moveExistingCount_other": "Also move {{count}} existing conversations from this sender",
+    "cancelLabel": "Cancel block",
+    "cancel": "Cancel",
+    "confirmLabel": "Confirm block {{sender}}",
+    "confirm": "Block"
+  },
+  "createTask": {
+    "title": "Create task",
+    "description": "Creates a task linked to this message. The conversation stays in your inbox untouched.",
+    "titleLabel": "Title",
+    "notesLabel": "Notes (optional)",
+    "notesPlaceholder": "Add context from the message…",
+    "cancel": "Cancel",
+    "confirm": "Create task"
+  },
+  "dates": {
+    "date": "MMM d, yyyy",
+    "dateTime": "MMM d, yyyy, HH:mm",
+    "time": "HH:mm"
+  },
+  "eventExtraction": {
+    "allDay": "All day · {{date}}",
+    "failed": "Event extraction failed.",
+    "unavailable": "Event extraction is unavailable right now.",
+    "title": "Suggested events",
+    "description": "AI-generated suggestions from this conversation — review each one in the calendar event form. Nothing is saved until you confirm it there.",
+    "busy": "Reviewing the conversation for events…",
+    "empty": "No events were found in this conversation.",
+    "closeLabel": "Close event suggestions",
+    "close": "Close",
+    "retry": "Retry",
+    "source": "From {{from}} · {{date}}",
+    "reviewLabel": "Review \"{{title}}\" in calendar",
+    "review": "Review in calendar"
+  },
+  "taskExtraction": {
+    "failed": "Task extraction failed.",
+    "unavailable": "Task extraction is unavailable right now.",
+    "tasksUnavailable": "The Tasks module arrives in a later update",
+    "addFailed_one": "{{count}} suggestion could not be added. Try again.",
+    "addFailed_other": "{{count}} suggestions could not be added. Try again.",
+    "addUnavailable": "Tasks cannot be added right now. Try again.",
+    "title": "Suggested tasks",
+    "description": "AI-generated suggestions from this conversation — review each one before adding. Nothing is created until you accept.",
+    "busy": "Reviewing the conversation for tasks…",
+    "retry": "Retry",
+    "empty": "No task suggestions were found in this conversation.",
+    "closeLabel": "Close task suggestions",
+    "close": "Close",
+    "addCount_one": "Add {{count}} task",
+    "addCount_other": "Add {{count}} tasks",
+    "include": "Include \"{{title}}\"",
+    "due": "Due {{date}}",
+    "added": "Added",
+    "dismissed": "Dismissed",
+    "addOne": "Add \"{{title}}\"",
+    "add": "Add"
+  },
+  "smartReply": {
+    "errors": {
+      "notConfigured": "AI assistance is not configured.",
+      "noSentMail": "No recent sent messages were found to analyze.",
+      "parse": "The writing style could not be read from the model's reply. Try again.",
+      "provider": "The provider request failed.",
+      "surfaceDisabled": "Smart replies are turned off in Settings.",
+      "noProfile": "No writing-style profile was found — build one first.",
+      "noThread": "This conversation could not be loaded.",
+      "buildFailed": "Building the writing-style profile failed.",
+      "generateFailed": "Drafting the suggestion failed."
+    },
+    "builtInfo_one": "Profile built from {{count}} sent message.",
+    "builtInfo_other": "Profile built from {{count}} sent messages.",
+    "title": "Smart reply",
+    "description": "A draft suggestion in your writing style, for you to edit. Nothing is sent automatically.",
+    "checking": "Checking your writing-style profile…",
+    "consent": "Emailer analyzes your recent sent messages to learn your writing style, so suggestions sound like you. The analysis runs against the active AI provider and the profile stays on this machine.",
+    "consentNote": "Nothing is sent automatically — suggestions are always drafts for you to review and edit.",
+    "closeLabel": "Close smart replies",
+    "cancel": "Cancel",
+    "analyze": "Analyze sent mail",
+    "analyzing": "Analyzing your recent sent messages…",
+    "generate": "Generate suggestion",
+    "generating": "Drafting a suggestion in your style…",
+    "previewNote": "AI-generated — inserting opens the composer with this draft for you to edit before sending.",
+    "dismissLabel": "Dismiss smart reply",
+    "dismiss": "Dismiss",
+    "regenerate": "Regenerate",
+    "use": "Use reply",
+    "retry": "Retry"
+  },
+  "sourceView": {
+    "noAccount": "The message's account is unavailable.",
+    "loadFailed": "Could not load the source.",
+    "copiedToast": "Message source copied",
+    "clipboardFailed": "Could not access the clipboard.",
+    "title": "Message source",
+    "description": "Raw RFC 822 source of “{{subject}}” — read-only, nothing executes.",
+    "loading": "Loading source…",
+    "copied": "Copied.",
+    "characters_one": "{{count}} character",
+    "characters_other": "{{count}} characters",
+    "copy": "Copy source",
+    "close": "Close"
+  },
+  "pgp": {
+    "title": "Unlock your private key",
+    "description": "Enter the passphrase of your private key to decrypt this message. The passphrase is used once and never stored.",
+    "passphrase": "PGP passphrase",
+    "cancel": "Cancel",
+    "decrypting": "Decrypting…",
+    "decrypt": "Decrypt",
+    "errors": {
+      "generic": "the message could not be decrypted",
+      "bodyMissing": "the message body is missing",
+      "payloadMissing": "the encrypted payload part is missing from this message",
+      "payloadNotArmored": "the encrypted payload part does not carry armored PGP data",
+      "decryptedEmpty": "the decrypted message is empty"
+    },
+    "signature": {
+      "valid": "Signed by a known key — the signature is valid.",
+      "invalid": "Signature check FAILED — the content was modified after signing or does not match the signer's key.",
+      "unknownSigner": "Signed by an unknown key — import the signer's public key to verify this signature.",
+      "checking": "Checking signature…"
+    },
+    "mimeSigned": "This message is PGP/MIME-signed. Its signature cannot be verified from the stored copy.",
+    "encrypted": "This message is encrypted."
+  },
+  "digest": {
+    "failed": "Could not build the digest.",
+    "title": "Catch me up",
+    "description": "An AI-generated briefing over this view's unread threads. Only those threads' text is sent to the provider.",
+    "busy": "Catching you up…",
+    "empty": "No unread threads.",
+    "retry": "Retry",
+    "meta_one": "{{count}} unread thread covered",
+    "meta_other": "{{count}} unread threads covered",
+    "metaWithOmitted_one": "{{count}} unread thread covered, and {{omitted}} more not covered",
+    "metaWithOmitted_other": "{{count}} unread threads covered, and {{omitted}} more not covered",
+    "closeLabel": "Close digest",
+    "close": "Close"
+  },
+  "quickStepConfirm": {
+    "title": "Run “{{name}}”?",
+    "description": "This quick step moves threads to Trash.",
+    "affected_one": "{{count}} thread will be affected.",
+    "affected_other": "{{count}} threads will be affected.",
+    "dontAskAgain": "Don't ask again",
+    "cancel": "Cancel",
+    "run": "Run"
+  },
+  "thread": {
+    "noMessageSelected": "No message selected",
+    "loading": "Loading thread…",
+    "notFound": "Message not found"
+  },
+  "toolbar": {
+    "print": "Print",
+    "printMessage": "Print this message",
+    "printThread": "Print whole thread",
+    "moveToTrash": "Move to trash",
+    "star": "Star thread",
+    "unstar": "Unstar thread",
+    "markRead": "Mark as read",
+    "markUnread": "Mark as unread",
+    "mute": "Mute thread",
+    "unmute": "Unmute thread",
+    "pin": "Pin thread",
+    "unpin": "Unpin thread",
+    "inTodosTitle": "In Todos — click to move to the bottom",
+    "inTodos": "In Todos",
+    "addToTodos": "Add to Todos",
+    "editNote": "Edit note",
+    "addNote": "Add a note",
+    "suggestTasks": "Suggest tasks",
+    "suggestEvents": "Suggest events",
+    "summarize": "Summarize thread",
+    "contactSidebar": "Contact sidebar"
+  },
+  "inlineReply": {
+    "participants": "participants",
+    "replyTo": "Reply to {{name}}…",
+    "to": "To:",
+    "cc": "Cc:",
+    "subject": "Subject:",
+    "replyAll": "Reply all",
+    "cancel": "Cancel",
+    "opensEditor": "Opens the full editor"
+  },
+  "notes": {
+    "title": "Note",
+    "private": "Private — stored only on this device",
+    "saved": "Saved",
+    "label": "Thread note",
+    "placeholder": "Add a private note…"
+  },
+  "summary": {
+    "disabled": "The summaries surface is disabled.",
+    "title": "AI summary",
+    "generatedBy": "Generated by {{model}} — AI-generated, may be imperfect",
+    "generatedByCached": "Generated by {{model}} · cached — AI-generated, may be imperfect",
+    "regenerate": "Regenerate summary",
+    "expand": "Expand summary",
+    "collapse": "Collapse summary",
+    "loading": "Summarizing the conversation…",
+    "stale": "The thread changed since this summary — Regenerate for the latest messages.",
+    "empty": "No messages to summarize.",
+    "retry": "Retry"
+  },
+  "message": {
+    "noContent": "(no content)",
+    "sendAgain": "Send again",
+    "viewSource": "View source",
+    "collapse": "Collapse",
+    "junk": "Your junk filter placed this conversation in Spam.",
+    "notSpam": "Not spam",
+    "loading": "Loading message…",
+    "phishingTitle": "Suspicious message",
+    "dismiss": "Dismiss",
+    "imagesHidden": "Images are hidden",
+    "showImages": "Show images",
+    "alwaysAllow": "Always allow from sender",
+    "dmarcFail": "DMARC authentication FAILED — this message may be impersonating the sender it claims to be from."
+  },
+  "unsubscribe": {
+    "queuedToast": "Unsubscribe queued — it will send when you are back online",
+    "doneToast": "Unsubscribed",
+    "failed": "The unsubscribe request failed",
+    "autoArchiveToast": "Future mail from {{sender}} will be archived",
+    "autoArchiveFailed": "Could not create the auto-archive rule",
+    "offer": "This sender offers an unsubscribe option.",
+    "unsubscribe": "Unsubscribe",
+    "confirmPrompt": "Send the unsubscribe request to <url>{{url}}</url>?",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "doneArchived": "Unsubscribed — future mail from this sender will be archived.",
+    "done": "Unsubscribed.",
+    "autoArchive": "Auto-archive future mail from this sender"
+  },
+  "attachments": {
+    "loadFailed": "Could not load attachments.",
+    "count_one": "{{count}} attachment",
+    "count_other": "{{count}} attachments",
+    "risk": {
+      "dangerous": "Dangerous",
+      "macros": "Macros"
+    },
+    "riskLabel": "{{risk}} file type",
+    "saveFailed": "Could not save this file.",
+    "openFailed": "Could not open this file.",
+    "unnamed": "(unnamed)",
+    "maliciousLabel": "Flagged malicious by the malware lookup",
+    "malicious": "Malicious",
+    "suspiciousLabel": "Flagged suspicious by the malware lookup",
+    "suspicious": "Suspicious",
+    "addToCalendar": "Add to calendar",
+    "saving": "Saving…",
+    "save": "Save",
+    "opening": "Opening…",
+    "open": "Open"
+  },
+  "popout": {
+    "threadGone": "This thread no longer exists.",
+    "noContext": "No thread window context.",
+    "loading": "Loading…",
+    "closeGuard": {
+      "title": "Save draft before closing?",
+      "description": "This window has a message in progress. The draft is saved automatically in Drafts — closing keeps it; discarding deletes it.",
+      "cancel": "Cancel",
+      "discard": "Discard & close",
+      "save": "Save & close"
+    }
+  },
+  "print": {
+    "gone": "Nothing to print — this message no longer exists.",
+    "documentTitle": "Emailer print",
+    "noContext": "No print window context.",
+    "loading": "Loading…"
+  }
+}

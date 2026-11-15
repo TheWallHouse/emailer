@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,7 +19,11 @@ import {
   getMailtoDefaultState,
   setMailtoDefault,
 } from "@/services/desktop/mailto"
-import { isAutostartEnabled, isTrayAvailable, setAutostartEnabled } from "@/services/desktop/tray"
+import {
+  isAutostartEnabled,
+  isTrayAvailable,
+  setAutostartEnabled,
+} from "@/services/desktop/tray"
 import {
   getCloseAction,
   getComposeShortcut,
@@ -53,11 +59,22 @@ import {
  */
 
 const CLOSE_ACTION_OPTIONS: { value: CloseAction; label: string }[] = [
-  { value: "quit", label: "Quit Emailer" },
-  { value: "hide", label: "Hide to tray" },
+  {
+    value: "quit",
+    get label() {
+      return i18next.t("settings.desktop.closeAction.quit")
+    },
+  },
+  {
+    value: "hide",
+    get label() {
+      return i18next.t("settings.desktop.closeAction.hide")
+    },
+  },
 ]
 
 export function DesktopSection() {
+  const { t } = useTranslation()
   const [trayAvailable, setTrayAvailable] = useState(false)
   const [closeAction, setCloseAction] = useState<CloseAction>("quit")
   const [isMailtoDefault, setIsMailtoDefault] = useState(false)
@@ -137,7 +154,9 @@ export function DesktopSection() {
     }
   }
 
-  async function saveComposeShortcut(accelerator: string | null): Promise<void> {
+  async function saveComposeShortcut(
+    accelerator: string | null
+  ): Promise<void> {
     setShortcutError(null)
     try {
       // The Rust command validates the accelerator (parse + OS register)
@@ -146,27 +165,32 @@ export function DesktopSection() {
       await setComposeShortcutPreference(getExecutor(), accelerator)
       setShortcut(accelerator)
       setShortcutDraft(accelerator ?? "")
-
     } catch (error) {
       setShortcutError(String(error))
     }
   }
 
   return (
-    <section aria-label="Desktop" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settings.desktop.title")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Desktop</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("settings.desktop.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          How Emailer behaves in your operating system.
+          {t("settings.desktop.description")}
         </p>
       </div>
       <Separator />
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <Label htmlFor="desktop-mailto-default">Default mail client</Label>
+          <Label htmlFor="desktop-mailto-default">
+            {t("settings.desktop.mailto.label")}
+          </Label>
           <p className="text-xs text-muted-foreground">
-            Handle mailto: links from your browser and other apps in Emailer.
-            Unsetting restores the previous default mail client.
+            {t("settings.desktop.mailto.hint")}
           </p>
         </div>
         <Switch
@@ -181,10 +205,11 @@ export function DesktopSection() {
       <Separator />
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <Label htmlFor="desktop-autostart">Launch at login</Label>
+          <Label htmlFor="desktop-autostart">
+            {t("settings.desktop.autostart.label")}
+          </Label>
           <p className="text-xs text-muted-foreground">
-            Start Emailer automatically when you log in, hidden in the tray —
-            syncing and notifying from the start.
+            {t("settings.desktop.autostart.hint")}
           </p>
         </div>
         <Switch
@@ -202,12 +227,14 @@ export function DesktopSection() {
       </div>
       <Separator />
       <div className="grid gap-2">
-        <Label htmlFor="desktop-compose-shortcut">Global compose shortcut</Label>
+        <Label htmlFor="desktop-compose-shortcut">
+          {t("settings.desktop.composeShortcut.label")}
+        </Label>
         <div className="flex items-center gap-2">
           <Input
             id="desktop-compose-shortcut"
             value={shortcutDraft}
-            placeholder="e.g. CmdOrCtrl+Shift+E"
+            placeholder={t("settings.desktop.composeShortcut.placeholder")}
             className="w-64 font-mono text-xs"
             onChange={(event) => {
               setShortcutDraft(event.target.value)
@@ -224,7 +251,7 @@ export function DesktopSection() {
               )
             }}
           >
-            Save
+            {t("settings.desktop.composeShortcut.save")}
           </Button>
           {shortcut !== null && (
             <Button
@@ -234,14 +261,14 @@ export function DesktopSection() {
                 void saveComposeShortcut(null)
               }}
             >
-              Clear
+              {t("settings.desktop.composeShortcut.clear")}
             </Button>
           )}
         </div>
         <p className="text-xs text-muted-foreground">
           {shortcut
-            ? "Registered — pressing it in any application surfaces Emailer with a fresh composer."
-            : "No global shortcut registered. Use modifier prefixes like CmdOrCtrl+Shift+…"}
+            ? t("settings.desktop.composeShortcut.registered")
+            : t("settings.desktop.composeShortcut.none")}
         </p>
         {shortcutError && (
           <p role="alert" className="text-xs text-destructive">
@@ -251,12 +278,14 @@ export function DesktopSection() {
       </div>
       {trayAvailable ? (
         <div className="grid gap-2">
-          <Label htmlFor="desktop-close-action">When closing the window</Label>
+          <Label htmlFor="desktop-close-action">
+            {t("settings.desktop.closeAction.label")}
+          </Label>
           <Select
             value={closeAction}
             items={{
-              quit: "Quit Emailer",
-              hide: "Hide to tray",
+              quit: t("settings.desktop.closeAction.quit"),
+              hide: t("settings.desktop.closeAction.hide"),
             }}
             onValueChange={(value) => {
               void changeCloseAction(String(value) as CloseAction)
@@ -275,14 +304,13 @@ export function DesktopSection() {
           </Select>
           <p className="text-xs text-muted-foreground">
             {closeAction === "hide"
-              ? "Emailer keeps running in the system tray — mail keeps syncing and notifications keep arriving. Restore it from the tray icon."
-              : "Closing the window quits Emailer and stops background syncing."}
+              ? t("settings.desktop.closeAction.hideHint")
+              : t("settings.desktop.closeAction.quitHint")}
           </p>
         </div>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Tray integration is not available on this platform; Emailer behaves
-          as a regular windowed application.
+          {t("settings.desktop.noTray")}
         </p>
       )}
     </section>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { Loader2, MailX, Trash2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +19,7 @@ import {
   removeEntry,
 } from "@/services/settings/subscriptions"
 import { getExecutor } from "@/services/db/executor"
+import { i18next } from "@/i18n"
 import { useActiveAccount } from "@/stores/account-store"
 
 /**
@@ -38,11 +40,35 @@ import { useActiveAccount } from "@/stores/account-store"
  * blocked-senders/delivery-schedules sections.
  */
 
-const STATE_BADGES: Record<SubscriptionState, { label: string; variant: "default" | "secondary" | "outline" }> = {
-  subscribed: { label: "Still subscribed", variant: "outline" },
-  unsubscribed: { label: "Unsubscribed", variant: "secondary" },
-  unknown: { label: "Unknown", variant: "outline" },
-  resumed: { label: "Resumed", variant: "default" },
+/** Labels are getters, localized at read time. */
+const STATE_BADGES: Record<
+  SubscriptionState,
+  { readonly label: string; variant: "default" | "secondary" | "outline" }
+> = {
+  subscribed: {
+    get label() {
+      return i18next.t("settingsMail.subscriptions.states.subscribed")
+    },
+    variant: "outline",
+  },
+  unsubscribed: {
+    get label() {
+      return i18next.t("settingsMail.subscriptions.states.unsubscribed")
+    },
+    variant: "secondary",
+  },
+  unknown: {
+    get label() {
+      return i18next.t("settingsMail.subscriptions.states.unknown")
+    },
+    variant: "outline",
+  },
+  resumed: {
+    get label() {
+      return i18next.t("settingsMail.subscriptions.states.resumed")
+    },
+    variant: "default",
+  },
 }
 
 /** An entry can be (bulk-)unsubscribed unless it already is. */
@@ -51,9 +77,11 @@ function isActionable(entry: SubscriptionEntry): boolean {
 }
 
 function lastSeenLabel(entry: SubscriptionEntry): string {
-  return `Last seen ${formatDistanceToNow(new Date(entry.lastSeenAt * 1000), {
-    addSuffix: true,
-  })}`
+  return i18next.t("settingsMail.subscriptions.lastSeen", {
+    when: formatDistanceToNow(new Date(entry.lastSeenAt * 1000), {
+      addSuffix: true,
+    }),
+  })
 }
 
 /** Toast shape for a bulk run: one result set, one summary. */
@@ -67,13 +95,22 @@ function summarizeResults(results: BulkUnsubscribeResult[]): {
       return {
         kind: "success",
         message: result.queued
-          ? `Unsubscribe for ${result.sender} queued — it will send when you are back online`
-          : `Unsubscribed ${result.sender}`,
+          ? i18next.t("settingsMail.subscriptions.toasts.queuedOne", {
+              sender: result.sender,
+            })
+          : i18next.t("settingsMail.subscriptions.toasts.unsubscribedOne", {
+              sender: result.sender,
+            }),
       }
     }
     return {
       kind: "error",
-      message: `Could not unsubscribe ${result.sender}: ${result.error ?? "the request failed"}`,
+      message: i18next.t("settingsMail.subscriptions.toasts.failedOne", {
+        sender: result.sender,
+        error:
+          result.error ??
+          i18next.t("settingsMail.subscriptions.toasts.requestFailed"),
+      }),
     }
   }
   const okResults = results.filter((result) => result.ok)
@@ -81,23 +118,40 @@ function summarizeResults(results: BulkUnsubscribeResult[]): {
   const queued = okResults.filter((result) => result.queued).length
   const okCount = okResults.length
   const suffix =
-    queued > 0 ? ` — ${queued} will send when you are back online` : ""
+    queued > 0
+      ? i18next.t("settingsMail.subscriptions.toasts.queuedSuffix", {
+          count: queued,
+        })
+      : ""
   if (failed.length === 0) {
-    return { kind: "success", message: `Unsubscribed ${okCount} senders${suffix}` }
+    return {
+      kind: "success",
+      message: i18next.t("settingsMail.subscriptions.toasts.unsubscribedMany", {
+        count: okCount,
+        suffix,
+      }),
+    }
   }
   if (okResults.length === 0) {
     return {
       kind: "error",
-      message: `All ${failed.length} unsubscribe requests failed`,
+      message: i18next.t("settingsMail.subscriptions.toasts.allFailed", {
+        count: failed.length,
+      }),
     }
   }
   return {
     kind: "warning",
-    message: `${okCount} unsubscribed, ${failed.length} failed${suffix}`,
+    message: i18next.t("settingsMail.subscriptions.toasts.partial", {
+      ok: okCount,
+      failed: failed.length,
+      suffix,
+    }),
   }
 }
 
 export function SubscriptionsSection() {
+  const { t } = useTranslation()
   const account = useActiveAccount()
   const [entries, setEntries] = useState<SubscriptionEntry[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -151,7 +205,9 @@ export function SubscriptionsSection() {
   }
 
   function toggleAll(checked: boolean): void {
-    setSelected(checked ? new Set(actionable.map((entry) => entry.sender)) : new Set())
+    setSelected(
+      checked ? new Set(actionable.map((entry) => entry.sender)) : new Set()
+    )
   }
 
   /** The bulk path for one or many senders; the service reports
@@ -176,7 +232,7 @@ export function SubscriptionsSection() {
       // bulkUnsubscribe resolves per-sender results; reaching here means
       // the call itself failed (executor gone) — surfaced via toast.
       console.warn("[settings] bulk unsubscribe failed", error)
-      toast.error("The unsubscribe request failed")
+      toast.error(t("settingsMail.subscriptions.toasts.bulkFailed"))
     } finally {
       setRunning(false)
     }
@@ -186,71 +242,78 @@ export function SubscriptionsSection() {
     if (!account) return
     try {
       await removeEntry(getExecutor(), account.id, entry.sender)
-      toast.success(`Removed ${entry.sender}`)
+      toast.success(
+        t("settingsMail.subscriptions.toasts.removed", { sender: entry.sender })
+      )
       reload()
     } catch (error) {
       console.warn("[settings] failed to remove subscription entry", error)
-      toast.error(`Could not remove ${entry.sender}`)
+      toast.error(
+        t("settingsMail.subscriptions.toasts.removeFailed", {
+          sender: entry.sender,
+        })
+      )
     }
   }
 
   return (
-    <section aria-label="Subscriptions" className="flex flex-col gap-4">
+    <section
+      aria-label={t("settingsMail.subscriptions.title")}
+      className="flex flex-col gap-4"
+    >
       <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-semibold text-foreground">
-            Subscriptions
+            {t("settingsMail.subscriptions.title")}
           </h2>
           <p className="text-sm text-muted-foreground">
             {account
-              ? `Newsletter senders for ${account.email}.`
-              : "Newsletter senders and unsubscribed senders."}
+              ? t("settingsMail.subscriptions.subtitleAccount", {
+                  email: account.email,
+                })
+              : t("settingsMail.subscriptions.subtitle")}
           </p>
         </div>
         <Button
           size="sm"
-          disabled={
-            !account || running || selected.size === 0
-          }
+          disabled={!account || running || selected.size === 0}
           onClick={() => {
             void runUnsubscribe([...selected])
           }}
         >
           {running && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
           <MailX />
-          Unsubscribe selected
-          {selected.size > 0 ? ` (${selected.size})` : ""}
+          {selected.size > 0
+            ? t("settingsMail.subscriptions.unsubscribeSelectedCount", {
+                n: selected.size,
+              })
+            : t("settingsMail.subscriptions.unsubscribeSelected")}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Senders whose mail carries an unsubscribe option (newsletters) are
-        detected automatically as their mail arrives. Unsubscribe still
-        subscribed senders — in bulk or one by one — and remove entries you
-        do not need. If mail arrives from an unsubscribed sender, the entry
-        is marked as resumed.
+        {t("settingsMail.subscriptions.help")}
       </p>
       <Separator />
       {!account ? (
         <p className="text-sm text-muted-foreground">
-          Add an account to manage its subscriptions.
+          {t("settingsMail.subscriptions.noAccount")}
         </p>
       ) : entries.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No subscriptions yet. Newsletter senders appear here automatically
-          as their mail is detected — nothing to configure.
+          {t("settingsMail.subscriptions.empty")}
         </p>
       ) : (
         <>
           <div className="flex items-center gap-3">
             <Checkbox
-              aria-label="Select all unsubscribable senders"
+              aria-label={t("settingsMail.subscriptions.selectAll")}
               checked={allSelected}
               onCheckedChange={(checked) => {
                 toggleAll(checked === true)
               }}
             />
             <span className="text-xs text-muted-foreground">
-              Select all unsubscribable senders
+              {t("settingsMail.subscriptions.selectAll")}
             </span>
           </div>
           <div className="divide-y divide-border">
@@ -264,7 +327,9 @@ export function SubscriptionsSection() {
                   className="flex items-start gap-3 py-2.5"
                 >
                   <Checkbox
-                    aria-label={`Select ${entry.sender}`}
+                    aria-label={t("settingsMail.subscriptions.selectSender", {
+                      sender: entry.sender,
+                    })}
                     className="mt-0.5"
                     disabled={!isActionable(entry)}
                     checked={isSelected}
@@ -301,26 +366,33 @@ export function SubscriptionsSection() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      aria-label={`Unsubscribe ${entry.sender}`}
+                      aria-label={t(
+                        "settingsMail.subscriptions.unsubscribeAria",
+                        {
+                          sender: entry.sender,
+                        }
+                      )}
                       disabled={running}
                       onClick={() => {
                         void runUnsubscribe([entry.sender])
                       }}
                     >
-                      Unsubscribe
+                      {t("settingsMail.subscriptions.unsubscribe")}
                     </Button>
                   )}
                   <Button
                     variant="ghost"
                     size="sm"
-                    aria-label={`Remove ${entry.sender}`}
+                    aria-label={t("settingsMail.subscriptions.removeAria", {
+                      sender: entry.sender,
+                    })}
                     disabled={running}
                     onClick={() => {
                       void handleRemove(entry)
                     }}
                   >
                     <Trash2 />
-                    Remove
+                    {t("settingsMail.subscriptions.remove")}
                   </Button>
                 </div>
               )
