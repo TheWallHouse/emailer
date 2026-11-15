@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { CalendarPlus } from "lucide-react"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -53,23 +55,16 @@ import {
  * affordance; content-fetch failures render the same way.
  */
 
-/** Informational v1 copy (frozen contract — see the seam module docs). */
-const ADD_UNAVAILABLE_TOAST =
-  "Adding to a calendar arrives with calendar setup — the event details are shown here already."
-const RSVP_UNAVAILABLE_TOAST =
-  "Invitation responses arrive with calendar setup — the event details are shown here already."
-const NO_SOURCES_NOTE =
-  "Connect a calendar in Settings (coming with calendar setup)."
-const ADD_OFFLINE_NOTE =
-  "You're offline — the event was not added to a calendar. Reconnect and try again."
-const RSVP_OFFLINE_NOTE =
-  "You're offline — the response was not sent. Reconnect and try again."
+/** Informational v1 copy (frozen contract — see the seam module docs).
+ * Getters, so the line follows the interface language. */
+const addUnavailableToast = () => i18next.t("calendar.ics.addUnavailable")
+const rsvpUnavailableToast = () => i18next.t("calendar.ics.rsvpUnavailable")
+const noSourcesNote = () => i18next.t("calendar.ics.noSources")
+const addOfflineNote = () => i18next.t("calendar.ics.addOffline")
+const rsvpOfflineNote = () => i18next.t("calendar.ics.rsvpOffline")
 
 /** Map a seam failure to its inline status line (task 5.4 reasons). */
-function failureStatus(
-  message: string | undefined,
-  fallback: string
-): string {
+function failureStatus(message: string | undefined, fallback: string): string {
   if (message) return message
   return fallback
 }
@@ -98,6 +93,7 @@ export function IcsPreviewDialog({
   onOpenChange,
   loadIcs,
 }: IcsPreviewDialogProps) {
+  const { t } = useTranslation()
   const [phase, setPhase] = useState<Phase>("loading")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [parsed, setParsed] = useState<ParsedIcs | null>(null)
@@ -127,7 +123,7 @@ export function IcsPreviewDialog({
         text = await loadIcs()
       } catch (error) {
         console.warn("[ics-preview] attachment content failed", error)
-        setErrorMessage("Could not load the calendar attachment.")
+        setErrorMessage(i18next.t("calendar.ics.loadFailed"))
         setPhase("error")
         return
       }
@@ -165,7 +161,8 @@ export function IcsPreviewDialog({
     }
   }, [open, run])
 
-  const event = parsed?.calendar.events[eventIndex] ?? parsed?.calendar.events[0] ?? null
+  const event =
+    parsed?.calendar.events[eventIndex] ?? parsed?.calendar.events[0] ?? null
   const invitation = parsed !== null && isInvitationRequest(parsed.calendar)
 
   async function handleAdd(): Promise<void> {
@@ -179,31 +176,28 @@ export function IcsPreviewDialog({
       })
       if (result.ok) {
         setAdded(true)
-        setStatus("Added to the calendar.")
-        toast.success("Event added to your calendar")
+        setStatus(t("calendar.ics.added"))
+        toast.success(t("calendar.ics.addedToast"))
       } else if (result.reason === "no-source") {
-        setStatus(NO_SOURCES_NOTE)
-        toast.info(NO_SOURCES_NOTE)
+        setStatus(noSourcesNote())
+        toast.info(noSourcesNote())
       } else if (result.reason === "offline") {
-        setStatus(ADD_OFFLINE_NOTE)
-        toast.info(ADD_OFFLINE_NOTE)
+        setStatus(addOfflineNote())
+        toast.info(addOfflineNote())
       } else if (result.reason === "unavailable") {
-        setStatus(ADD_UNAVAILABLE_TOAST)
-        toast.info(ADD_UNAVAILABLE_TOAST)
+        setStatus(addUnavailableToast())
+        toast.info(addUnavailableToast())
       } else {
         // invalid / no-event / config / unsupported / failed: the seam's
         // message is the honest line (CalDAV RSVP-style limitations,
         // provider rejections); a generic fallback keeps it readable.
-        const note = failureStatus(
-          result.message,
-          "Adding to the calendar failed. Try again."
-        )
+        const note = failureStatus(result.message, t("calendar.ics.addFailed"))
         setStatus(note)
         toast.info(note)
       }
     } catch (error) {
       console.warn("[ics-preview] add-to-calendar failed", error)
-      setStatus("Adding to the calendar failed. Try again.")
+      setStatus(t("calendar.ics.addFailed"))
     } finally {
       setBusy(null)
     }
@@ -220,28 +214,25 @@ export function IcsPreviewDialog({
       })
       if (result.ok) {
         setRsvpSent(response)
-        setStatus("Response sent.")
-        toast.success("Your response was sent")
+        setStatus(t("calendar.ics.responseSent"))
+        toast.success(t("calendar.ics.responseSentToast"))
       } else if (result.reason === "no-source") {
-        setStatus(NO_SOURCES_NOTE)
-        toast.info(NO_SOURCES_NOTE)
+        setStatus(noSourcesNote())
+        toast.info(noSourcesNote())
       } else if (result.reason === "offline") {
-        setStatus(RSVP_OFFLINE_NOTE)
-        toast.info(RSVP_OFFLINE_NOTE)
+        setStatus(rsvpOfflineNote())
+        toast.info(rsvpOfflineNote())
       } else if (result.reason === "unavailable") {
-        setStatus(RSVP_UNAVAILABLE_TOAST)
-        toast.info(RSVP_UNAVAILABLE_TOAST)
+        setStatus(rsvpUnavailableToast())
+        toast.info(rsvpUnavailableToast())
       } else {
-        const note = failureStatus(
-          result.message,
-          "Sending the response failed. Try again."
-        )
+        const note = failureStatus(result.message, t("calendar.ics.sendFailed"))
         setStatus(note)
         toast.info(note)
       }
     } catch (error) {
       console.warn("[ics-preview] invitation response failed", error)
-      setStatus("Sending the response failed. Try again.")
+      setStatus(t("calendar.ics.sendFailed"))
     } finally {
       setBusy(null)
     }
@@ -252,12 +243,12 @@ export function IcsPreviewDialog({
       <DialogContent data-testid="ics-preview-dialog" className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {event?.summary ?? "Calendar event"}
+            {event?.summary ?? t("calendar.ics.fallbackTitle")}
           </DialogTitle>
           <DialogDescription>
             {invitation
-              ? "This message carries a calendar invitation."
-              : "Event details from the calendar attachment."}
+              ? t("calendar.ics.invitationDescription")
+              : t("calendar.ics.attachmentDescription")}
           </DialogDescription>
         </DialogHeader>
         {phase === "loading" && (
@@ -265,7 +256,7 @@ export function IcsPreviewDialog({
             data-testid="ics-preview-loading"
             className="py-6 text-center text-sm text-muted-foreground"
           >
-            Reading the calendar attachment…
+            {t("calendar.ics.reading")}
           </div>
         )}
         {phase === "error" && (
@@ -274,7 +265,7 @@ export function IcsPreviewDialog({
             className="flex flex-col items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm"
           >
             <span className="text-destructive">
-              {errorMessage ?? "This file could not be read as an iCalendar file."}
+              {errorMessage ?? t("calendar.ics.unreadable")}
             </span>
             <Button
               variant="outline"
@@ -282,7 +273,7 @@ export function IcsPreviewDialog({
               data-testid="ics-preview-retry"
               onClick={run}
             >
-              Retry
+              {t("calendar.ics.retry")}
             </Button>
           </div>
         )}
@@ -290,16 +281,19 @@ export function IcsPreviewDialog({
           <>
             {parsed.calendar.events.length > 1 && (
               <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                Event
+                {t("calendar.ics.event")}
                 <select
                   data-testid="ics-event-picker"
                   className="h-8 w-full flex-1 rounded-lg border border-input bg-transparent px-2 text-sm"
                   value={eventIndex}
-                  onChange={(change) => setEventIndex(Number(change.target.value))}
+                  onChange={(change) =>
+                    setEventIndex(Number(change.target.value))
+                  }
                 >
                   {parsed.calendar.events.map((item, index) => (
                     <option key={index} value={index}>
-                      {item.summary ?? `Event ${index + 1}`}
+                      {item.summary ??
+                        t("calendar.ics.eventNumber", { number: index + 1 })}
                     </option>
                   ))}
                 </select>
@@ -337,18 +331,20 @@ export function IcsPreviewDialog({
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Close
+                {t("calendar.ics.close")}
               </Button>
               <Button
                 data-testid="ics-add"
                 className="gap-1"
-                disabled={
-                  busy !== null || added || !sourceId || event === null
-                }
+                disabled={busy !== null || added || !sourceId || event === null}
                 onClick={() => void handleAdd()}
               >
                 <CalendarPlus className="size-3.5" />
-                {added ? "Added" : busy === "add" ? "Adding…" : "Add to calendar"}
+                {added
+                  ? t("calendar.ics.addedButton")
+                  : busy === "add"
+                    ? t("calendar.ics.adding")
+                    : t("calendar.ics.addToCalendar")}
               </Button>
             </DialogFooter>
           </>
@@ -360,10 +356,11 @@ export function IcsPreviewDialog({
 
 /** The parsed details grid (the spec scenario's first half). */
 function EventDetails({ event }: { event: IcsEvent | null }) {
+  const { t } = useTranslation()
   if (!event) {
     return (
       <p className="text-sm text-muted-foreground">
-        No event was found in this calendar file.
+        {t("calendar.ics.noEvent")}
       </p>
     )
   }
@@ -373,7 +370,9 @@ function EventDetails({ event }: { event: IcsEvent | null }) {
     <dl className="grid gap-1.5 text-sm">
       {when !== null && (
         <div className="flex gap-2">
-          <dt className="w-20 shrink-0 text-xs text-muted-foreground">When</dt>
+          <dt className="w-20 shrink-0 text-xs text-muted-foreground">
+            {t("calendar.ics.when")}
+          </dt>
           <dd data-testid="ics-preview-when" className="min-w-0 flex-1">
             {when}
           </dd>
@@ -381,7 +380,9 @@ function EventDetails({ event }: { event: IcsEvent | null }) {
       )}
       {event.location !== null && (
         <div className="flex gap-2">
-          <dt className="w-20 shrink-0 text-xs text-muted-foreground">Where</dt>
+          <dt className="w-20 shrink-0 text-xs text-muted-foreground">
+            {t("calendar.ics.where")}
+          </dt>
           <dd data-testid="ics-preview-where" className="min-w-0 flex-1">
             {event.location}
           </dd>
@@ -390,7 +391,7 @@ function EventDetails({ event }: { event: IcsEvent | null }) {
       {organizer !== null && (
         <div className="flex gap-2">
           <dt className="w-20 shrink-0 text-xs text-muted-foreground">
-            Organizer
+            {t("calendar.ics.organizer")}
           </dt>
           <dd data-testid="ics-preview-organizer" className="min-w-0 flex-1">
             {organizer}
@@ -399,10 +400,12 @@ function EventDetails({ event }: { event: IcsEvent | null }) {
       )}
       {event.description !== null && (
         <div className="flex gap-2">
-          <dt className="w-20 shrink-0 text-xs text-muted-foreground">Notes</dt>
+          <dt className="w-20 shrink-0 text-xs text-muted-foreground">
+            {t("calendar.ics.notes")}
+          </dt>
           <dd
             data-testid="ics-preview-description"
-            className="min-w-0 flex-1 whitespace-pre-wrap break-words"
+            className="min-w-0 flex-1 break-words whitespace-pre-wrap"
           >
             {event.description}
           </dd>
@@ -422,20 +425,21 @@ function InvitationRow({
   sent: InvitationResponse | null
   onRespond: (response: InvitationResponse) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       data-testid="ics-rsvp-row"
       className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 p-2.5"
     >
       <span className="text-xs font-medium text-muted-foreground">
-        Are you going?
+        {t("calendar.ics.going")}
       </span>
       <div className="ml-auto flex gap-1.5">
         {(
           [
-            ["yes", "Yes"],
-            ["maybe", "Maybe"],
-            ["no", "No"],
+            ["yes", t("calendar.ics.yes")],
+            ["maybe", t("calendar.ics.maybe")],
+            ["no", t("calendar.ics.no")],
           ] as const
         ).map(([value, label]) => (
           <Button
@@ -472,10 +476,14 @@ function SourcePicker({
   sourceId: string | null
   onSelect: (id: string) => void
 }) {
+  const { t } = useTranslation()
   if (sources === null) {
     return (
-      <p data-testid="ics-sources-loading" className="text-xs text-muted-foreground">
-        Looking for your calendars…
+      <p
+        data-testid="ics-sources-loading"
+        className="text-xs text-muted-foreground"
+      >
+        {t("calendar.ics.lookingForCalendars")}
       </p>
     )
   }
@@ -485,13 +493,13 @@ function SourcePicker({
         data-testid="ics-no-sources"
         className="rounded-lg border border-border bg-muted/30 p-2 text-xs text-muted-foreground"
       >
-        {NO_SOURCES_NOTE}
+        {noSourcesNote()}
       </p>
     )
   }
   return (
     <label className="flex items-center gap-2 text-xs text-muted-foreground">
-      Add to
+      {t("calendar.ics.addTo")}
       <select
         data-testid="ics-source-picker"
         className="h-8 w-full flex-1 rounded-lg border border-input bg-transparent px-2 text-sm"

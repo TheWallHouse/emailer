@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core"
 
+import { i18next } from "@/i18n"
+
 import type { SqlExecutor } from "../db/executor"
 import type { FetchImpl } from "../email/token-manager"
 import { bytesToBase64 } from "../email/mime-builder"
@@ -16,10 +18,7 @@ import {
   getMicrosoftEvent,
   respondToMicrosoftEvent,
 } from "./microsoft-calendar"
-import {
-  buildIcsReply,
-  replyRequestFromInvite,
-} from "./ics-reply"
+import { buildIcsReply, replyRequestFromInvite } from "./ics-reply"
 import type { IcsReplyBuildRequest } from "./ics-reply"
 import { unfoldIcsLines, type IcsEvent } from "./ics"
 import { parseInviteCalendar } from "./invites"
@@ -90,13 +89,13 @@ const ANSWER_SUBJECT: Record<RsvpAnswer, string> = {
 export function rsvpAnswerLabel(partstat: string): string {
   switch (partstat.toUpperCase()) {
     case "ACCEPTED":
-      return "Accepted"
+      return i18next.t("calendar.rsvp.accepted")
     case "TENTATIVE":
-      return "Tentative"
+      return i18next.t("calendar.rsvp.tentative")
     case "DECLINED":
-      return "Declined"
+      return i18next.t("calendar.rsvp.declined")
     default:
-      return "Awaiting reply"
+      return i18next.t("calendar.rsvp.awaiting")
   }
 }
 
@@ -133,9 +132,7 @@ export interface RsvpOutcome {
 export interface RsvpDeps {
   fetchImpl?: FetchImpl
   /** Overrides the REPLY blob builder (the Rust command is default). */
-  buildReply?: (
-    request: IcsReplyBuildRequest
-  ) => Promise<string> | string
+  buildReply?: (request: IcsReplyBuildRequest) => Promise<string> | string
 }
 
 /**
@@ -273,12 +270,10 @@ async function writeBackCaldav(
 ): Promise<void> {
   const envelope = await unsealCaldavConfig(source)
   if (!envelope) {
-    throw new Error(
-      "No stored CalDAV connection details for this source; re-connect it"
-    )
+    throw new Error(i18next.t("calendar.errors.caldavNoConfig"))
   }
   if (!envelope.calendarPaths.includes(target.calendarId)) {
-    throw new Error("That calendar is not among the source's connected ones.")
+    throw new Error(i18next.t("calendar.errors.calendarNotConnected"))
   }
   const rows = await executor.select<{ ical: string | null }>(
     "SELECT ical FROM calendar_events WHERE source_id = $1 AND calendar_id = $2 AND uid = $3",
@@ -286,14 +281,11 @@ async function writeBackCaldav(
   )
   const stored = rows[0]?.ical
   if (!stored) {
-    throw new Error("The event resource is not cached locally anymore.")
+    throw new Error(i18next.t("calendar.errors.resourceGone"))
   }
-  const ical = await writeBackCaldavAttendee(
-    stored,
-    attendeeEmail,
-    partstat,
-    { recurrenceId: scope === "occurrence" ? recurrenceId : null }
-  )
+  const ical = await writeBackCaldavAttendee(stored, attendeeEmail, partstat, {
+    recurrenceId: scope === "occurrence" ? recurrenceId : null,
+  })
   await putCaldavEvent(
     {
       serverUrl: envelope.serverUrl,
@@ -446,9 +438,7 @@ export async function respondToInvite(
         reply: {
           status: "failed",
           reason: "no-organizer",
-          message:
-            "The invitation carries no organizer address — the answer " +
-            "was recorded on your calendar but could not be mailed.",
+          message: i18next.t("calendar.errors.noOrganizer"),
         },
       }
     }
@@ -482,16 +472,14 @@ async function writeBackPerFamily(
       return {
         status: "failed",
         reason: "no-source",
-        message: "The calendar source is not connected anymore.",
+        message: i18next.t("calendar.errors.rsvpSourceGone"),
       }
     }
     if (!useOnlineStore.getState().online) {
       return {
         status: "failed",
         reason: "offline",
-        message:
-          "You're offline — the calendar was not updated. " +
-          "Reconnect and answer again to sync the response.",
+        message: i18next.t("calendar.errors.rsvpOffline"),
       }
     }
     if (source.provider === "microsoft") {
@@ -520,7 +508,7 @@ async function writeBackPerFamily(
       return {
         status: "failed",
         reason: result.reason,
-        message: result.message ?? "Google rejected the response.",
+        message: result.message ?? i18next.t("calendar.errors.googleRejected"),
       }
     }
     const account = await lookupAccount(executor, accountId)

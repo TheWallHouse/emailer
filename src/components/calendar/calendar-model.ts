@@ -13,6 +13,7 @@ import {
 } from "date-fns"
 import { fromUnixTime } from "date-fns"
 
+import { i18next } from "@/i18n"
 import type { CalendarEvent } from "@/services/calendar/events"
 
 /**
@@ -107,10 +108,7 @@ export interface GridRange {
  * single focus day. The end is exclusive so the query range is a clean
  * [start, end).
  */
-export function gridRangeFor(
-  focus: Date,
-  unit: CalendarViewUnit
-): GridRange {
+export function gridRangeFor(focus: Date, unit: CalendarViewUnit): GridRange {
   if (unit === "day") {
     const start = startOfDay(focus)
     return { start, end: addDays(start, 1), days: [start] }
@@ -133,18 +131,29 @@ export function shiftFocus(
   unit: CalendarViewUnit,
   delta: 1 | -1
 ): Date {
-  if (unit === "month") return delta === 1 ? addMonths(focus, 1) : subMonths(focus, 1)
-  if (unit === "week") return delta === 1 ? addWeeks(focus, 1) : subWeeks(focus, 1)
+  if (unit === "month")
+    return delta === 1 ? addMonths(focus, 1) : subMonths(focus, 1)
+  if (unit === "week")
+    return delta === 1 ? addWeeks(focus, 1) : subWeeks(focus, 1)
   return addDays(focus, delta)
 }
 
 /** Header label for the visible period. */
 export function periodLabel(focus: Date, unit: CalendarViewUnit): string {
-  if (unit === "month") return format(focus, "MMMM yyyy")
-  if (unit === "day") return format(focus, "EEEE, MMMM d, yyyy")
-  // Week: "Sep 7 – 13, 2026" via the exclusive end's last covered day.
+  // Localized date-fns patterns (calendar.formats.*); the date-fns default
+  // locale follows the interface language, so names come out translated.
+  if (unit === "month")
+    return format(focus, i18next.t("calendar.formats.month"))
+  if (unit === "day") return format(focus, i18next.t("calendar.formats.day"))
+  // Week: "Sep 7 – Sep 13, 2026" via the exclusive end's last covered day.
   const start = startOfWeek(focus)
-  return `${format(start, "MMM d")} – ${format(subDays(addDays(start, 7), 1), "MMM d, yyyy")}`
+  return i18next.t("calendar.formats.weekRange", {
+    start: format(start, i18next.t("calendar.formats.weekStart")),
+    end: format(
+      subDays(addDays(start, 7), 1),
+      i18next.t("calendar.formats.weekEnd")
+    ),
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -174,7 +183,9 @@ export function eventDayKeys(event: CalendarEvent): string[] {
     return keys
   }
   let day = startOfDay(fromUnixTime(event.startAt))
-  const lastDay = startOfDay(fromUnixTime(Math.max(event.endAt - 1, event.startAt)))
+  const lastDay = startOfDay(
+    fromUnixTime(Math.max(event.endAt - 1, event.startAt))
+  )
   while (day <= lastDay && keys.length < 62) {
     keys.push(localDayKey(day))
     day = addDays(day, 1)
@@ -218,10 +229,9 @@ export function packLanes<T>(
   startOf: (item: T) => number,
   endOf: (item: T) => number
 ): LaidOutEvent<T>[] {
-  const ordered = [...items].sort((a, b) =>
-    startOf(a) !== startOf(b)
-      ? startOf(a) - startOf(b)
-      : endOf(b) - endOf(a) // longer first on ties
+  const ordered = [...items].sort(
+    (a, b) =>
+      startOf(a) !== startOf(b) ? startOf(a) - startOf(b) : endOf(b) - endOf(a) // longer first on ties
   )
   const laneEnds: number[] = []
   const laid: LaidOutEvent<T>[] = []

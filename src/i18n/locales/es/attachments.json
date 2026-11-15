@@ -1,0 +1,59 @@
+{
+  "browser": {
+    "backToMailbox": "Volver al correo",
+    "back": "Volver",
+    "presentation": "Presentación",
+    "gridView": "Vista de cuadrícula",
+    "listView": "Vista de lista",
+    "search": "Buscar adjuntos",
+    "searchPlaceholder": "Buscar por nombre de archivo",
+    "filterByType": "Filtrar por tipo",
+    "empty": "Aún no hay adjuntos",
+    "emptyHint": "Los adjuntos del correo de esta cuenta aparecen aquí automáticamente.",
+    "noMatches": "Ningún adjunto coincide con «{{query}}»",
+    "noMatchesHint": "La búsqueda encuentra nombres de archivo; prueba con otro término o tipo de archivo."
+  },
+  "categories": {
+    "all": "Todos",
+    "images": "Imágenes",
+    "pdfs": "PDF",
+    "documents": "Documentos",
+    "spreadsheets": "Hojas de cálculo",
+    "archives": "Archivos comprimidos",
+    "other": "Otros"
+  },
+  "entry": {
+    "unknownSender": "Remitente desconocido",
+    "unnamed": "(sin nombre)",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "showInMessage": "Mostrar en el mensaje"
+  },
+  "preview": {
+    "loading": "Cargando vista previa…",
+    "failed": "No se ha podido cargar la vista previa de este archivo.",
+    "label": "Vista previa de {{name}}",
+    "attachment": "adjunto",
+    "unsupported": "Este tipo de archivo no tiene vista previa: usa Guardar para conservar una copia."
+  },
+  "toasts": {
+    "saved": "{{name}} guardado en {{path}}",
+    "attachment": "Adjunto",
+    "saveFailed": "No se ha podido guardar {{name}}.",
+    "saveFailedUnnamed": "No se ha podido guardar este adjunto."
+  },
+  "openConfirm": {
+    "thisFile": "Este archivo",
+    "blockTitle": "Adjunto peligroso",
+    "cautionTitle": "Posible documento con macros",
+    "maliciousTitle": "Malware detectado",
+    "suspiciousTitle": "Adjunto sospechoso",
+    "blockMessage": "{{name}} es un archivo ejecutable o un script. Los adjuntos maliciosos suelen usar este formato para ejecutar código en tu equipo. Ábrelo solo si confías en el remitente y esperabas este archivo.",
+    "cautionMessage": "{{name}} es un documento de Office con macros. Sus macros pueden ejecutar código: ábrelo solo si confías en el remitente y esperabas este archivo.",
+    "maliciousMessage": "Se ha BLOQUEADO la apertura de {{name}}: el análisis de malware indica que este archivo es malicioso{{report}}. Abrirlo podría dañar este equipo.",
+    "suspiciousMessage": "El análisis de malware ha marcado {{name}} como sospechoso{{report}}. Ábrelo solo si confías en el remitente.",
+    "report": " ({{flagged}} de {{total}} motores lo han marcado)",
+    "openAnyway": "Abrir de todos modos",
+    "cancel": "Cancelar"
+  }
+}

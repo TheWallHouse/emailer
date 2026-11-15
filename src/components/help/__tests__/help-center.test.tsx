@@ -57,9 +57,9 @@ describe("HelpCenter", () => {
     ]) {
       expect(screen.getByText(category)).toBeTruthy()
     }
-    expect(
-      screen.getByTestId("help-result-count").textContent
-    ).toContain(`${HELP_CARDS.length} articles`)
+    expect(screen.getByTestId("help-result-count").textContent).toContain(
+      `${HELP_CARDS.length} articles`
+    )
     // Every card title is present, collapsed by default.
     expect(screen.getByText("Snooze a thread")).toBeTruthy()
     expect(screen.queryByTestId("help-card-body-snooze")).toBeNull()
@@ -73,9 +73,9 @@ describe("HelpCenter", () => {
 
     fireEvent.change(input, { target: { value: "snooze" } })
 
-    expect(
-      screen.getByTestId("help-result-count").textContent
-    ).toContain(`3 of ${HELP_CARDS.length} articles match`)
+    expect(screen.getByTestId("help-result-count").textContent).toContain(
+      `3 of ${HELP_CARDS.length} articles match`
+    )
     expect(screen.getByText("Snooze a thread")).toBeTruthy()
     expect(screen.getByText("Keyboard shortcuts")).toBeTruthy()
     expect(screen.queryByText("Encrypt with PGP")).toBeNull()
@@ -109,7 +109,9 @@ describe("HelpCenter", () => {
     fireEvent.click(toggle)
     expect(screen.getByTestId("help-card-body-snooze")).toBeTruthy()
     expect(
-      screen.getByTestId("help-card-toggle-snooze").getAttribute("aria-expanded")
+      screen
+        .getByTestId("help-card-toggle-snooze")
+        .getAttribute("aria-expanded")
     ).toBe("true")
     fireEvent.click(screen.getByTestId("help-card-toggle-snooze"))
     expect(screen.queryByTestId("help-card-body-snooze")).toBeNull()

@@ -1,4 +1,5 @@
 import { decryptCredentials, encryptCredentials } from "../crypto/credentials"
+import { i18next } from "@/i18n"
 import { getAccount } from "../db/accounts"
 import type { SqlExecutor } from "../db/executor"
 import { getExecutor } from "../db/executor"
@@ -47,7 +48,7 @@ export const MICROSOFT_CALENDAR_CONNECT_SCOPES = MICROSOFT_CALENDAR_SCOPES
 /** The user closed/cancelled the consent dialog — a quiet no-op. */
 export class MicrosoftCalendarConnectCancelledError extends Error {
   constructor() {
-    super("Calendar sign-in was cancelled.")
+    super(i18next.t("calendar.connect.cancelled"))
     this.name = "MicrosoftCalendarConnectCancelledError"
   }
 }
@@ -78,11 +79,7 @@ export class MicrosoftCalendarConsentDeniedError extends Error {
  */
 export class MicrosoftCalendarScopeNotGrantedError extends Error {
   constructor() {
-    super(
-      "Microsoft did not grant calendar access for this account. If it is " +
-        "a work or school account, calendar access may be disabled by " +
-        "administrator policy."
-    )
+    super(i18next.t("calendar.connect.microsoftScopeNotGranted"))
     this.name = "MicrosoftCalendarScopeNotGrantedError"
   }
 }
@@ -141,13 +138,13 @@ export async function connectMicrosoftCalendar(
   }
   if (account.type !== "microsoft") {
     throw new MicrosoftCalendarConnectError(
-      "Calendar sources connect from a Microsoft 365 account"
+      i18next.t("calendar.connect.needsMicrosoft365")
     )
   }
   const clientId = options.clientId ?? account.oauth_client_id
   if (!clientId) {
     throw new MicrosoftCalendarConnectError(
-      "The connected Microsoft account has no OAuth client id configured"
+      i18next.t("calendar.connect.microsoftNoClientId")
     )
   }
 
@@ -176,7 +173,7 @@ export async function connectMicrosoftCalendar(
       }
     }
     throw new MicrosoftCalendarConnectError(
-      "Connecting the calendar failed. Please try again.",
+      i18next.t("calendar.connect.failed"),
       { cause: error }
     )
   }
@@ -193,7 +190,7 @@ export async function connectMicrosoftCalendar(
     )
   } catch (error) {
     throw new MicrosoftCalendarConnectError(
-      "Microsoft did not complete the calendar sign-in. Please try again.",
+      i18next.t("calendar.connect.microsoftIncomplete"),
       { cause: error }
     )
   }
@@ -219,7 +216,7 @@ export async function connectMicrosoftCalendar(
     )
   } catch (error) {
     throw new MicrosoftCalendarConnectError(
-      "Connected, but the calendar list could not be read. Please try again.",
+      i18next.t("calendar.connect.listFailed"),
       { cause: error }
     )
   }
@@ -272,12 +269,7 @@ export async function testMicrosoftStoredConnection(
   | {
       ok: false
       provider: "microsoft"
-      reason:
-        | "auth"
-        | "no-credentials"
-        | "api"
-        | "config"
-        | "network"
+      reason: "auth" | "no-credentials" | "api" | "config" | "network"
       detail?: string
     }
 > {

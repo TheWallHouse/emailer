@@ -257,6 +257,7 @@ export async function invoke<T = unknown>(
   // false (the settings UI hides tray controls) and the live-value pushes
   // resolve as no-ops.
   if (command === "set_close_action") return null as T
+  if (command === "set_tray_labels") return null as T
   if (command === "get_close_action") return "quit" as T
   if (command === "tray_available") return false as T
   if (command === "mailto_default_state") {

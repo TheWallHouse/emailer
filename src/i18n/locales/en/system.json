@@ -1,0 +1,29 @@
+{
+  "app": {
+    "loading": "Loading…",
+    "initFailed": "Failed to initialize the local database. {{error}}"
+  },
+  "ui": {
+    "close": "Close",
+    "more": "More",
+    "commandPalette": "Command Palette",
+    "commandPaletteDescription": "Search for a command to run..."
+  },
+  "notifications": {
+    "newMail": "New mail",
+    "newMailBody_one": "{{count}} new message for {{email}}",
+    "newMailBody_other": "{{count}} new messages for {{email}}"
+  },
+  "dialogs": {
+    "chooseExportFolder": "Choose export folder",
+    "chooseImportFiles": "Choose email files to import",
+    "emailFiles": "Email files",
+    "chooseBackupDestination": "Choose where to save your backup",
+    "chooseBackupFile": "Choose a backup file",
+    "backupFiles": "Emailer backups"
+  },
+  "windows": {
+    "print": "Print",
+    "composer": "Composer"
+  }
+}

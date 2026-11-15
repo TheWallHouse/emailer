@@ -15,5 +15,11 @@
     "label": "Filter threads",
     "allMail": "All mail",
     "unread": "Unread"
+  },
+  "tray": {
+    "open": "Open Emailer",
+    "compose": "Compose",
+    "quit": "Quit",
+    "unreadTooltip": "Emailer — {{n}} unread"
   }
 }

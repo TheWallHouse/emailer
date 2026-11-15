@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import {
-  HELP_CARDS,
-  HELP_CATEGORIES,
-  SHORTCUTS_CARD_ID,
-} from "../content"
+import { HELP_CARDS, HELP_CATEGORIES, SHORTCUTS_CARD_ID } from "../content"
 import { groupHelpCards, searchHelpCards, searchHelpGrouped } from "../search"
 
 /**
@@ -17,12 +13,7 @@ import { groupHelpCards, searchHelpCards, searchHelpGrouped } from "../search"
 
 /** Lowercased haystack of everything a card is findable by. */
 function cardText(card: (typeof HELP_CARDS)[number]): string {
-  return [
-    card.title,
-    card.category,
-    ...card.keywords,
-    ...card.body,
-  ]
+  return [card.title, card.category, ...card.keywords, ...card.body]
     .join(" ")
     .toLowerCase()
 }
@@ -57,9 +48,7 @@ describe("help catalog integrity", () => {
     for (const category of HELP_CATEGORIES) {
       expect(categories.has(category)).toBe(true)
     }
-    expect(
-      HELP_CARDS.some((card) => card.id === SHORTCUTS_CARD_ID)
-    ).toBe(true)
+    expect(HELP_CARDS.some((card) => card.id === SHORTCUTS_CARD_ID)).toBe(true)
   })
 
   it("every parity-round-2 surface is reachable by its keywords, best hit first", () => {

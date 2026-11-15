@@ -67,7 +67,7 @@ import {
   onMailtoLink,
   parseMailto,
 } from "@/services/desktop/mailto"
-import { onComposeRequest } from "@/services/desktop/tray"
+import { onComposeRequest, syncTrayLabels } from "@/services/desktop/tray"
 import { installThreadSyncBridge } from "@/services/desktop/thread-sync-bridge"
 import {
   applyBootPreferences,
@@ -354,6 +354,9 @@ export function MailShell({
       useUiStore.getState().setAssistantOpen(false)
     }
   }, [narrowWindow])
+
+  // Tray menu labels follow the interface language (pushed to Rust).
+  useEffect(() => syncTrayLabels(), [])
 
   // Tray menu (1.2): the tray's Compose item emits tray-compose from Rust
   // (which first surfaces the window); mirror the sidebar Compose click.

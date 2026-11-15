@@ -1,0 +1,32 @@
+{
+  "categories": {
+    "gettingStarted": "Getting started",
+    "reading": "Reading & organizing",
+    "composing": "Composing",
+    "ai": "AI assistance",
+    "security": "Security & privacy",
+    "desktop": "Desktop integration"
+  },
+  "search": {
+    "label": "Search help",
+    "placeholder": "Search help — try “snooze”…"
+  },
+  "count": {
+    "matching": "{{matches}} of {{total}} articles match “{{query}}”",
+    "browsing": "{{total}} articles — everything is stored in the app, no network needed"
+  },
+  "empty": {
+    "title": "No matching help articles",
+    "hint": "Try a shorter keyword, or clear the search to browse every article by category.",
+    "clear": "Clear search"
+  },
+  "section": {
+    "aria": "Help",
+    "title": "Help",
+    "description": "Search the built-in help center — bundled with the app, so it works offline."
+  },
+  "dialog": {
+    "title": "Help center",
+    "description": "Everything Emailer can do, answered locally — nothing here needs the network."
+  }
+}

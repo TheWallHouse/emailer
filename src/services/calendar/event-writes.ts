@@ -1,3 +1,4 @@
+import { i18next } from "@/i18n"
 import type { FetchImpl } from "../email/token-manager"
 import { getAccount } from "../db/accounts"
 import type { SqlExecutor } from "../db/executor"
@@ -99,10 +100,11 @@ export type EventWriteFailureReason =
   /** The provider rejected the write, or transport failed mid-write. */
   | "failed"
 
-/** The user-facing offline line (kept in one place for tests). */
-export const OFFLINE_WRITE_MESSAGE =
-  "You're offline — the change could not be saved to the server. " +
-  "Reconnect and try again."
+/** The user-facing offline line (kept in one place for tests; a getter so
+ * it follows the interface language). */
+export function offlineWriteMessage(): string {
+  return i18next.t("calendar.errors.offlineWrite")
+}
 
 /** Every write op answers this; failures never throw. */
 export type EventWriteResult =
@@ -174,7 +176,7 @@ function messageOf(error: unknown): string {
 
 /** The offline gate — checked before ANY network attempt (module docs). */
 function offlineFailure(): EventWriteResult {
-  return { ok: false, reason: "offline", message: OFFLINE_WRITE_MESSAGE }
+  return { ok: false, reason: "offline", message: offlineWriteMessage() }
 }
 
 // ---------------------------------------------------------------------------
@@ -247,9 +249,7 @@ export function buildGoogleEventPayload(fields: {
         ? { useDefault: true }
         : {
             useDefault: false,
-            overrides: [
-              { method: "popup", minutes: fields.reminderMinutes },
-            ],
+            overrides: [{ method: "popup", minutes: fields.reminderMinutes }],
           }
   }
   return payload
@@ -281,9 +281,7 @@ async function googleTokensFor(
     return { tokens: await createCalendarTokens(source, fetchImpl) }
   } catch (error) {
     return {
-      message:
-        messageOf(error) ||
-        "The stored Google connection is unusable; re-connect the calendar source",
+      message: messageOf(error) || i18next.t("calendar.errors.googleUnusable"),
     }
   }
 }
@@ -297,17 +295,12 @@ async function microsoftTokensFor(
 ): Promise<{ tokens: MicrosoftCalendarTokens } | { message: string }> {
   try {
     return {
-      tokens: await createMicrosoftCalendarTokens(
-        executor,
-        source,
-        fetchImpl
-      ),
+      tokens: await createMicrosoftCalendarTokens(executor, source, fetchImpl),
     }
   } catch (error) {
     return {
       message:
-        messageOf(error) ||
-        "The stored Microsoft connection is unusable; re-connect the calendar source",
+        messageOf(error) || i18next.t("calendar.errors.microsoftUnusable"),
     }
   }
 }
@@ -321,7 +314,7 @@ async function loadSource(
     return {
       ok: false,
       reason: "no-source",
-      message: "That calendar source is not connected anymore.",
+      message: i18next.t("calendar.errors.sourceGone"),
     }
   }
   return source
@@ -458,7 +451,7 @@ export async function createEvent(
         return {
           ok: false,
           reason: "failed",
-          message: "Google accepted the event but returned no id.",
+          message: i18next.t("calendar.errors.googleNoId"),
         }
       }
       // Server write confirmed — now cache the row (and only now).
@@ -470,7 +463,7 @@ export async function createEvent(
         return {
           ok: false,
           reason: "failed",
-          message: "Google returned an event payload that could not be cached.",
+          message: i18next.t("calendar.errors.googleUncacheable"),
         }
       }
       return { ok: true, event: inputToCalendarEvent(mapped.input) }
@@ -492,20 +485,22 @@ export async function createEvent(
         return {
           ok: false,
           reason: "failed",
-          message: "Microsoft accepted the event but returned no id.",
+          message: i18next.t("calendar.errors.microsoftNoId"),
         }
       }
       // Server write confirmed — now cache the row (and only now).
-      await upsertMicrosoftEventsFromApi(executor, source.id, input.calendarId, [
-        created,
-      ])
+      await upsertMicrosoftEventsFromApi(
+        executor,
+        source.id,
+        input.calendarId,
+        [created]
+      )
       const mapped = mapMicrosoftEvent(source.id, input.calendarId, created)
       if (!mapped || mapped.isTombstone) {
         return {
           ok: false,
           reason: "failed",
-          message:
-            "Microsoft returned an event payload that could not be cached.",
+          message: i18next.t("calendar.errors.microsoftUncacheable"),
         }
       }
       return { ok: true, event: inputToCalendarEvent(mapped.input) }
@@ -517,15 +512,14 @@ export async function createEvent(
       return {
         ok: false,
         reason: "config",
-        message:
-          "No stored CalDAV connection details for this source; re-connect it",
+        message: i18next.t("calendar.errors.caldavNoConfig"),
       }
     }
     if (!envelope.calendarPaths.includes(input.calendarId)) {
       return {
         ok: false,
         reason: "config",
-        message: "That calendar is not among the source's connected ones.",
+        message: i18next.t("calendar.errors.calendarNotConnected"),
       }
     }
     const uid = crypto.randomUUID()
@@ -550,7 +544,7 @@ export async function createEvent(
       return {
         ok: false,
         reason: "failed",
-        message: "The written event could not be cached locally.",
+        message: i18next.t("calendar.errors.notCached"),
       }
     }
     await upsertEvents(executor, inputs)
@@ -599,7 +593,7 @@ export async function updateEvent(
         return {
           ok: false,
           reason: "failed",
-          message: "Google did not return the updated event.",
+          message: i18next.t("calendar.errors.googleNoUpdate"),
         }
       }
       await upsertEventsFromApi(executor, source.id, existing.calendarId, [
@@ -610,7 +604,7 @@ export async function updateEvent(
         return {
           ok: false,
           reason: "failed",
-          message: "Google returned an event payload that could not be cached.",
+          message: i18next.t("calendar.errors.googleUncacheable"),
         }
       }
       return { ok: true, event: inputToCalendarEvent(mapped.input) }
@@ -633,7 +627,7 @@ export async function updateEvent(
         return {
           ok: false,
           reason: "failed",
-          message: "Microsoft did not return the updated event.",
+          message: i18next.t("calendar.errors.microsoftNoUpdate"),
         }
       }
       await upsertMicrosoftEventsFromApi(
@@ -642,17 +636,12 @@ export async function updateEvent(
         existing.calendarId,
         [updated]
       )
-      const mapped = mapMicrosoftEvent(
-        source.id,
-        existing.calendarId,
-        updated
-      )
+      const mapped = mapMicrosoftEvent(source.id, existing.calendarId, updated)
       if (!mapped || mapped.isTombstone) {
         return {
           ok: false,
           reason: "failed",
-          message:
-            "Microsoft returned an event payload that could not be cached.",
+          message: i18next.t("calendar.errors.microsoftUncacheable"),
         }
       }
       return { ok: true, event: inputToCalendarEvent(mapped.input) }
@@ -666,8 +655,7 @@ export async function updateEvent(
       return {
         ok: false,
         reason: "config",
-        message:
-          "No stored CalDAV connection details for this source; re-connect it",
+        message: i18next.t("calendar.errors.caldavNoConfig"),
       }
     }
     const blobRows = await executor.select<{ ical: string | null }>(
@@ -680,14 +668,20 @@ export async function updateEvent(
       startAt: patch.startAt ?? existing.startAt,
       endAt: patch.endAt ?? existing.endAt,
       allDay: patch.allDay ?? existing.allDay,
-      location: patch.location !== undefined ? patch.location : existing.location,
+      location:
+        patch.location !== undefined ? patch.location : existing.location,
       description:
-        patch.description !== undefined ? patch.description : existing.description,
+        patch.description !== undefined
+          ? patch.description
+          : existing.description,
       guests: patch.guests ?? stored.guests,
       organizerEmail: stored.organizerEmail,
     }
     const ical = buildEventIcal(existing.uid, merged)
-    const resourcePath = caldavEventResourcePath(existing.calendarId, existing.uid)
+    const resourcePath = caldavEventResourcePath(
+      existing.calendarId,
+      existing.uid
+    )
     await putCaldavEvent(
       {
         serverUrl: envelope.serverUrl,
@@ -707,7 +701,7 @@ export async function updateEvent(
       return {
         ok: false,
         reason: "failed",
-        message: "The written event could not be cached locally.",
+        message: i18next.t("calendar.errors.notCached"),
       }
     }
     await upsertEvents(executor, inputs)
@@ -733,7 +727,7 @@ export async function deleteEvent(
   options: EventWriteOptions = {}
 ): Promise<EventDeleteResult> {
   if (!useOnlineStore.getState().online) {
-    return { ok: false, reason: "offline", message: OFFLINE_WRITE_MESSAGE }
+    return { ok: false, reason: "offline", message: offlineWriteMessage() }
   }
   const source = await loadSource(executor, existing.sourceId)
   if (!("provider" in source)) return source
@@ -768,8 +762,7 @@ export async function deleteEvent(
         return {
           ok: false,
           reason: "config",
-          message:
-            "No stored CalDAV connection details for this source; re-connect it",
+          message: i18next.t("calendar.errors.caldavNoConfig"),
         }
       }
       await deleteCaldavEvent(
@@ -917,8 +910,7 @@ export async function respondToGoogleInvitation(
     return {
       ok: false,
       reason: "no-event",
-      message:
-        "This event is not on the connected calendar yet — refresh the calendar and try again.",
+      message: i18next.t("calendar.errors.eventNotSynced"),
     }
   }
 
@@ -948,15 +940,14 @@ export async function respondToGoogleInvitation(
       return {
         ok: false,
         reason: "no-event",
-        message: "The event could not be found on Google Calendar anymore.",
+        message: i18next.t("calendar.errors.googleEventGone"),
       }
     }
     const attendees = [...(current.attendees ?? [])]
     let index = -1
     if (userEmail) {
       index = attendees.findIndex(
-        (attendee) =>
-          attendee.email.toLowerCase() === userEmail?.toLowerCase()
+        (attendee) => attendee.email.toLowerCase() === userEmail?.toLowerCase()
       )
     }
     if (index < 0 && attendees.length === 1) index = 0
@@ -964,11 +955,13 @@ export async function respondToGoogleInvitation(
       return {
         ok: false,
         reason: "unsupported",
-        message:
-          "Could not tell which attendee on this invitation is you; reply by email instead.",
+        message: i18next.t("calendar.errors.attendeeUnknown"),
       }
     }
-    attendees[index] = { ...attendees[index], responseStatus: RESPONSE_STATUS[response] }
+    attendees[index] = {
+      ...attendees[index],
+      responseStatus: RESPONSE_STATUS[response],
+    }
     const updated = await updateGoogleEvent(
       auth.tokens,
       row.calendar_id,

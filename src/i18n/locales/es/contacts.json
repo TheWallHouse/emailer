@@ -1,0 +1,42 @@
+{
+  "browser": {
+    "backToMailbox": "Volver al correo",
+    "back": "Volver",
+    "search": "Buscar contactos",
+    "searchPlaceholder": "Buscar por nombre o correo",
+    "empty": "Aún no hay contactos",
+    "emptyHint": "Las personas con las que te escribes aparecen aquí automáticamente.",
+    "noMatches": "Ningún contacto coincide con «{{query}}»",
+    "noMatchesHint": "La búsqueda encuentra nombres y direcciones de correo parciales.",
+    "select": "Selecciona un contacto",
+    "selectHint": "Elige a alguien de la lista para ver sus datos."
+  },
+  "detail": {
+    "compose": "Redactar a {{name}}",
+    "delete": "Eliminar el contacto {{name}}",
+    "knownTo": "Conocido por {{email}}",
+    "displayName": "Nombre visible",
+    "saveName": "Guardar nombre",
+    "cancelNameEdit": "Cancelar la edición del nombre",
+    "rename": "Cambiar nombre",
+    "renameLabel": "Cambiar el nombre de {{name}}",
+    "correspondence": "Correspondencia",
+    "messageCount_one": "{{count}} mensaje",
+    "messageCount_other": "{{count}} mensajes",
+    "lastContacted": "Último contacto",
+    "never": "Nunca",
+    "notes": "Notas",
+    "contactNotes": "Notas del contacto",
+    "notesPlaceholder": "Añade una nota privada sobre este contacto…",
+    "saveNotes": "Guardar notas",
+    "recentThreads": "Conversaciones recientes",
+    "noRecentThreads": "No hay conversaciones recientes con este contacto."
+  },
+  "delete": {
+    "title": "Eliminar contacto",
+    "description": "¿Eliminar a <name>{{name}}</name>? Solo se quita la entrada de la libreta de direcciones: los mensajes no se ven afectados y el contacto vuelve a aparecer automáticamente si os escribís de nuevo.",
+    "cancel": "Cancelar",
+    "confirm": "Eliminar",
+    "confirmLabel": "Confirmar la eliminación de {{name}}"
+  }
+}

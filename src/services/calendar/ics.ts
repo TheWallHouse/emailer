@@ -1,5 +1,7 @@
 import { format } from "date-fns"
 
+import { i18next } from "@/i18n"
+
 /**
  * Hand-rolled iCalendar (RFC 5545) parser for .ics attachments and
  * text/calendar parts (task 5.5, design D5).
@@ -252,14 +254,7 @@ export function parseIcsDateValue(
   const dateOnly = /^(\d{4})(\d{2})(\d{2})$/.exec(raw)
   if (dateOnly) {
     const [, year, month, day] = dateOnly
-    const date = utcDate(
-      Number(year),
-      Number(month),
-      Number(day),
-      0,
-      0,
-      0
-    )
+    const date = utcDate(Number(year), Number(month), Number(day), 0, 0, 0)
     if (!date) return null // impossible calendar values never roll over
     return {
       raw,
@@ -435,7 +430,7 @@ export function parseIcsCalendar(text: string): IcsParseResult {
     return {
       ok: false,
       reason: "empty",
-      message: "The attachment contains no iCalendar content.",
+      message: i18next.t("calendar.icsParse.empty"),
     }
   }
 
@@ -464,7 +459,8 @@ export function parseIcsCalendar(text: string): IcsParseResult {
       const component = property.value.trim().toUpperCase()
       stack.push(component)
       if (component === "VCALENDAR") {
-        if (sawVcalendar) addWarning("Multiple VCALENDAR blocks; using the first.")
+        if (sawVcalendar)
+          addWarning(i18next.t("calendar.icsParse.multipleCalendars"))
         sawVcalendar = true
       } else if (component === "VEVENT" && stackTop(stack, 1) === "VCALENDAR") {
         currentEvent = {
@@ -524,8 +520,7 @@ export function parseIcsCalendar(text: string): IcsParseResult {
     return {
       ok: false,
       reason: "not-icalendar",
-      message:
-        "The attachment does not look like an iCalendar (.ics) file — no VCALENDAR block was found.",
+      message: i18next.t("calendar.icsParse.notIcalendar"),
     }
   }
 
@@ -557,7 +552,9 @@ function applyEventProperty(
         event.recurrenceId = parsed
       } else {
         addWarning(
-          `Could not parse the RECURRENCE-ID ("${property.value.trim()}").`
+          i18next.t("calendar.icsParse.badRecurrenceId", {
+            value: property.value.trim(),
+          })
         )
       }
       break
@@ -583,7 +580,9 @@ function applyEventProperty(
         event.start = parsed
       } else {
         addWarning(
-          `Could not parse the event start time ("${property.value.trim()}").`
+          i18next.t("calendar.icsParse.badStart", {
+            value: property.value.trim(),
+          })
         )
       }
       break
@@ -594,7 +593,9 @@ function applyEventProperty(
         event.end = parsed
       } else {
         addWarning(
-          `Could not parse the event end time ("${property.value.trim()}").`
+          i18next.t("calendar.icsParse.badEnd", {
+            value: property.value.trim(),
+          })
         )
       }
       break
@@ -628,9 +629,12 @@ export function isInvitationRequest(calendar: IcsCalendar): boolean {
 // Display helpers (describeIcsEvent* — task 5.5)
 // ---------------------------------------------------------------------------
 
-const DAY_DATE_FORMAT = "EEE, MMM d, yyyy"
-const SHORT_DATE_FORMAT = "MMM d, yyyy"
-const TIME_FORMAT = "h:mm a"
+/** Localized date-fns patterns, read per call so they follow the
+ * interface language (English: "EEE, MMM d, yyyy" / "MMM d, yyyy" /
+ * "h:mm a"). */
+const dayDateFormat = () => i18next.t("calendar.formats.fullDate")
+const shortDateFormat = () => i18next.t("calendar.formats.shortDate")
+const timeFormat = () => i18next.t("sidebar.dates.time")
 
 /** Format an all-day date from its UTC components (timezone-stable). */
 function formatAllDayDate(date: Date): string {
@@ -639,7 +643,15 @@ function formatAllDayDate(date: Date): string {
     date.getUTCMonth(),
     date.getUTCDate()
   )
-  return format(localView, DAY_DATE_FORMAT)
+  return format(localView, dayDateFormat())
+}
+
+/** "<short date>, <time>" for a timed instant. */
+function formatDateTime(date: Date): string {
+  return i18next.t("calendar.icsTime.dateTime", {
+    date: format(date, shortDateFormat()),
+    time: format(date, timeFormat()),
+  })
 }
 
 /**
@@ -659,30 +671,32 @@ export function describeIcsEventTime(
   if (start.allDay) {
     const startLabel = formatAllDayDate(start.date)
     const endDate = end?.date ?? null
-    if (endDate === null) return `${startLabel} (all-day)`
+    const single = i18next.t("calendar.icsTime.allDay", { date: startLabel })
+    if (endDate === null) return single
     const spanDays = Math.round(
       (endDate.getTime() - start.date.getTime()) / 86_400_000
     )
-    if (spanDays <= 1) return `${startLabel} (all-day)`
-    return `${startLabel} – ${formatAllDayDate(endDate)} (all-day)`
+    if (spanDays <= 1) return single
+    return i18next.t("calendar.icsTime.allDaySpan", {
+      start: startLabel,
+      end: formatAllDayDate(endDate),
+    })
   }
 
   const tzNote = start.tzid ? ` (${start.tzid})` : ""
-  const startDateTime = format(
-    start.date,
-    `${SHORT_DATE_FORMAT}, ${TIME_FORMAT}`
-  )
+  const startDateTime = formatDateTime(start.date)
   if (!end?.date) return `${startDateTime}${tzNote}`
   if (isSameLocalDay(start.date, end.date)) {
-    return `${format(start.date, SHORT_DATE_FORMAT)} ${format(
-      start.date,
-      TIME_FORMAT
-    )} – ${format(end.date, TIME_FORMAT)}${tzNote}`
+    return `${i18next.t("calendar.icsTime.sameDay", {
+      date: format(start.date, shortDateFormat()),
+      start: format(start.date, timeFormat()),
+      end: format(end.date, timeFormat()),
+    })}${tzNote}`
   }
-  return `${startDateTime} – ${format(
-    end.date,
-    `${SHORT_DATE_FORMAT}, ${TIME_FORMAT}`
-  )}${tzNote}`
+  return `${i18next.t("calendar.icsTime.span", {
+    start: startDateTime,
+    end: formatDateTime(end.date),
+  })}${tzNote}`
 }
 
 function isSameLocalDay(a: Date, b: Date): boolean {

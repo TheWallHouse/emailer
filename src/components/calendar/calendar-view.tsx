@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   ArrowLeft,
   CalendarDays,
@@ -20,6 +21,7 @@ import {
   startOfDay,
 } from "date-fns"
 
+import { i18next } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { EmptyState } from "@/components/email/empty-state"
 import { Badge } from "@/components/ui/badge"
@@ -29,10 +31,7 @@ import type { CalendarEvent } from "@/services/calendar/events"
 import { getCalendarEvent } from "@/services/calendar/events"
 import { deleteEvent } from "@/services/calendar/event-writes"
 import { extractJoinLink } from "@/services/calendar/join-links"
-import {
-  rsvpAnswerBadgeClass,
-  rsvpAnswerLabel,
-} from "@/services/calendar/rsvp"
+import { rsvpAnswerBadgeClass, rsvpAnswerLabel } from "@/services/calendar/rsvp"
 import { useOnlineStore } from "@/stores/online-store"
 import { useUiStore } from "@/stores/ui-store"
 import { EventDialog } from "./event-dialog"
@@ -95,6 +94,7 @@ export function CalendarView({
   onCreateEvent,
   initialFocusDate,
 }: CalendarViewProps = {}) {
+  const { t } = useTranslation()
   const [unit, setUnit] = useState<CalendarViewUnit>("month")
   const [focusDate, setFocusDate] = useState<Date>(() =>
     startOfDay(initialFocusDate ?? new Date())
@@ -105,8 +105,9 @@ export function CalendarView({
   >("idle")
   const [refreshMessage, setRefreshMessage] = useState<string | null>(null)
   /** The event dialog's current request (create slot / edit event). */
-  const [dialogRequest, setDialogRequest] =
-    useState<EventDialogRequest | null>(null)
+  const [dialogRequest, setDialogRequest] = useState<EventDialogRequest | null>(
+    null
+  )
   /** Delete-from-the-card state (dialog delete surfaces in the dialog). */
   const [deleteBusy, setDeleteBusy] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -224,7 +225,7 @@ export function CalendarView({
           setSelectedEventId(null)
           reload()
         } else {
-          setDeleteError(result.message ?? "The event could not be deleted.")
+          setDeleteError(result.message ?? t("calendar.details.deleteFailed"))
         }
       })
       .catch((error: unknown) => {
@@ -239,14 +240,14 @@ export function CalendarView({
         <Button
           variant="ghost"
           size="sm"
-          aria-label="Back to mailbox"
+          aria-label={t("calendar.view.backAria")}
           onClick={() => setView(previousView)}
         >
           <ArrowLeft />
-          Back
+          {t("calendar.view.back")}
         </Button>
         <h1 className="truncate text-xl font-bold text-foreground">
-          Calendar
+          {t("calendar.view.title")}
         </h1>
         <span
           data-testid="calendar-period-label"
@@ -261,12 +262,12 @@ export function CalendarView({
             data-testid="calendar-today"
             onClick={() => setFocusDate(startOfDay(new Date()))}
           >
-            Today
+            {t("calendar.view.today")}
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Previous"
+            aria-label={t("calendar.view.previous")}
             data-testid="calendar-prev"
             onClick={() => setFocusDate((date) => shiftFocus(date, unit, -1))}
           >
@@ -275,7 +276,7 @@ export function CalendarView({
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Next"
+            aria-label={t("calendar.view.next")}
             data-testid="calendar-next"
             onClick={() => setFocusDate((date) => shiftFocus(date, unit, 1))}
           >
@@ -283,7 +284,7 @@ export function CalendarView({
           </Button>
           <div
             role="group"
-            aria-label="Calendar view unit"
+            aria-label={t("calendar.view.unitGroupAria")}
             data-testid="calendar-unit-toggle"
             className="ml-1 flex items-center rounded-lg border bg-muted/40 p-0.5 text-xs"
           >
@@ -291,7 +292,7 @@ export function CalendarView({
               <button
                 key={option}
                 type="button"
-                aria-label={`${option} view`}
+                aria-label={t(`calendar.view.unitAria.${option}`)}
                 aria-pressed={unit === option}
                 data-testid={`calendar-unit-${option}`}
                 className={cn(
@@ -302,14 +303,14 @@ export function CalendarView({
                 )}
                 onClick={() => setUnit(option)}
               >
-                {option}
+                {t(`calendar.view.units.${option}`)}
               </button>
             ))}
           </div>
           <Button
             variant="ghost"
             size="sm"
-            aria-label="Refresh calendars"
+            aria-label={t("calendar.view.refreshAria")}
             data-testid="calendar-refresh"
             // Offline the sync cannot run: the cache keeps rendering and
             // the hint below explains (spec "Offline browsing").
@@ -322,7 +323,7 @@ export function CalendarView({
                 refreshStage === "refreshing" && "animate-spin"
               )}
             />
-            Refresh
+            {t("calendar.view.refresh")}
           </Button>
         </div>
       </div>
@@ -333,7 +334,7 @@ export function CalendarView({
           className="flex items-center gap-1.5 bg-muted/40 px-4 py-1.5 text-xs text-muted-foreground"
         >
           <WifiOff aria-hidden className="size-3.5" />
-          Offline — showing cached events. Reconnect and refresh to update.
+          {t("calendar.view.offlineHint")}
         </div>
       )}
       {refreshStage === "error" && (
@@ -343,11 +344,13 @@ export function CalendarView({
           className="flex items-start gap-2 border-b bg-destructive/10 px-4 py-2 text-xs text-destructive"
         >
           <span className="flex-1">
-            Refresh failed: {refreshMessage} Showing cached events.
+            {t("calendar.view.refreshFailed", {
+              message: refreshMessage ?? "",
+            })}
           </span>
           <button
             type="button"
-            aria-label="Dismiss refresh error"
+            aria-label={t("calendar.view.dismissRefreshError")}
             onClick={() => {
               setRefreshStage("idle")
               setRefreshMessage(null)
@@ -375,8 +378,8 @@ export function CalendarView({
       {events.length === 0 && !loading ? (
         <EmptyState
           icon={CalendarDays}
-          title="No events in this range"
-          hint="Connect a calendar source in Settings and refresh to sync events; synced ranges stay available offline."
+          title={t("calendar.view.emptyTitle")}
+          hint={t("calendar.view.emptyHint")}
         />
       ) : unit === "month" ? (
         <MonthGrid
@@ -411,26 +414,40 @@ export function CalendarView({
 // Details card
 // ---------------------------------------------------------------------------
 
-/** Human [start, end) line for the details card. */
+/** Human [start, end) line for the details card (localized patterns). */
 function formatEventRange(event: CalendarEvent): string {
+  const fullDate = i18next.t("calendar.formats.fullDate")
+  const time = i18next.t("sidebar.dates.time")
   if (event.allDay) {
     // All-day ends are EXCLUSIVE (UTC midnights) — display the last covered
     // day, the Google convention.
     const start = fromUnixTime(event.startAt)
-    const lastCovered = fromUnixTime(Math.max(event.endAt - 86400, event.startAt))
-    return (
-      format(start, "EEE, MMM d, yyyy") +
-      (event.endAt - event.startAt > 86400
-        ? ` – ${format(lastCovered, "EEE, MMM d, yyyy")} (all day)`
-        : " (all day)")
+    const lastCovered = fromUnixTime(
+      Math.max(event.endAt - 86400, event.startAt)
     )
+    return event.endAt - event.startAt > 86400
+      ? i18next.t("calendar.details.rangeAllDaySpan", {
+          start: format(start, fullDate),
+          end: format(lastCovered, fullDate),
+        })
+      : i18next.t("calendar.details.rangeAllDay", {
+          date: format(start, fullDate),
+        })
   }
   const start = fromUnixTime(event.startAt)
   const end = fromUnixTime(Math.max(event.endAt, event.startAt + 1))
   if (localDayKey(start) === localDayKey(end)) {
-    return `${format(start, "EEE, MMM d, yyyy")}, ${format(start, "h:mm a")} – ${format(end, "h:mm a")}`
+    return i18next.t("calendar.details.rangeSameDay", {
+      date: format(start, fullDate),
+      start: format(start, time),
+      end: format(end, time),
+    })
   }
-  return `${format(start, "MMM d, h:mm a")} – ${format(end, "MMM d, h:mm a")}`
+  const dateTime = i18next.t("calendar.formats.dateTime")
+  return i18next.t("calendar.details.rangeSpan", {
+    start: format(start, dateTime),
+    end: format(end, dateTime),
+  })
 }
 
 function EventDetailsCard({
@@ -450,6 +467,7 @@ function EventDetailsCard({
   onDelete: () => void
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const color = eventColor(event)
   // Join link (parity-round-3 task 8.6): the same curated extractor the
   // mail-side meeting card uses, over the same surfaces (location first).
@@ -467,15 +485,15 @@ function EventDetailsCard({
       <div className="grid min-w-0 flex-1 gap-0.5">
         <div className="flex flex-wrap items-center gap-1.5">
           <p className="truncate text-sm font-semibold text-foreground">
-            {event.summary ?? "(untitled)"}
+            {event.summary ?? t("calendar.details.untitled")}
             {event.status === "cancelled" && (
               <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                (cancelled)
+                {t("calendar.details.cancelled")}
               </span>
             )}
             {event.status === "tentative" && (
               <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                (tentative)
+                {t("calendar.details.tentative")}
               </span>
             )}
           </p>
@@ -487,10 +505,7 @@ function EventDetailsCard({
               variant="outline"
               data-testid="calendar-event-partstat"
               data-partstat={event.partstat}
-              className={cn(
-                "shrink-0",
-                rsvpAnswerBadgeClass(event.partstat)
-              )}
+              className={cn("shrink-0", rsvpAnswerBadgeClass(event.partstat))}
             >
               {rsvpAnswerLabel(event.partstat)}
             </Badge>
@@ -519,7 +534,7 @@ function EventDetailsCard({
             }}
           >
             <ExternalLink className="size-3" />
-            Join — {joinLink.label}
+            {t("reader.meeting.joinWith", { label: joinLink.label })}
           </Button>
         )}
         {event.description && (
@@ -551,7 +566,7 @@ function EventDetailsCard({
             onClick={onEdit}
           >
             <Pencil className="size-3" />
-            Edit
+            {t("calendar.details.edit")}
           </Button>
           <Button
             variant="outline"
@@ -562,14 +577,16 @@ function EventDetailsCard({
             onClick={onDelete}
           >
             <Trash2 className="size-3" />
-            {deleteBusy ? "Deleting…" : "Delete"}
+            {deleteBusy
+              ? t("calendar.details.deleting")
+              : t("calendar.details.delete")}
           </Button>
         </div>
       </div>
       <Button
         variant="ghost"
         size="icon-xs"
-        aria-label="Close event details"
+        aria-label={t("calendar.details.close")}
         onClick={onClose}
       >
         <X />
@@ -600,6 +617,7 @@ function MonthGrid({
   onCellDoubleClick: (start: Date, end: Date) => void
   onShowMore: (day: Date) => void
 }) {
+  const { t } = useTranslation()
   // Events per ISO day key, precomputed once (eventDayKeys enumerates the
   // covered days — UTC for all-day, local for timed).
   const byDay = useMemo(() => {
@@ -634,7 +652,7 @@ function MonthGrid({
               data-testid="calendar-day-cell"
               data-date={key}
               className={cn(
-                "min-h-0 overflow-hidden border-b border-r p-1 [&:nth-child(7n)]:border-r-0",
+                "min-h-0 overflow-hidden border-r border-b p-1 [&:nth-child(7n)]:border-r-0",
                 !inMonth[index] && "bg-muted/30"
               )}
               // Task 5.4 wires event creation here: a month-cell
@@ -673,7 +691,7 @@ function MonthGrid({
                     className="px-1 text-start text-[10px] text-muted-foreground hover:text-foreground"
                     onClick={() => onShowMore(day)}
                   >
-                    +{chips.length - 3} more
+                    {t("calendar.view.more", { count: chips.length - 3 })}
                   </button>
                 )}
               </div>
@@ -693,6 +711,7 @@ function MonthChip({
   event: CalendarEvent
   onClick: () => void
 }) {
+  const { t } = useTranslation()
   const color = eventColor(event)
   return (
     <button
@@ -711,11 +730,11 @@ function MonthChip({
     >
       {!event.allDay && (
         <span className="shrink-0 text-muted-foreground tabular-nums">
-          {format(fromUnixTime(event.startAt), "h:mm a")}
+          {format(fromUnixTime(event.startAt), t("sidebar.dates.time"))}
         </span>
       )}
       <span className="truncate text-foreground">
-        {event.summary ?? "(untitled)"}
+        {event.summary ?? t("calendar.details.untitled")}
       </span>
     </button>
   )
@@ -742,10 +761,7 @@ interface TimedSlot {
 }
 
 /** Timed events of one day column, clamped to the day and lane-packed. */
-function timedSlotsForDay(
-  day: Date,
-  events: CalendarEvent[]
-): TimedSlot[] {
+function timedSlotsForDay(day: Date, events: CalendarEvent[]): TimedSlot[] {
   const dayStartSec = Math.floor(startOfDay(day).getTime() / 1000)
   const dayEndSec = dayStartSec + 86400
   const inDay = events.filter(
@@ -766,10 +782,7 @@ function timedSlotsForDay(
       lane,
       laneCount,
       topPx: ((startSec - dayStartSec) / 60) * PIXELS_PER_MINUTE,
-      heightPx: Math.max(
-        ((endSec - startSec) / 60) * PIXELS_PER_MINUTE,
-        16
-      ),
+      heightPx: Math.max(((endSec - startSec) / 60) * PIXELS_PER_MINUTE, 16),
     }
   })
 }
@@ -792,8 +805,11 @@ function allDaySegments(
   events: CalendarEvent[]
 ): AllDaySegment[] {
   const dayKeys = days.map(localDayKey)
-  const clipped: { event: CalendarEvent; startIndex: number; endIndex: number }[] =
-    []
+  const clipped: {
+    event: CalendarEvent
+    startIndex: number
+    endIndex: number
+  }[] = []
   for (const event of events) {
     if (!isAllDayRowEvent(event)) continue
     const covered = new Set(eventDayKeys(event))
@@ -825,6 +841,7 @@ function TimeGrid({
   onEventClick: (eventId: string) => void
   onSlotDoubleClick: (start: Date, end: Date) => void
 }) {
+  const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement | null>(null)
   // Keep the working morning in view after mount and after navigation.
   useEffect(() => {
@@ -834,10 +851,7 @@ function TimeGrid({
     }
   }, [days])
 
-  const segments = useMemo(
-    () => allDaySegments(days, events),
-    [days, events]
-  )
+  const segments = useMemo(() => allDaySegments(days, events), [days, events])
   const allDayLaneCount = segments.reduce(
     (max, segment) => Math.max(max, segment.lane + 1),
     0
@@ -845,17 +859,17 @@ function TimeGrid({
   const ALL_DAY_LANE_HEIGHT = 26
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col" data-testid="calendar-time-grid">
+    <div
+      className="flex min-h-0 flex-1 flex-col"
+      data-testid="calendar-time-grid"
+    >
       <div className="flex items-stretch border-b text-center text-xs">
         {days.map((day) => (
           <div
             key={localDayKey(day)}
             data-testid="calendar-day-header"
             data-date={localDayKey(day)}
-            className={cn(
-              "flex-1 px-1 py-1.5",
-              isToday(day) && "bg-muted/60"
-            )}
+            className={cn("flex-1 px-1 py-1.5", isToday(day) && "bg-muted/60")}
           >
             <span className="text-muted-foreground">{format(day, "EEE")}</span>{" "}
             <span
@@ -892,7 +906,7 @@ function TimeGrid({
           ))}
         </div>
         <span className="pointer-events-none absolute top-0.5 left-1 z-10 text-[10px] text-muted-foreground">
-          All day
+          {t("calendar.view.allDay")}
         </span>
         {segments.map((segment) => {
           const color = eventColor(segment.event)
@@ -905,7 +919,8 @@ function TimeGrid({
               data-event-id={segment.event.id}
               className={cn(
                 "absolute overflow-hidden rounded px-1 text-start text-[11px] font-medium transition-colors hover:brightness-95",
-                segment.event.status === "cancelled" && "line-through opacity-60"
+                segment.event.status === "cancelled" &&
+                  "line-through opacity-60"
               )}
               style={{
                 left: `calc(${(segment.startIndex / days.length) * 100}% + 2px)`,
@@ -919,7 +934,7 @@ function TimeGrid({
               onClick={() => onEventClick(segment.event.id)}
             >
               <span className="block truncate text-foreground">
-                {segment.event.summary ?? "(untitled)"}
+                {segment.event.summary ?? t("calendar.details.untitled")}
               </span>
             </button>
           )
@@ -941,7 +956,10 @@ function TimeGrid({
                 style={{ top: hour * 60 * PIXELS_PER_MINUTE }}
               >
                 <span className="absolute top-0.5 left-1 text-[10px] text-muted-foreground tabular-nums">
-                  {format(new Date(2000, 0, 1, hour), "h a")}
+                  {format(
+                    new Date(2000, 0, 1, hour),
+                    t("calendar.formats.hour")
+                  )}
                 </span>
               </div>
             ))}
@@ -977,6 +995,7 @@ function DayColumn({
   onEventClick: (eventId: string) => void
   onSlotDoubleClick: (start: Date, end: Date) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       data-testid="calendar-day-column"
@@ -989,9 +1008,7 @@ function DayColumn({
         // falls back to the day's first slot instead of NaN.
         const rect = event.currentTarget.getBoundingClientRect()
         const fraction =
-          rect.height > 0
-            ? (event.clientY - rect.top) / rect.height
-            : 0
+          rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0
         const safeFraction = Number.isFinite(fraction) ? fraction : 0
         const minutes = Math.max(
           0,
@@ -1031,10 +1048,13 @@ function DayColumn({
             onClick={() => onEventClick(slot.event.id)}
           >
             <span className="block truncate text-[10px] text-muted-foreground tabular-nums">
-              {format(fromUnixTime(slot.event.startAt), "h:mm a")}
+              {format(
+                fromUnixTime(slot.event.startAt),
+                t("sidebar.dates.time")
+              )}
             </span>
             <span className="block truncate font-medium text-foreground">
-              {slot.event.summary ?? "(untitled)"}
+              {slot.event.summary ?? t("calendar.details.untitled")}
             </span>
           </button>
         )

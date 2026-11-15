@@ -1,8 +1,8 @@
 import { sendNotification } from "@tauri-apps/plugin-notification"
 
-import {
-  getAccountReminderLeadMinutes,
-} from "../db/accounts"
+import { i18next } from "@/i18n"
+
+import { getAccountReminderLeadMinutes } from "../db/accounts"
 import type { SqlExecutor } from "../db/executor"
 import { ensureNotificationPermission } from "./new-mail-notifier"
 
@@ -119,18 +119,24 @@ export async function checkMeetingReminders(
   }
 }
 
-/** "Meeting starting soon" + the local start time (12-hour clock). */
+/** "Meeting starting soon" + the local start time (English: the runtime's
+ * default clock; other interface languages: that language's convention,
+ * e.g. 24-hour for Spanish). */
 export function buildNotification(
   summary: string | null,
   startAt: number
 ): { title: string; body: string } {
-  const title = summary?.trim() || "Meeting"
-  const time = new Date(startAt * 1000).toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  })
+  const title = summary?.trim() || i18next.t("calendar.reminders.fallbackTitle")
+  const language = i18next.language
+  const time = new Date(startAt * 1000).toLocaleTimeString(
+    !language || language === "en" ? [] : language,
+    {
+      hour: "numeric",
+      minute: "2-digit",
+    }
+  )
   return {
-    title: "Meeting starting soon",
-    body: `${title} — starts at ${time}`,
+    title: i18next.t("calendar.reminders.title"),
+    body: i18next.t("calendar.reminders.body", { title, time }),
   }
 }

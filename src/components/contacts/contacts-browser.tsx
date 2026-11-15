@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import { ArrowLeft, Search, Users } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { AccountBadge } from "@/components/email/account-badge"
@@ -32,6 +33,7 @@ import { useContacts } from "./use-contacts"
  * search filters out simply hides the detail pane until the text clears.
  */
 export function ContactsBrowser() {
+  const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const contacts = useContacts(query)
@@ -53,13 +55,15 @@ export function ContactsBrowser() {
         <Button
           variant="ghost"
           size="sm"
-          aria-label="Back to mailbox"
+          aria-label={t("contacts.browser.backToMailbox")}
           onClick={() => setView(previousView)}
         >
           <ArrowLeft />
-          Back
+          {t("contacts.browser.back")}
         </Button>
-        <h1 className="truncate text-xl font-bold text-foreground">Contacts</h1>
+        <h1 className="truncate text-xl font-bold text-foreground">
+          {t("common.views.contacts")}
+        </h1>
       </div>
       <Separator />
       <div className="flex min-h-0 flex-1">
@@ -71,10 +75,10 @@ export function ContactsBrowser() {
                 className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
               />
               <Input
-                aria-label="Search contacts"
+                aria-label={t("contacts.browser.search")}
                 data-testid="contacts-search"
                 value={query}
-                placeholder="Search by name or email"
+                placeholder={t("contacts.browser.searchPlaceholder")}
                 className="pl-8"
                 onChange={(event) => setQuery(event.target.value)}
               />
@@ -85,14 +89,16 @@ export function ContactsBrowser() {
               query.trim() === "" ? (
                 <EmptyState
                   icon={Users}
-                  title="No contacts yet"
-                  hint="People you exchange mail with appear here automatically."
+                  title={t("contacts.browser.empty")}
+                  hint={t("contacts.browser.emptyHint")}
                 />
               ) : (
                 <EmptyState
                   icon={Search}
-                  title={`No contacts match “${query.trim()}”`}
-                  hint="Search matches partial names and email addresses."
+                  title={t("contacts.browser.noMatches", {
+                    query: query.trim(),
+                  })}
+                  hint={t("contacts.browser.noMatchesHint")}
                 />
               )
             ) : (
@@ -123,12 +129,14 @@ export function ContactsBrowser() {
             <EmptyState
               icon={Users}
               title={
-                contacts.length === 0 ? "No contacts yet" : "Select a contact"
+                contacts.length === 0
+                  ? t("contacts.browser.empty")
+                  : t("contacts.browser.select")
               }
               hint={
                 contacts.length === 0
-                  ? "People you exchange mail with appear here automatically."
-                  : "Choose someone from the list to see their details."
+                  ? t("contacts.browser.emptyHint")
+                  : t("contacts.browser.selectHint")
               }
             />
           )}

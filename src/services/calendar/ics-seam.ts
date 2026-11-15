@@ -1,3 +1,4 @@
+import { i18next } from "@/i18n"
 import type { SqlExecutor } from "../db/executor"
 import type { FetchImpl } from "../email/token-manager"
 import { useOnlineStore } from "../../stores/online-store"
@@ -6,7 +7,7 @@ import type { IcsEvent } from "./ics"
 import {
   createEvent,
   defaultWritableCalendarId,
-  OFFLINE_WRITE_MESSAGE,
+  offlineWriteMessage,
   respondToGoogleInvitation,
 } from "./event-writes"
 import type { EventWriteInput, EventWriteResult } from "./event-writes"
@@ -86,10 +87,11 @@ export type RespondToInvitationResult =
   | { ok: true; response: InvitationResponse }
   | { ok: false; reason: IcsWriteFailureReason; message?: string }
 
-/** The CalDAV RSVP v1 copy (honest limitation, see the module docs). */
-export const CALDAV_RSVP_UNSUPPORTED_MESSAGE =
-  "This calendar server does not support in-app invitation responses yet — " +
-  "please answer by email."
+/** The CalDAV RSVP v1 copy (honest limitation, see the module docs); a
+ * getter so it follows the interface language. */
+export function caldavRsvpUnsupportedMessage(): string {
+  return i18next.t("calendar.errors.caldavRsvpUnsupported")
+}
 
 /** Injectable seams (tests): override source discovery, the event write,
  * the RSVP send, or the transport. */
@@ -247,7 +249,7 @@ export async function addIcsEventToCalendar(
     const sources = await resolveSources(executor, deps)
     if (sources.length === 0) return { ok: false, reason: "no-source" }
     if (!useOnlineStore.getState().online) {
-      return { ok: false, reason: "offline", message: OFFLINE_WRITE_MESSAGE }
+      return { ok: false, reason: "offline", message: offlineWriteMessage() }
     }
     const parsed = parseIcsCalendar(request.ics)
     if (!parsed.ok) {
@@ -259,7 +261,7 @@ export async function addIcsEventToCalendar(
       return {
         ok: false,
         reason: "no-event",
-        message: "The file carries no event with a usable start time.",
+        message: i18next.t("calendar.errors.fileNoStart"),
       }
     }
     const choice = pickSource(sources, request.preferredSourceId)
@@ -269,7 +271,7 @@ export async function addIcsEventToCalendar(
       return {
         ok: false,
         reason: "no-source",
-        message: "The chosen calendar source is not connected anymore.",
+        message: i18next.t("calendar.errors.chosenSourceGone"),
       }
     }
     const calendarId = await defaultWritableCalendarId(source)
@@ -277,7 +279,7 @@ export async function addIcsEventToCalendar(
       return {
         ok: false,
         reason: "config",
-        message: "That source has no calendar to add the event to.",
+        message: i18next.t("calendar.errors.sourceNoCalendar"),
       }
     }
     const input = icsEventToWriteInput(source.id, calendarId, event)
@@ -285,7 +287,7 @@ export async function addIcsEventToCalendar(
       return {
         ok: false,
         reason: "no-event",
-        message: "The event has no usable start time.",
+        message: i18next.t("calendar.errors.eventNoStart"),
       }
     }
     const write = deps.createEvent ?? createEvent
@@ -319,7 +321,7 @@ export async function respondToInvitation(
     const sources = await resolveSources(executor, deps)
     if (sources.length === 0) return { ok: false, reason: "no-source" }
     if (!useOnlineStore.getState().online) {
-      return { ok: false, reason: "offline", message: OFFLINE_WRITE_MESSAGE }
+      return { ok: false, reason: "offline", message: offlineWriteMessage() }
     }
     const parsed = parseIcsCalendar(request.ics)
     if (!parsed.ok) {
@@ -331,7 +333,7 @@ export async function respondToInvitation(
       return {
         ok: false,
         reason: "no-event",
-        message: "The invitation carries no event id to respond to.",
+        message: i18next.t("calendar.errors.noEventId"),
       }
     }
     const choice = pickSource(sources, request.preferredSourceId)
@@ -344,14 +346,14 @@ export async function respondToInvitation(
       return {
         ok: false,
         reason: "no-source",
-        message: "The chosen calendar source is not connected anymore.",
+        message: i18next.t("calendar.errors.chosenSourceGone"),
       }
     }
     if (source.provider !== "google") {
       return {
         ok: false,
         reason: "unsupported",
-        message: CALDAV_RSVP_UNSUPPORTED_MESSAGE,
+        message: caldavRsvpUnsupportedMessage(),
       }
     }
     const result = await respondToGoogleInvitation(

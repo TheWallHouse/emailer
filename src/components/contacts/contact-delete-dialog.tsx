@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -34,6 +35,7 @@ export function ContactDeleteDialog({
   /** Called after a confirmed delete so the host can drop the selection. */
   onDeleted: () => void
 }) {
+  const { t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
 
   async function handleConfirm(): Promise<void> {
@@ -60,12 +62,13 @@ export function ContactDeleteDialog({
       {contact && (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete contact</DialogTitle>
+            <DialogTitle>{t("contacts.delete.title")}</DialogTitle>
             <DialogDescription>
-              Delete <span className="font-medium">{displayName}</span>? Only
-              the address-book entry is removed — the messages are not affected,
-              and the contact reappears automatically if you correspond with
-              them again.
+              <Trans
+                i18nKey="contacts.delete.description"
+                values={{ name: displayName }}
+                components={{ name: <span className="font-medium" /> }}
+              />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -74,11 +77,13 @@ export function ContactDeleteDialog({
               onClick={() => onOpenChange(false)}
               disabled={deleting}
             >
-              Cancel
+              {t("contacts.delete.cancel")}
             </Button>
             <Button
               variant="destructive"
-              aria-label={`Confirm deleting ${displayName}`}
+              aria-label={t("contacts.delete.confirmLabel", {
+                name: displayName,
+              })}
               onClick={() => {
                 void handleConfirm()
               }}
@@ -87,7 +92,7 @@ export function ContactDeleteDialog({
               {deleting && (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden />
               )}
-              Delete
+              {t("contacts.delete.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,0 +1,32 @@
+{
+  "categories": {
+    "gettingStarted": "Primeros pasos",
+    "reading": "Lectura y organización",
+    "composing": "Redacción",
+    "ai": "Asistencia con IA",
+    "security": "Seguridad y privacidad",
+    "desktop": "Integración con el escritorio"
+  },
+  "search": {
+    "label": "Buscar en la ayuda",
+    "placeholder": "Busca en la ayuda; prueba con «posponer»…"
+  },
+  "count": {
+    "matching": "{{matches}} de {{total}} artículos coinciden con «{{query}}»",
+    "browsing": "{{total}} artículos: todo está guardado en la app, sin necesidad de conexión"
+  },
+  "empty": {
+    "title": "Ningún artículo de ayuda coincide",
+    "hint": "Prueba con una palabra más corta o borra la búsqueda para ver todos los artículos por categoría.",
+    "clear": "Borrar búsqueda"
+  },
+  "section": {
+    "aria": "Ayuda",
+    "title": "Ayuda",
+    "description": "Busca en el centro de ayuda integrado: viene incluido en la app, así que funciona sin conexión."
+  },
+  "dialog": {
+    "title": "Centro de ayuda",
+    "description": "Todo lo que puede hacer Emailer, resuelto en local: nada de esto necesita conexión."
+  }
+}

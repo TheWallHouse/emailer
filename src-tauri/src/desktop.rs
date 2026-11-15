@@ -8,12 +8,12 @@
 //! boot and on every change (`set_close_action`), mirroring how the
 //! unread badge is a webview-computed value pushed through a command.
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
 use tauri::{
-    menu::{MenuBuilder, MenuItem},
+    menu::{Menu, MenuBuilder, MenuItem},
     tray::{TrayIcon, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, Runtime, State,
 };
@@ -49,6 +49,40 @@ impl CloseAction {
     }
 }
 
+/// Localized tray texts. The interface language lives in the webview, so
+/// — like the close action — the frontend pushes them (`set_tray_labels`)
+/// at boot and on every language change; until then the English defaults
+/// apply. `unread_tooltip` carries a literal `{count}` placeholder.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TrayLabels {
+    pub open: String,
+    pub compose: String,
+    pub quit: String,
+    pub unread_tooltip: String,
+}
+
+impl Default for TrayLabels {
+    fn default() -> Self {
+        Self {
+            open: "Open Emailer".to_string(),
+            compose: "Compose".to_string(),
+            quit: "Quit".to_string(),
+            unread_tooltip: "Emailer — {count} unread".to_string(),
+        }
+    }
+}
+
+impl TrayLabels {
+    fn tooltip(&self, count: u32) -> String {
+        if count > 0 {
+            self.unread_tooltip.replace("{count}", &count.to_string())
+        } else {
+            "Emailer".to_string()
+        }
+    }
+}
+
 /// Managed state: the live close action, whether the platform gave us
 /// a tray (Linux without appindicator fails tray construction at startup —
 /// the settings UI hides the tray-dependent controls in that case), and
@@ -57,6 +91,10 @@ impl CloseAction {
 #[derive(Default)]
 pub struct DesktopState {
     close_action: Mutex<Option<CloseAction>>,
+    tray_labels: Mutex<TrayLabels>,
+    /// Last unread count pushed by the badge command, so a language change
+    /// can re-render the tooltip without waiting for the next sync pass.
+    last_unread: AtomicU32,
     pub tray_available: AtomicBool,
     compose_shortcut: Mutex<Option<String>>,
     /// Set at startup when the process was launched with `--hidden` (the
@@ -66,6 +104,13 @@ pub struct DesktopState {
 }
 
 impl DesktopState {
+    fn tray_labels(&self) -> TrayLabels {
+        self.tray_labels
+            .lock()
+            .map(|labels| labels.clone())
+            .unwrap_or_default()
+    }
+
     pub fn close_action(&self) -> CloseAction {
         *self
             .close_action
@@ -110,10 +155,8 @@ pub fn relay_deep_link_args<R: Runtime>(app: &AppHandle<R>, args: &[String]) {
 /// the built icon so the caller can record tray availability; a build
 /// failure is the platform-without-tray path and is reported, not fatal.
 pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon<R>, tauri::Error> {
-    let open = MenuItem::with_id(app, "tray-open", "Open Emailer", true, None::<&str>)?;
-    let compose = MenuItem::with_id(app, "tray-compose", "Compose", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "tray-quit", "Quit", true, None::<&str>)?;
-    let menu = MenuBuilder::new(app).items(&[&open, &compose, &quit]).build()?;
+    let labels = app.state::<DesktopState>().tray_labels();
+    let menu = build_tray_menu(app, &labels)?;
 
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
         .menu(&menu)
@@ -145,18 +188,50 @@ pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> Result<TrayIcon<R>, tauri::
     builder.build(app)
 }
 
-/// Set the tray tooltip to the unread count ("Emailer — N unread"); an
-/// empty count resets to the bare app name. Best-effort: Linux tray
-/// implementations vary in tooltip support.
+/// The tray menu (Open / Compose / Quit) with the current labels. The ids
+/// are fixed, so the tray's `on_menu_event` handler keeps working when the
+/// menu is rebuilt for a new language.
+fn build_tray_menu<R: Runtime>(
+    app: &AppHandle<R>,
+    labels: &TrayLabels,
+) -> Result<Menu<R>, tauri::Error> {
+    let open = MenuItem::with_id(app, "tray-open", &labels.open, true, None::<&str>)?;
+    let compose = MenuItem::with_id(app, "tray-compose", &labels.compose, true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "tray-quit", &labels.quit, true, None::<&str>)?;
+    MenuBuilder::new(app).items(&[&open, &compose, &quit]).build()
+}
+
+/// Set the tray tooltip to the unread count ("Emailer — N unread", in the
+/// pushed language); an empty count resets to the bare app name.
+/// Best-effort: Linux tray implementations vary in tooltip support.
 pub fn update_tray_unread<R: Runtime>(app: &AppHandle<R>, count: u32) {
+    let state = app.state::<DesktopState>();
+    state.last_unread.store(count, Ordering::Relaxed);
     if let Some(tray) = app.tray_by_id(TRAY_ID) {
-        let tooltip = if count > 0 {
-            format!("Emailer — {count} unread")
-        } else {
-            "Emailer".to_string()
-        };
-        let _ = tray.set_tooltip(Some(tooltip));
+        let _ = tray.set_tooltip(Some(state.tray_labels().tooltip(count)));
     }
+}
+
+/// Push the localized tray texts (frontend, at boot and on every language
+/// change): rebuilds the tray menu and re-renders the unread tooltip.
+#[tauri::command]
+pub fn set_tray_labels(
+    app: AppHandle,
+    state: State<'_, DesktopState>,
+    labels: TrayLabels,
+) -> Result<(), String> {
+    *state
+        .tray_labels
+        .lock()
+        .map_err(|error| error.to_string())? = labels.clone();
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        let menu = build_tray_menu(&app, &labels).map_err(|error| error.to_string())?;
+        tray.set_menu(Some(menu)).map_err(|error| error.to_string())?;
+        let count = state.last_unread.load(Ordering::Relaxed);
+        tray.set_tooltip(Some(labels.tooltip(count)))
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------

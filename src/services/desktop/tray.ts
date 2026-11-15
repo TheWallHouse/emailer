@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core"
 import { listen } from "@tauri-apps/api/event"
 
+import { i18next } from "@/i18n"
+
 /**
  * Desktop-integration bridge (task 1.2, spec desktop-integration): thin
  * typed wrappers over the Rust commands and events the tray feature
@@ -53,7 +55,6 @@ export async function setAutostartEnabled(enabled: boolean): Promise<void> {
   }
 }
 
-
 /**
  * Subscribe to desktop compose requests (tray menu / global shortcut).
  * Resolves to an unsubscribe function; a non-Tauri runtime resolves to a
@@ -69,4 +70,39 @@ export async function onComposeRequest(
   } catch {
     return () => {}
   }
+}
+
+/**
+ * Push the localized tray menu labels and unread-tooltip template to Rust
+ * (desktop.rs `set_tray_labels`): the interface language lives in the
+ * webview, so the tray follows it the same way the close action does.
+ * The tooltip template keeps a literal `{count}` that Rust fills in.
+ * Best-effort: outside the Tauri runtime (or without a tray) it no-ops.
+ */
+export async function pushTrayLabels(): Promise<void> {
+  try {
+    await invoke("set_tray_labels", {
+      labels: {
+        open: i18next.t("shell.tray.open"),
+        compose: i18next.t("shell.tray.compose"),
+        quit: i18next.t("shell.tray.quit"),
+        unreadTooltip: i18next.t("shell.tray.unreadTooltip", { n: "{count}" }),
+      },
+    })
+  } catch (error) {
+    console.warn("[desktop] tray labels push failed", error)
+  }
+}
+
+/**
+ * Push the tray labels now and again on every language change. Returns
+ * the unsubscribe function (main window only — pop-outs have no tray).
+ */
+export function syncTrayLabels(): () => void {
+  void pushTrayLabels()
+  const onLanguageChanged = () => {
+    void pushTrayLabels()
+  }
+  i18next.on("languageChanged", onLanguageChanged)
+  return () => i18next.off("languageChanged", onLanguageChanged)
 }

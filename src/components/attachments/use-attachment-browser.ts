@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { i18next } from "@/i18n"
 import type { AccountAttachmentRow } from "@/services/db/attachment-search"
 import { listAccountAttachments } from "@/services/db/attachment-search"
 import type { SqlExecutor } from "@/services/db/executor"
@@ -67,9 +68,7 @@ export function useAccountAttachments(
     // resolveExecutor() throws outside Tauri) out of the effect body.
     Promise.resolve()
       .then(() =>
-        accountId
-          ? listAccountAttachments(resolveExecutor(), accountId)
-          : []
+        accountId ? listAccountAttachments(resolveExecutor(), accountId) : []
       )
       .then((rows) => {
         if (!cancelled) setAttachments(rows)
@@ -128,7 +127,8 @@ export async function saveAttachmentToDisk(
   try {
     const executor = resolveExecutor()
     const accountRow = await getAccount(executor, entry.account_id)
-    if (!accountRow) throw new Error("the attachment's account no longer exists")
+    if (!accountRow)
+      throw new Error("the attachment's account no longer exists")
     const bytes = await getAttachmentContent(
       executor,
       toEmailAccount(accountRow),
@@ -138,11 +138,20 @@ export async function saveAttachmentToDisk(
     )
     const target = await saveAttachmentAs(entry, bytes, deps)
     if (target === null) return "cancelled"
-    toast.success(`Saved ${entry.filename ?? "attachment"} to ${target}`)
+    toast.success(
+      i18next.t("attachments.toasts.saved", {
+        name: entry.filename ?? i18next.t("attachments.toasts.attachment"),
+        path: target,
+      })
+    )
     return "saved"
   } catch (error) {
     console.warn("[attachments-browser] attachment save failed", error)
-    toast.error(`Could not save ${entry.filename ?? "this attachment"}.`)
+    toast.error(
+      typeof entry.filename === "string"
+        ? i18next.t("attachments.toasts.saveFailed", { name: entry.filename })
+        : i18next.t("attachments.toasts.saveFailedUnnamed")
+    )
     return "failed"
   }
 }

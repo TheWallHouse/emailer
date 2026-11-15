@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { KeyboardEvent } from "react"
 import { RefreshCw, Sparkles, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { accountHue } from "@/components/email/account-hue"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,7 @@ import { getExecutor } from "@/services/db/executor"
 import { getThread } from "@/services/db/threads"
 import { useAssistantStore } from "@/stores/assistant-store"
 import { useUiStore } from "@/stores/ui-store"
+import { i18next } from "@/i18n"
 import { useAssistantAvailable } from "./use-assistant-available"
 
 /**
@@ -42,12 +44,15 @@ import { useAssistantAvailable } from "./use-assistant-available"
 const MAX_SOURCE_CHIPS = 8
 
 /** The empty state's suggested prompts (spec "Empty-state guidance");
- * activating one sends it as the user's message. */
-const SUGGESTED_PROMPTS = [
-  "Find my flight confirmations",
-  "What did I promise in the last week?",
-  "Summarize unread newsletters",
-]
+ * activating one sends it as the user's message. A getter, so the chips
+ * follow the interface language. */
+function suggestedPrompts(): string[] {
+  return [
+    i18next.t("assistant.prompts.flights"),
+    i18next.t("assistant.prompts.promises"),
+    i18next.t("assistant.prompts.newsletters"),
+  ]
+}
 
 /** Resolved chip label for one touched thread; null = the thread is gone
  * or unreadable, and the chip degrades to a placeholder (chips are
@@ -73,6 +78,7 @@ export function AssistantPanel() {
  * assistant-store; this component only renders it and dispatches.
  */
 function AssistantPanelBody() {
+  const { t } = useTranslation()
   const setAssistantOpen = useUiStore((state) => state.setAssistantOpen)
   const turns = useAssistantStore((state) => state.turns)
   const busy = useAssistantStore((state) => state.busy)
@@ -82,9 +88,9 @@ function AssistantPanelBody() {
   const touchedThreadIds = useAssistantStore((state) => state.touchedThreadIds)
   const unavailable = useAssistantStore((state) => state.unavailable)
   const [draft, setDraft] = useState("")
-  const [threadTitles, setThreadTitles] = useState<
-    Record<string, ThreadTitle>
-  >({})
+  const [threadTitles, setThreadTitles] = useState<Record<string, ThreadTitle>>(
+    {}
+  )
   const endRef = useRef<HTMLDivElement>(null)
 
   function close(): void {
@@ -99,12 +105,15 @@ function AssistantPanelBody() {
     // the dialog's behavior, read back through the store's turnError. The
     // restore deliberately lives in this event-handler continuation, not
     // in an effect.
-    void useAssistantStore.getState().sendTurn(message).then(() => {
-      const state = useAssistantStore.getState()
-      if (state.turnError !== null && state.lastUserMessage === message) {
-        setDraft(message)
-      }
-    })
+    void useAssistantStore
+      .getState()
+      .sendTurn(message)
+      .then(() => {
+        const state = useAssistantStore.getState()
+        if (state.turnError !== null && state.lastUserMessage === message) {
+          setDraft(message)
+        }
+      })
   }
 
   // The store consumes the AiUnavailableError signal here: hide-vs-show —
@@ -118,7 +127,6 @@ function AssistantPanelBody() {
 
   // The failed-turn draft restore lives in runTurn's continuation (an
   // event handler), not in an effect.
-
 
   // Source-chip subjects resolve lazily per newly-touched id through the
   // light single-row getter (design D4; small N, panel-local). Failures
@@ -190,10 +198,11 @@ function AssistantPanelBody() {
             className="mt-0.5 size-4 shrink-0 text-muted-foreground"
           />
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold leading-5">AI assistant</h2>
+            <h2 className="text-sm leading-5 font-semibold">
+              {t("assistant.panel.title")}
+            </h2>
             <p className="text-xs text-muted-foreground">
-              Answers are generated from your mailbox with read-only
-              lookups. Nothing is changed.
+              {t("assistant.panel.consent")}
             </p>
           </div>
         </div>
@@ -206,13 +215,13 @@ function AssistantPanelBody() {
             disabled={busy}
             onClick={() => useAssistantStore.getState().resetConversation()}
           >
-            New conversation
+            {t("assistant.panel.newConversation")}
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label="Close assistant"
+            aria-label={t("assistant.panel.close")}
             data-testid="assistant-close"
             onClick={close}
           >
@@ -232,11 +241,10 @@ function AssistantPanelBody() {
             className="flex flex-col gap-3 py-4"
           >
             <p className="text-center text-sm text-muted-foreground">
-              Ask about your mailbox — e.g. "find all my flight
-              confirmations".
+              {t("assistant.panel.emptyHint")}
             </p>
             <div className="flex flex-wrap justify-center gap-1.5">
-              {SUGGESTED_PROMPTS.map((prompt) => (
+              {suggestedPrompts().map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
@@ -272,9 +280,9 @@ function AssistantPanelBody() {
                   data-testid="assistant-tool-activity"
                   className="text-xs text-muted-foreground"
                 >
-                  Searched the mailbox (
-                  {turn.toolRounds}{" "}
-                  {turn.toolRounds === 1 ? "lookup" : "lookups"})
+                  {t("assistant.panel.toolActivity", {
+                    count: turn.toolRounds,
+                  })}
                 </p>
               )}
               {/* Regenerate (spec "Regeneration"): offered on the newest
@@ -292,7 +300,7 @@ function AssistantPanelBody() {
                   }
                 >
                   <RefreshCw aria-hidden />
-                  Regenerate
+                  {t("assistant.panel.regenerate")}
                 </Button>
               )}
             </div>
@@ -304,7 +312,7 @@ function AssistantPanelBody() {
             data-testid="assistant-busy"
             className="text-sm text-muted-foreground"
           >
-            Looking in your mailbox…
+            {t("assistant.panel.busy")}
           </p>
         )}
         {turnError && lastUserMessage && (
@@ -322,7 +330,7 @@ function AssistantPanelBody() {
               disabled={busy}
               onClick={() => runTurn(lastUserMessage)}
             >
-              Retry
+              {t("assistant.panel.retry")}
             </Button>
           </div>
         )}
@@ -341,9 +349,12 @@ function AssistantPanelBody() {
         }}
       >
         {touchedThreadIds.length > 0 && (
-          <div data-testid="assistant-sources" className="flex flex-col gap-1.5">
+          <div
+            data-testid="assistant-sources"
+            className="flex flex-col gap-1.5"
+          >
             <p className="text-xs font-medium text-muted-foreground">
-              Sources
+              {t("assistant.panel.sources")}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {touchedThreadIds.slice(0, MAX_SOURCE_CHIPS).map((threadId) => {
@@ -368,7 +379,7 @@ function AssistantPanelBody() {
                       }}
                     />
                     <span className="max-w-48 truncate">
-                      {title?.subject ?? "(no subject)"}
+                      {title?.subject ?? t("threadList.noSubject")}
                     </span>
                   </button>
                 )
@@ -378,11 +389,11 @@ function AssistantPanelBody() {
         )}
         <Textarea
           data-testid="assistant-input"
-          aria-label="Message the assistant"
+          aria-label={t("assistant.panel.inputLabel")}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask about your mailbox…"
+          placeholder={t("assistant.panel.inputPlaceholder")}
           rows={2}
           disabled={busy}
         />
@@ -391,14 +402,14 @@ function AssistantPanelBody() {
             data-testid="assistant-token-cost"
             className="text-xs text-muted-foreground"
           >
-            ≈ {approxTokens} tokens
+            {t("assistant.panel.tokens", { count: approxTokens })}
           </p>
           <Button
             type="submit"
             size="sm"
             disabled={busy || draft.trim() === ""}
           >
-            {busy ? "Sending…" : "Send"}
+            {busy ? t("assistant.panel.sending") : t("assistant.panel.send")}
           </Button>
         </div>
       </form>

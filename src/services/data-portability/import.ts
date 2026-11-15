@@ -1,5 +1,7 @@
 import { open as pickFilesDialog } from "@tauri-apps/plugin-dialog"
 
+import { i18next } from "@/i18n"
+
 import { decryptCredentials } from "../crypto/credentials"
 import type { CacheFs } from "../attachments/cache"
 import {
@@ -729,7 +731,12 @@ function createDefaultUpload(
 export async function pickImportFiles(): Promise<string[] | null> {
   return pickFilesDialog({
     multiple: true,
-    title: "Choose email files to import",
-    filters: [{ name: "Email files", extensions: ["eml", "mbox"] }],
+    title: i18next.t("system.dialogs.chooseImportFiles"),
+    filters: [
+      {
+        name: i18next.t("system.dialogs.emailFiles"),
+        extensions: ["eml", "mbox"],
+      },
+    ],
   })
 }

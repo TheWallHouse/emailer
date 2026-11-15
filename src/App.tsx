@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { invoke } from "@tauri-apps/api/core"
+import { useTranslation } from "react-i18next"
 
 import { MailShell } from "@/components/layout/mail-shell"
 import { ShortcutsOverlay } from "@/components/layout/shortcuts-overlay"
@@ -8,6 +9,7 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
 import { bootstrap } from "@/services/bootstrap"
 
 export default function App() {
+  const { t } = useTranslation()
   const [ready, setReady] = useState(false)
   const [initError, setInitError] = useState<string | null>(null)
   // Shortcuts help overlay state (task 6.6): owned here so the global
@@ -50,7 +52,7 @@ export default function App() {
         <Titlebar />
         <div className="flex flex-1 items-center justify-center">
           <p className="max-w-md text-center text-sm text-muted-foreground">
-            Failed to initialize the local database. {initError}
+            {t("system.app.initFailed", { error: initError })}
           </p>
         </div>
       </div>
@@ -62,7 +64,9 @@ export default function App() {
       <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
         <Titlebar />
         <div className="flex flex-1 items-center justify-center">
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">
+            {t("system.app.loading")}
+          </p>
         </div>
       </div>
     )

@@ -1,15 +1,16 @@
 import { decryptCredentials, encryptCredentials } from "../crypto/credentials"
+import { i18next } from "@/i18n"
 import { getAccount } from "../db/accounts"
 import type { SqlExecutor } from "../db/executor"
 import { getExecutor } from "../db/executor"
 import { exchangeCodeForTokens } from "../email/token-manager"
 import type { FetchImpl } from "../email/token-manager"
 import { OauthFlowError, runGoogleConsent } from "../account-flows/oauth-pkce"
-import { GMAIL_SCOPES, GOOGLE_CALENDAR_SCOPE } from "../account-flows/oauth-pkce"
 import {
-  CaldavProviderError,
-  testCaldavConnection,
-} from "./caldav"
+  GMAIL_SCOPES,
+  GOOGLE_CALENDAR_SCOPE,
+} from "../account-flows/oauth-pkce"
+import { CaldavProviderError, testCaldavConnection } from "./caldav"
 import type { CaldavDiscoveredCalendar, CaldavSourceConfig } from "./caldav"
 import { createCalendarTokens, listCalendars } from "./google-calendar"
 import type { GoogleCalendarListEntry } from "./google-calendar"
@@ -54,7 +55,7 @@ export const CALENDAR_CONNECT_SCOPES: string[] = [
 /** The user closed/cancelled the consent dialog — a quiet no-op. */
 export class CalendarConnectCancelledError extends Error {
   constructor() {
-    super("Calendar sign-in was cancelled.")
+    super(i18next.t("calendar.connect.cancelled"))
     this.name = "CalendarConnectCancelledError"
   }
 }
@@ -82,10 +83,7 @@ export class CalendarConsentDeniedError extends Error {
  */
 export class CalendarScopeNotGrantedError extends Error {
   constructor() {
-    super(
-      "Google did not grant calendar access for this account. If it is " +
-        "managed (Workspace), calendar sharing may be disabled by policy."
-    )
+    super(i18next.t("calendar.connect.googleScopeNotGranted"))
     this.name = "CalendarScopeNotGrantedError"
   }
 }
@@ -138,14 +136,12 @@ export async function connectGoogleCalendar(
   const fetchImpl = options.fetchImpl ?? fetch
   const account = await getAccount(executor, options.accountId)
   if (!account) {
-    throw new CalendarConnectError(
-      `account ${options.accountId} not found`
-    )
+    throw new CalendarConnectError(`account ${options.accountId} not found`)
   }
   const clientId = options.clientId ?? account.oauth_client_id
   if (!clientId) {
     throw new CalendarConnectError(
-      "The connected Gmail account has no OAuth client id configured"
+      i18next.t("calendar.connect.gmailNoClientId")
     )
   }
 
@@ -171,10 +167,9 @@ export async function connectGoogleCalendar(
         })
       }
     }
-    throw new CalendarConnectError(
-      "Connecting the calendar failed. Please try again.",
-      { cause: error }
-    )
+    throw new CalendarConnectError(i18next.t("calendar.connect.failed"), {
+      cause: error,
+    })
   }
 
   // 2. Exchange the authorization code for a calendar-scoped token set.
@@ -189,7 +184,7 @@ export async function connectGoogleCalendar(
     )
   } catch (error) {
     throw new CalendarConnectError(
-      "Google did not complete the calendar sign-in. Please try again.",
+      i18next.t("calendar.connect.googleIncomplete"),
       { cause: error }
     )
   }
@@ -214,10 +209,9 @@ export async function connectGoogleCalendar(
       fetchImpl
     )
   } catch (error) {
-    throw new CalendarConnectError(
-      "Connected, but the calendar list could not be read. Please try again.",
-      { cause: error }
-    )
+    throw new CalendarConnectError(i18next.t("calendar.connect.listFailed"), {
+      cause: error,
+    })
   }
 
   // 5. SEAL the calendar token envelope (AES-256-GCM) and persist the
@@ -382,11 +376,7 @@ async function testCaldavStoredConnection(
   } catch {
     envelope = null
   }
-  if (
-    !envelope?.serverUrl ||
-    !envelope.username ||
-    !envelope.appPassword
-  ) {
+  if (!envelope?.serverUrl || !envelope.username || !envelope.appPassword) {
     return {
       ok: false,
       provider: "caldav",
@@ -410,7 +400,10 @@ async function testCaldavStoredConnection(
             "network",
             error instanceof Error ? error.message : String(error)
           )
-    if (providerError.kind === "status" && (providerError.status === 401 || providerError.status === 403)) {
+    if (
+      providerError.kind === "status" &&
+      (providerError.status === 401 || providerError.status === 403)
+    ) {
       return {
         ok: false,
         provider: "caldav",

@@ -3,6 +3,7 @@ import { openPath } from "@tauri-apps/plugin-opener"
 import { writeFile as fsWriteFile } from "@tauri-apps/plugin-fs"
 import { appDataDir, join } from "@tauri-apps/api/path"
 
+import { i18next } from "@/i18n"
 import type { AttachmentRow } from "../db/messages"
 import type { SqlExecutor } from "../db/executor"
 import type { EmailAccount } from "../email/types"
@@ -205,19 +206,26 @@ export function isCacheRelativePath(relPath: string): boolean {
 export function openConfirmationMessage(
   confirmation: OpenConfirmation
 ): string {
-  const name = confirmation.filename || "This file"
+  const name =
+    confirmation.filename || i18next.t("attachments.openConfirm.thisFile")
   switch (confirmation.kind) {
     case "block":
-      return `${name} is an executable or script file. Malicious email attachments commonly use this format to run code on your machine. Only open it if you trust the sender and expected this file.`
+      return i18next.t("attachments.openConfirm.blockMessage", { name })
     case "caution":
-      return `${name} is a macro-enabled Office document. Its macros can run code — only open it if you trust the sender and expected this file.`
+      return i18next.t("attachments.openConfirm.cautionMessage", { name })
     case "malicious": {
       const report = reportCounts(confirmation)
-      return `Opening ${name} was BLOCKED: the malware lookup reports this file as malicious${report}. Opening it could harm this machine.`
+      return i18next.t("attachments.openConfirm.maliciousMessage", {
+        name,
+        report,
+      })
     }
     case "suspicious": {
       const report = reportCounts(confirmation)
-      return `The malware lookup flagged ${name} as suspicious${report}. Open it only if you trust the sender.`
+      return i18next.t("attachments.openConfirm.suspiciousMessage", {
+        name,
+        report,
+      })
     }
   }
 }
@@ -228,24 +236,34 @@ function reportCounts(confirmation: OpenConfirmation): string {
   if (typeof maliciousCount !== "number" || typeof totalEngines !== "number") {
     return ""
   }
-  return ` (${maliciousCount} of ${totalEngines} engines flagged this file)`
+  return i18next.t("attachments.openConfirm.report", {
+    flagged: maliciousCount,
+    total: totalEngines,
+  })
 }
 
-const CONFIRM_TITLES: Record<OpenConfirmationKind, string> = {
-  block: "Dangerous attachment",
-  caution: "Possible macro document",
-  malicious: "Malware detected",
-  suspicious: "Suspicious attachment",
+/** Dialog title per risk kind (a function, so it follows the language). */
+function confirmTitle(kind: OpenConfirmationKind): string {
+  switch (kind) {
+    case "block":
+      return i18next.t("attachments.openConfirm.blockTitle")
+    case "caution":
+      return i18next.t("attachments.openConfirm.cautionTitle")
+    case "malicious":
+      return i18next.t("attachments.openConfirm.maliciousTitle")
+    case "suspicious":
+      return i18next.t("attachments.openConfirm.suspiciousTitle")
+  }
 }
 
 async function defaultConfirm(
   confirmation: OpenConfirmation
 ): Promise<boolean> {
   return ask(openConfirmationMessage(confirmation), {
-    title: CONFIRM_TITLES[confirmation.kind],
+    title: confirmTitle(confirmation.kind),
     kind: "warning",
-    okLabel: "Open anyway",
-    cancelLabel: "Cancel",
+    okLabel: i18next.t("attachments.openConfirm.openAnyway"),
+    cancelLabel: i18next.t("attachments.openConfirm.cancel"),
   })
 }
 

@@ -1,0 +1,42 @@
+{
+  "browser": {
+    "backToMailbox": "Back to mailbox",
+    "back": "Back",
+    "search": "Search contacts",
+    "searchPlaceholder": "Search by name or email",
+    "empty": "No contacts yet",
+    "emptyHint": "People you exchange mail with appear here automatically.",
+    "noMatches": "No contacts match “{{query}}”",
+    "noMatchesHint": "Search matches partial names and email addresses.",
+    "select": "Select a contact",
+    "selectHint": "Choose someone from the list to see their details."
+  },
+  "detail": {
+    "compose": "Compose to {{name}}",
+    "delete": "Delete contact {{name}}",
+    "knownTo": "Known to {{email}}",
+    "displayName": "Display name",
+    "saveName": "Save name",
+    "cancelNameEdit": "Cancel name edit",
+    "rename": "Rename",
+    "renameLabel": "Rename {{name}}",
+    "correspondence": "Correspondence",
+    "messageCount_one": "{{count}} message",
+    "messageCount_other": "{{count}} messages",
+    "lastContacted": "Last contacted",
+    "never": "Never",
+    "notes": "Notes",
+    "contactNotes": "Contact notes",
+    "notesPlaceholder": "Add a private note about this contact…",
+    "saveNotes": "Save notes",
+    "recentThreads": "Recent threads",
+    "noRecentThreads": "No recent threads with this contact."
+  },
+  "delete": {
+    "title": "Delete contact",
+    "description": "Delete <name>{{name}}</name>? Only the address-book entry is removed — the messages are not affected, and the contact reappears automatically if you correspond with them again.",
+    "cancel": "Cancel",
+    "confirm": "Delete",
+    "confirmLabel": "Confirm deleting {{name}}"
+  }
+}

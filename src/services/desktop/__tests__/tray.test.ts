@@ -1,14 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { invoke } from "@tauri-apps/api/core"
-import { listen, type Event, type EventCallback, type UnlistenFn } from "@tauri-apps/api/event"
+import {
+  listen,
+  type Event,
+  type EventCallback,
+  type UnlistenFn,
+} from "@tauri-apps/api/event"
 
 import {
   isAutostartEnabled,
   isTrayAvailable,
   onComposeRequest,
+  pushTrayLabels,
   setAutostartEnabled,
+  syncTrayLabels,
 } from "../tray"
+import { i18next } from "@/i18n"
 
 /**
  * Desktop-integration bridge (task 1.2, spec desktop-integration). Every
@@ -114,5 +122,48 @@ describe("compose request subscription", () => {
     const unlisten = await onComposeRequest(() => {})
     expect(typeof unlisten).toBe("function")
     expect(() => unlisten()).not.toThrow()
+  })
+})
+
+describe("tray labels", () => {
+  afterEach(async () => {
+    await i18next.changeLanguage("en")
+  })
+
+  it("pushes the localized menu labels and a {count} tooltip template", async () => {
+    invokeMock.mockResolvedValue(null)
+    await pushTrayLabels()
+    expect(invokeMock).toHaveBeenCalledWith("set_tray_labels", {
+      labels: {
+        open: "Open Emailer",
+        compose: "Compose",
+        quit: "Quit",
+        unreadTooltip: "Emailer — {count} unread",
+      },
+    })
+  })
+
+  it("re-pushes on a language change until unsubscribed", async () => {
+    invokeMock.mockResolvedValue(null)
+    const off = syncTrayLabels()
+    await i18next.changeLanguage("es")
+    expect(invokeMock).toHaveBeenLastCalledWith("set_tray_labels", {
+      labels: {
+        open: "Abrir Emailer",
+        compose: "Redactar",
+        quit: "Salir",
+        unreadTooltip: "Emailer — {count} sin leer",
+      },
+    })
+    off()
+    const calls = invokeMock.mock.calls.length
+    await i18next.changeLanguage("en")
+    expect(invokeMock.mock.calls.length).toBe(calls)
+  })
+
+  it("degrades to a no-op outside the Tauri runtime", async () => {
+    invokeMock.mockRejectedValue(new Error("no tauri"))
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    await expect(pushTrayLabels()).resolves.toBeUndefined()
   })
 })

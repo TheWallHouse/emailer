@@ -12,6 +12,10 @@
  * it. Cards stay short: two or three friendly sentences per paragraph.
  */
 
+import { i18next } from "@/i18n"
+
+import { HELP_CARDS_ES, type HelpCardTranslation } from "./content.es"
+
 /** Categories of the help center, in display (and catalog) order. */
 export type HelpCategory =
   | "Getting started"
@@ -1042,3 +1046,67 @@ export const HELP_CARDS: ReadonlyArray<HelpCard> = [
     ],
   },
 ]
+
+// -----------------------------------------------------------------------
+// Localization
+// -----------------------------------------------------------------------
+
+/**
+ * Translated card text per language (English is HELP_CARDS itself). A
+ * card missing from a translation falls back to its English text.
+ */
+const TRANSLATIONS: Readonly<
+  Record<string, Readonly<Record<string, HelpCardTranslation>>>
+> = {
+  es: HELP_CARDS_ES,
+}
+
+/** Catalog key (help.categories.*) of each category's display name. */
+const CATEGORY_KEYS = {
+  "Getting started": "gettingStarted",
+  "Reading & organizing": "reading",
+  Composing: "composing",
+  "AI assistance": "ai",
+  "Security & privacy": "security",
+  "Desktop integration": "desktop",
+} as const satisfies Record<HelpCategory, string>
+
+/**
+ * A category's display name in the active language. The HelpCategory
+ * values themselves are internal ids (they happen to be the English
+ * names) and must never be shown untranslated.
+ */
+export function helpCategoryLabel(category: HelpCategory): string {
+  return i18next.t(`help.categories.${CATEGORY_KEYS[category]}`)
+}
+
+/** Cache of localized catalogs, keyed by language. */
+const localizedCache = new Map<string, ReadonlyArray<HelpCard>>()
+
+/**
+ * The catalog in the active interface language (read at call time, never
+ * frozen at import). Ids, categories and order are the English catalog's;
+ * title/body come from the translation, and the keywords are the
+ * translated ones PLUS the English ones, so English search terms keep
+ * working in every language. English returns HELP_CARDS unchanged.
+ */
+export function getHelpCards(
+  language: string = i18next.language
+): ReadonlyArray<HelpCard> {
+  const translations = TRANSLATIONS[language.split("-")[0]]
+  if (!translations) return HELP_CARDS
+  const cached = localizedCache.get(language)
+  if (cached) return cached
+  const cards = HELP_CARDS.map((card): HelpCard => {
+    const translation = translations[card.id]
+    if (!translation) return card
+    return {
+      ...card,
+      title: translation.title,
+      body: translation.body,
+      keywords: [...new Set([...translation.keywords, ...card.keywords])],
+    }
+  })
+  localizedCache.set(language, cards)
+  return cards
+}

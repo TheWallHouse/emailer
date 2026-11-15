@@ -1,0 +1,26 @@
+{
+  "panel": {
+    "title": "Asistente de IA",
+    "consent": "Las respuestas se generan a partir de tu buzón con consultas de solo lectura. No se modifica nada.",
+    "newConversation": "Nueva conversación",
+    "close": "Cerrar el asistente",
+    "emptyHint": "Pregunta sobre tu buzón; por ejemplo, «busca todas las confirmaciones de mis vuelos».",
+    "toolActivity_one": "Ha buscado en el buzón ({{count}} consulta)",
+    "toolActivity_other": "Ha buscado en el buzón ({{count}} consultas)",
+    "regenerate": "Regenerar",
+    "busy": "Buscando en tu buzón…",
+    "retry": "Reintentar",
+    "sources": "Fuentes",
+    "inputLabel": "Escribe al asistente",
+    "inputPlaceholder": "Pregunta sobre tu buzón…",
+    "tokens_one": "≈ {{count}} token",
+    "tokens_other": "≈ {{count}} tokens",
+    "send": "Enviar",
+    "sending": "Enviando…"
+  },
+  "prompts": {
+    "flights": "Busca las confirmaciones de mis vuelos",
+    "promises": "¿Qué he prometido en la última semana?",
+    "newsletters": "Resume los boletines sin leer"
+  }
+}

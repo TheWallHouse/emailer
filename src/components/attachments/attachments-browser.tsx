@@ -14,7 +14,9 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
+import { i18next } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { EmptyState } from "@/components/email/empty-state"
 import { Button } from "@/components/ui/button"
@@ -61,8 +63,11 @@ import {
  * cache/download services (use-attachment-browser.ts).
  */
 export function AttachmentsBrowser() {
+  const { t } = useTranslation()
   const [query, setQuery] = useState("")
-  const [category, setCategory] = useState<AttachmentTypeCategory | "all">("all")
+  const [category, setCategory] = useState<AttachmentTypeCategory | "all">(
+    "all"
+  )
   const [layout, setLayout] = useState<"grid" | "list">("grid")
   // The entry whose inline preview is expanded (click an entry to toggle;
   // one at a time keeps the list calm and the fetches lazy per entry).
@@ -85,26 +90,26 @@ export function AttachmentsBrowser() {
         <Button
           variant="ghost"
           size="sm"
-          aria-label="Back to mailbox"
+          aria-label={t("attachments.browser.backToMailbox")}
           onClick={() => setView(previousView)}
         >
           <ArrowLeft />
-          Back
+          {t("attachments.browser.back")}
         </Button>
         <h1 className="truncate text-xl font-bold text-foreground">
-          Attachments
+          {t("common.views.attachments")}
         </h1>
         {/* Grid/list presentation toggle (the pane-header segmented
             control pattern). */}
         <div
           role="group"
-          aria-label="Presentation"
+          aria-label={t("attachments.browser.presentation")}
           data-testid="attachments-layout-toggle"
           className="ml-auto flex items-center rounded-lg border bg-muted/40 p-0.5 text-xs"
         >
           <button
             type="button"
-            aria-label="Grid view"
+            aria-label={t("attachments.browser.gridView")}
             aria-pressed={layout === "grid"}
             data-testid="attachments-layout-grid"
             className={cn(
@@ -119,7 +124,7 @@ export function AttachmentsBrowser() {
           </button>
           <button
             type="button"
-            aria-label="List view"
+            aria-label={t("attachments.browser.listView")}
             aria-pressed={layout === "list"}
             data-testid="attachments-layout-list"
             className={cn(
@@ -144,17 +149,17 @@ export function AttachmentsBrowser() {
             className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
-            aria-label="Search attachments"
+            aria-label={t("attachments.browser.search")}
             data-testid="attachments-search"
             value={query}
-            placeholder="Search by filename"
+            placeholder={t("attachments.browser.searchPlaceholder")}
             className="pl-8"
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
         <div
           role="group"
-          aria-label="Filter by type"
+          aria-label={t("attachments.browser.filterByType")}
           data-testid="attachments-type-filter"
           className="flex flex-wrap items-center gap-1"
         >
@@ -183,14 +188,14 @@ export function AttachmentsBrowser() {
         {attachments.length === 0 ? (
           <EmptyState
             icon={Paperclip}
-            title="No attachments yet"
-            hint="Attachments from this account's mail appear here automatically."
+            title={t("attachments.browser.empty")}
+            hint={t("attachments.browser.emptyHint")}
           />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Search}
-            title={`No attachments match “${query.trim()}”`}
-            hint="Search matches attachment filenames; try another term or type filter."
+            title={t("attachments.browser.noMatches", { query: query.trim() })}
+            hint={t("attachments.browser.noMatchesHint")}
           />
         ) : layout === "grid" ? (
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3 p-3">
@@ -256,7 +261,11 @@ function renderTypeIcon(
 
 /** Shared per-entry data line: sender · date (the row's secondary text). */
 function entrySender(entry: AccountAttachmentRow): string {
-  return entry.from_name ?? entry.from_address ?? "Unknown sender"
+  return (
+    entry.from_name ??
+    entry.from_address ??
+    i18next.t("attachments.entry.unknownSender")
+  )
 }
 
 function AttachmentActions({
@@ -266,6 +275,7 @@ function AttachmentActions({
   entry: AccountAttachmentRow
   className?: string
 }) {
+  const { t } = useTranslation()
   const [saving, setSaving] = useState(false)
   return (
     <div className={cn("flex shrink-0 items-center gap-1", className)}>
@@ -281,7 +291,7 @@ function AttachmentActions({
         }}
       >
         <Save className="size-3.5" />
-        {saving ? "Saving…" : "Save"}
+        {saving ? t("attachments.entry.saving") : t("attachments.entry.save")}
       </Button>
       <Button
         variant="ghost"
@@ -291,7 +301,7 @@ function AttachmentActions({
         onClick={() => openAttachmentSourceMessage(entry.thread_id)}
       >
         <Mail className="size-3.5" />
-        Show in message
+        {t("attachments.entry.showInMessage")}
       </Button>
     </div>
   )
@@ -306,6 +316,7 @@ function AttachmentCard({
   previewed: boolean
   onTogglePreview: () => void
 }) {
+  const { t } = useTranslation()
   const category = attachmentTypeCategory(entry)
   return (
     <div
@@ -333,7 +344,7 @@ function AttachmentCard({
         </span>
         <span className="grid min-w-0 gap-0.5">
           <span className="truncate text-sm font-medium">
-            {entry.filename || "(unnamed)"}
+            {entry.filename || t("attachments.entry.unnamed")}
           </span>
           <span className="truncate text-xs text-muted-foreground">
             {entrySender(entry)}
@@ -344,10 +355,7 @@ function AttachmentCard({
           <span>{humanFileSize(entry.size)}</span>
         </span>
       </button>
-      <AttachmentActions
-        entry={entry}
-        className="border-t px-1.5 py-1"
-      />
+      <AttachmentActions entry={entry} className="border-t px-1.5 py-1" />
     </div>
   )
 }
@@ -361,6 +369,7 @@ function AttachmentListRow({
   previewed: boolean
   onTogglePreview: () => void
 }) {
+  const { t } = useTranslation()
   const category = attachmentTypeCategory(entry)
   return (
     <div
@@ -381,7 +390,7 @@ function AttachmentListRow({
           {renderTypeIcon(category, "size-4 shrink-0 text-muted-foreground")}
           <span className="grid min-w-0 flex-1 gap-0">
             <span className="truncate text-sm font-medium">
-              {entry.filename || "(unnamed)"}
+              {entry.filename || t("attachments.entry.unnamed")}
             </span>
             <span className="truncate text-xs text-muted-foreground">
               {entrySender(entry)}
@@ -418,10 +427,14 @@ type PreviewState =
  * composer preview's WKWebView-safe approach, task 2.8).
  */
 function AttachmentInlinePreview({ entry }: { entry: AccountAttachmentRow }) {
+  const { t } = useTranslation()
   // "loading" is the initial stage; the fetch promise below settles into
   // ready/error (the parent keys this component by entry id, so a new
   // entry remounts instead of reusing a stale stage).
   const [state, setState] = useState<PreviewState>({ stage: "loading" })
+  const previewLabel = t("attachments.preview.label", {
+    name: entry.filename || t("attachments.preview.attachment"),
+  })
   const kind = attachmentPreviewKind({
     name: entry.filename ?? "",
     mimeType: entry.mime_type ?? undefined,
@@ -460,17 +473,19 @@ function AttachmentInlinePreview({ entry }: { entry: AccountAttachmentRow }) {
       className="flex w-full items-center justify-center"
     >
       {state.stage === "loading" && (
-        <p className="text-xs text-muted-foreground">Loading preview…</p>
+        <p className="text-xs text-muted-foreground">
+          {t("attachments.preview.loading")}
+        </p>
       )}
       {state.stage === "error" && (
         <p className="text-xs text-destructive">
-          Could not load a preview of this file.
+          {t("attachments.preview.failed")}
         </p>
       )}
       {state.stage === "ready" && kind === "image" && objectUrl && (
         <img
           src={objectUrl}
-          alt={`Preview of ${entry.filename || "attachment"}`}
+          alt={previewLabel}
           data-testid="attachment-preview-image"
           className="max-h-48 max-w-full rounded-md"
         />
@@ -479,14 +494,14 @@ function AttachmentInlinePreview({ entry }: { entry: AccountAttachmentRow }) {
         <object
           data={attachmentPdfDataUrl(state.bytes)}
           type="application/pdf"
-          aria-label={`Preview of ${entry.filename || "attachment"}`}
+          aria-label={previewLabel}
           data-testid="attachment-preview-pdf"
           className="h-48 w-full rounded-md"
         />
       )}
       {state.stage === "ready" && kind === "other" && (
         <p className="text-xs text-muted-foreground">
-          No inline preview for this file type — use Save to keep a copy.
+          {t("attachments.preview.unsupported")}
         </p>
       )}
     </div>

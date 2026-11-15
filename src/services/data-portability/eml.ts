@@ -2,6 +2,8 @@ import { open as openFileDialog } from "@tauri-apps/plugin-dialog"
 import { writeFile as fsWriteFile } from "@tauri-apps/plugin-fs"
 import { join } from "@tauri-apps/api/path"
 
+import { i18next } from "@/i18n"
+
 import { createPluginCacheFs, type CacheFs } from "../attachments/cache"
 import type { SqlExecutor } from "../db/executor"
 import type { AttachmentRow, ContactRef } from "../db/messages"
@@ -408,7 +410,7 @@ async function defaultPickDirectory(): Promise<string | null> {
   return openFileDialog({
     directory: true,
     multiple: false,
-    title: "Choose export folder",
+    title: i18next.t("system.dialogs.chooseExportFolder"),
   })
 }
 

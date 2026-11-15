@@ -1,0 +1,29 @@
+{
+  "app": {
+    "loading": "Cargando…",
+    "initFailed": "No se ha podido inicializar la base de datos local. {{error}}"
+  },
+  "ui": {
+    "close": "Cerrar",
+    "more": "Más",
+    "commandPalette": "Paleta de comandos",
+    "commandPaletteDescription": "Busca un comando para ejecutarlo..."
+  },
+  "notifications": {
+    "newMail": "Correo nuevo",
+    "newMailBody_one": "{{count}} mensaje nuevo para {{email}}",
+    "newMailBody_other": "{{count}} mensajes nuevos para {{email}}"
+  },
+  "dialogs": {
+    "chooseExportFolder": "Elige la carpeta de exportación",
+    "chooseImportFiles": "Elige los archivos de correo que quieres importar",
+    "emailFiles": "Archivos de correo",
+    "chooseBackupDestination": "Elige dónde guardar la copia de seguridad",
+    "chooseBackupFile": "Elige un archivo de copia de seguridad",
+    "backupFiles": "Copias de seguridad de Emailer"
+  },
+  "windows": {
+    "print": "Imprimir",
+    "composer": "Redactar"
+  }
+}

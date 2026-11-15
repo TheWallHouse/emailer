@@ -4,6 +4,8 @@ import {
   sendNotification,
 } from "@tauri-apps/plugin-notification"
 
+import { i18next } from "@/i18n"
+
 import { getExecutor } from "../db/executor"
 import {
   getNotificationsEnabled,
@@ -139,11 +141,11 @@ export async function notifyNewMail(event: NewMailEvent): Promise<void> {
   lastNotifiedAt.set(event.accountId, Date.now())
   try {
     sendNotification({
-      title: "New mail",
-      body:
-        event.count === 1
-          ? `1 new message for ${event.accountEmail}`
-          : `${event.count} new messages for ${event.accountEmail}`,
+      title: i18next.t("system.notifications.newMail"),
+      body: i18next.t("system.notifications.newMailBody", {
+        count: event.count,
+        email: event.accountEmail,
+      }),
     })
     // Only here — the banner is out, so the chime may follow (sounds.ts
     // still honors its own toggle and never throws).

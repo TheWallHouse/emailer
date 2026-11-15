@@ -1,0 +1,59 @@
+{
+  "browser": {
+    "backToMailbox": "Back to mailbox",
+    "back": "Back",
+    "presentation": "Presentation",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "search": "Search attachments",
+    "searchPlaceholder": "Search by filename",
+    "filterByType": "Filter by type",
+    "empty": "No attachments yet",
+    "emptyHint": "Attachments from this account's mail appear here automatically.",
+    "noMatches": "No attachments match “{{query}}”",
+    "noMatchesHint": "Search matches attachment filenames; try another term or type filter."
+  },
+  "categories": {
+    "all": "All",
+    "images": "Images",
+    "pdfs": "PDFs",
+    "documents": "Documents",
+    "spreadsheets": "Spreadsheets",
+    "archives": "Archives",
+    "other": "Other"
+  },
+  "entry": {
+    "unknownSender": "Unknown sender",
+    "unnamed": "(unnamed)",
+    "save": "Save",
+    "saving": "Saving…",
+    "showInMessage": "Show in message"
+  },
+  "preview": {
+    "loading": "Loading preview…",
+    "failed": "Could not load a preview of this file.",
+    "label": "Preview of {{name}}",
+    "attachment": "attachment",
+    "unsupported": "No inline preview for this file type — use Save to keep a copy."
+  },
+  "toasts": {
+    "saved": "Saved {{name}} to {{path}}",
+    "attachment": "attachment",
+    "saveFailed": "Could not save {{name}}.",
+    "saveFailedUnnamed": "Could not save this attachment."
+  },
+  "openConfirm": {
+    "thisFile": "This file",
+    "blockTitle": "Dangerous attachment",
+    "cautionTitle": "Possible macro document",
+    "maliciousTitle": "Malware detected",
+    "suspiciousTitle": "Suspicious attachment",
+    "blockMessage": "{{name}} is an executable or script file. Malicious email attachments commonly use this format to run code on your machine. Only open it if you trust the sender and expected this file.",
+    "cautionMessage": "{{name}} is a macro-enabled Office document. Its macros can run code — only open it if you trust the sender and expected this file.",
+    "maliciousMessage": "Opening {{name}} was BLOCKED: the malware lookup reports this file as malicious{{report}}. Opening it could harm this machine.",
+    "suspiciousMessage": "The malware lookup flagged {{name}} as suspicious{{report}}. Open it only if you trust the sender.",
+    "report": " ({{flagged}} of {{total}} engines flagged this file)",
+    "openAnyway": "Open anyway",
+    "cancel": "Cancel"
+  }
+}

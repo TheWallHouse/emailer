@@ -1,14 +1,29 @@
 import { invoke } from "@tauri-apps/api/core"
-import { open as openFileDialog, save as saveFileDialog } from "@tauri-apps/plugin-dialog"
+import {
+  open as openFileDialog,
+  save as saveFileDialog,
+} from "@tauri-apps/plugin-dialog"
 import { remove as fsRemove } from "@tauri-apps/plugin-fs"
 import { join as joinPath, tempDir } from "@tauri-apps/api/path"
 import Database from "@tauri-apps/plugin-sql"
 
+import { i18next } from "@/i18n"
 import { flagAllAccountsForReauth } from "../db/accounts"
-import { createStrippedSnapshot, type SnapshotStripSummary } from "../db/backup-snapshot"
+import {
+  createStrippedSnapshot,
+  type SnapshotStripSummary,
+} from "../db/backup-snapshot"
 import { closeDatabase, initDatabase } from "../db/connection"
-import { createTauriExecutor, getExecutor, type SqlExecutor } from "../db/executor"
-import { mergeSnapshotInto, RestoreCancelledError, type MergeSummary } from "./backup-merge"
+import {
+  createTauriExecutor,
+  getExecutor,
+  type SqlExecutor,
+} from "../db/executor"
+import {
+  mergeSnapshotInto,
+  RestoreCancelledError,
+  type MergeSummary,
+} from "./backup-merge"
 import { useAccountStore } from "../../stores/account-store"
 
 /**
@@ -159,9 +174,14 @@ async function defaultPickDestination(
   suggestedName: string
 ): Promise<string | null> {
   return saveFileDialog({
-    title: "Choose where to save your backup",
+    title: i18next.t("system.dialogs.chooseBackupDestination"),
     defaultPath: suggestedName,
-    filters: [{ name: "Emailer backups", extensions: [BACKUP_FILE_EXTENSION] }],
+    filters: [
+      {
+        name: i18next.t("system.dialogs.backupFiles"),
+        extensions: [BACKUP_FILE_EXTENSION],
+      },
+    ],
   })
 }
 
@@ -279,7 +299,9 @@ export async function inspectBackupArchive(
   return manifestInfo(verified.manifest)
 }
 
-async function defaultVerifyArchive(archivePath: string): Promise<VerifiedArchive> {
+async function defaultVerifyArchive(
+  archivePath: string
+): Promise<VerifiedArchive> {
   try {
     return await invoke<VerifiedArchive>("verify_backup_archive", {
       archivePath,
@@ -420,10 +442,7 @@ export async function restoreBackup(
 }
 
 async function defaultMakeScratchDir(): Promise<string> {
-  return joinPath(
-    await tempDir(),
-    `emailer-restore-${crypto.randomUUID()}`
-  )
+  return joinPath(await tempDir(), `emailer-restore-${crypto.randomUUID()}`)
 }
 
 async function defaultRemoveDir(path: string): Promise<void> {
@@ -484,7 +503,9 @@ async function restoreMerge(
   deps: RestoreBackupDeps
 ): Promise<RestoreResult> {
   const executor = deps.executor ?? getExecutor()
-  const snapshot = await (deps.loadSnapshot ?? defaultLoadSnapshot)(snapshotPath)
+  const snapshot = await (deps.loadSnapshot ?? defaultLoadSnapshot)(
+    snapshotPath
+  )
   try {
     // One transaction inside — a cancel or failure leaves the live data
     // byte-identical (RestoreCancelledError included).
@@ -506,8 +527,13 @@ async function restoreMerge(
 export async function pickBackupArchive(): Promise<string | null> {
   return openFileDialog({
     multiple: false,
-    title: "Choose a backup file",
-    filters: [{ name: "Emailer backups", extensions: [BACKUP_FILE_EXTENSION] }],
+    title: i18next.t("system.dialogs.chooseBackupFile"),
+    filters: [
+      {
+        name: i18next.t("system.dialogs.backupFiles"),
+        extensions: [BACKUP_FILE_EXTENSION],
+      },
+    ],
   })
 }
 

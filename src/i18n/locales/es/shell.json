@@ -15,5 +15,11 @@
     "label": "Filtrar conversaciones",
     "allMail": "Todo el correo",
     "unread": "No leídos"
+  },
+  "tray": {
+    "open": "Abrir Emailer",
+    "compose": "Redactar",
+    "quit": "Salir",
+    "unreadTooltip": "Emailer — {{n}} sin leer"
   }
 }

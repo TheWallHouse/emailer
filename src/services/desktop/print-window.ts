@@ -1,3 +1,4 @@
+import { i18next } from "@/i18n"
 import { currentWindowLabel, isTauriRuntime } from "@/services/desktop/popout"
 
 /**
@@ -32,8 +33,7 @@ export const PRINT_POPOUT_LABEL_PREFIX = "popout-print-"
 /** What a print run covers: the open message only (the default) or the
  * whole conversation (the reading-pane dialog's secondary choice). */
 export type PrintScope =
-  | { kind: "thread" }
-  | { kind: "message"; messageId: string }
+  { kind: "thread" } | { kind: "message"; messageId: string }
 
 /** The print run a `popout-print-*` window was opened for. */
 export interface PrintWindowContext {
@@ -133,7 +133,7 @@ export async function openPrintWindow(
     }
     const window = new WebviewWindow(label, {
       url: "index.html",
-      title: "Print",
+      title: i18next.t("system.windows.print"),
       width: 760,
       height: 840,
       center: true,

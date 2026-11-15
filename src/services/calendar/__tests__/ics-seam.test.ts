@@ -30,17 +30,14 @@ import { createCalendarSource } from "./calendar-fixtures"
 import { useOnlineStore } from "../../../stores/online-store"
 import {
   addIcsEventToCalendar,
-  CALDAV_RSVP_UNSUPPORTED_MESSAGE,
+  caldavRsvpUnsupportedMessage,
   listIcsCalendarSources,
   readCalendarSources,
   respondToInvitation,
   type CalendarSourceChoice,
   type RespondToInvitationResult,
 } from "../ics-seam"
-import type {
-  EventWriteInput,
-  EventWriteResult,
-} from "../event-writes"
+import type { EventWriteInput, EventWriteResult } from "../event-writes"
 import type { CalendarEvent } from "../events"
 
 const stubExecutor = { marker: "test-executor" } as unknown as SqlExecutor
@@ -96,10 +93,7 @@ describe("addIcsEventToCalendar (task 5.4 bodies)", () => {
   const created: unknown[] = []
   /** The injected write layer: records the input, answers success. */
   const createEventFake = vi.fn<
-    (
-      executor: SqlExecutor,
-      input: EventWriteInput
-    ) => Promise<EventWriteResult>
+    (executor: SqlExecutor, input: EventWriteInput) => Promise<EventWriteResult>
   >(async () => ({ ok: true, event: WRITTEN_EVENT }))
 
   function source(id: string): CalendarSourceChoice {
@@ -134,11 +128,15 @@ describe("addIcsEventToCalendar (task 5.4 bodies)", () => {
 
   it("degrades a failing source listing to no-source instead of throwing", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    const result = await addIcsEventToCalendar(executor, { ics: TIMED_INVITE }, {
-      listSources: async () => {
-        throw new Error("db gone")
-      },
-    })
+    const result = await addIcsEventToCalendar(
+      executor,
+      { ics: TIMED_INVITE },
+      {
+        listSources: async () => {
+          throw new Error("db gone")
+        },
+      }
+    )
     expect(result).toEqual({ ok: false, reason: "no-source" })
     expect(warn).toHaveBeenCalled()
   })
@@ -201,7 +199,10 @@ describe("addIcsEventToCalendar (task 5.4 bodies)", () => {
     const result = await addIcsEventToCalendar(
       executor,
       { ics: "not a calendar" },
-      { listSources: async () => [source("src-1")], createEvent: createEventFake }
+      {
+        listSources: async () => [source("src-1")],
+        createEvent: createEventFake,
+      }
     )
     expect(result).toMatchObject({ ok: false, reason: "invalid" })
     expect(createEventFake).not.toHaveBeenCalled()
@@ -211,7 +212,10 @@ describe("addIcsEventToCalendar (task 5.4 bodies)", () => {
     const result = await addIcsEventToCalendar(
       executor,
       { ics: "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n" },
-      { listSources: async () => [source("src-1")], createEvent: createEventFake }
+      {
+        listSources: async () => [source("src-1")],
+        createEvent: createEventFake,
+      }
     )
     expect(result).toMatchObject({ ok: false, reason: "no-event" })
     expect(createEventFake).not.toHaveBeenCalled()
@@ -278,7 +282,7 @@ describe("respondToInvitation (task 5.4 bodies)", () => {
     expect(result.ok).toBe(false)
     if (!result.ok) {
       expect(result.reason).toBe("unsupported")
-      expect(result.message).toBe(CALDAV_RSVP_UNSUPPORTED_MESSAGE)
+      expect(result.message).toBe(caldavRsvpUnsupportedMessage())
     }
   })
 
@@ -297,7 +301,10 @@ describe("respondToInvitation (task 5.4 bodies)", () => {
   it("answers no-event when the invitation carries no UID", async () => {
     const result = await respondToInvitation(
       executor,
-      { ics: "BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nEND:VCALENDAR\r\n", response: "no" },
+      {
+        ics: "BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nEND:VCALENDAR\r\n",
+        response: "no",
+      },
       { listSources: async () => [source("src-1")] }
     )
     expect(result).toMatchObject({ ok: false, reason: "no-event" })
@@ -320,9 +327,7 @@ describe("respondToInvitation (task 5.4 bodies)", () => {
 
 describe("listIcsCalendarSources", () => {
   it("uses the injected source listing when provided", async () => {
-    const choices = [
-      { id: "src-1", name: "Work", provider: "google" as const },
-    ]
+    const choices = [{ id: "src-1", name: "Work", provider: "google" as const }]
     const sources = await listIcsCalendarSources(stubExecutor, {
       listSources: async () => choices,
     })

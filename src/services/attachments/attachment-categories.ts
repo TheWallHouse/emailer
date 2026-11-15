@@ -1,3 +1,5 @@
+import { i18next } from "@/i18n"
+
 import type { AccountAttachmentRow } from "../db/attachment-search"
 
 /**
@@ -15,12 +17,7 @@ import type { AccountAttachmentRow } from "../db/attachment-search"
  */
 
 export type AttachmentTypeCategory =
-  | "images"
-  | "pdfs"
-  | "documents"
-  | "spreadsheets"
-  | "archives"
-  | "other"
+  "images" | "pdfs" | "documents" | "spreadsheets" | "archives" | "other"
 
 /** Filter-chip order: "all" renders first, then these. */
 export const ATTACHMENT_TYPE_CATEGORIES: readonly AttachmentTypeCategory[] = [
@@ -38,19 +35,19 @@ export function attachmentCategoryLabel(
 ): string {
   switch (category) {
     case "all":
-      return "All"
+      return i18next.t("attachments.categories.all")
     case "images":
-      return "Images"
+      return i18next.t("attachments.categories.images")
     case "pdfs":
-      return "PDFs"
+      return i18next.t("attachments.categories.pdfs")
     case "documents":
-      return "Documents"
+      return i18next.t("attachments.categories.documents")
     case "spreadsheets":
-      return "Spreadsheets"
+      return i18next.t("attachments.categories.spreadsheets")
     case "archives":
-      return "Archives"
+      return i18next.t("attachments.categories.archives")
     case "other":
-      return "Other"
+      return i18next.t("attachments.categories.other")
   }
 }
 
@@ -81,7 +78,15 @@ const DOCUMENT_EXTENSIONS = new Set([
   "txt",
 ])
 const SPREADSHEET_EXTENSIONS = new Set(["csv", "numbers", "ods", "xls", "xlsx"])
-const ARCHIVE_EXTENSIONS = new Set(["7z", "bz2", "gz", "rar", "tar", "tgz", "zip"])
+const ARCHIVE_EXTENSIONS = new Set([
+  "7z",
+  "bz2",
+  "gz",
+  "rar",
+  "tar",
+  "tgz",
+  "zip",
+])
 
 function extensionOf(filename: string | null): string | null {
   if (!filename) return null
@@ -170,14 +175,16 @@ export function filterAccountAttachments(
   attachments: AccountAttachmentRow[],
   filter: AttachmentBrowserFilter
 ): AccountAttachmentRow[] {
-  return attachments
-    .filter(
-      (attachment) =>
-        (filter.category === "all" ||
-          attachmentTypeCategory(attachment) === filter.category) &&
-        matchesAttachmentSearch(attachment, filter.query)
-    )
-    // Newest message first. Array#sort is stable, so equal dates keep the
-    // db query's insertion ordering (listAccountAttachments' rowid tiebreak).
-    .sort((a, b) => b.message_date - a.message_date)
+  return (
+    attachments
+      .filter(
+        (attachment) =>
+          (filter.category === "all" ||
+            attachmentTypeCategory(attachment) === filter.category) &&
+          matchesAttachmentSearch(attachment, filter.query)
+      )
+      // Newest message first. Array#sort is stable, so equal dates keep the
+      // db query's insertion ordering (listAccountAttachments' rowid tiebreak).
+      .sort((a, b) => b.message_date - a.message_date)
+  )
 }

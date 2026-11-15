@@ -10,13 +10,16 @@
  * Extraction scans http(s) URLs in the given text IN ORDER and returns
  * the first one whose host matches the curated list. Dial-in-only text
  * (no URL) matches the tel:/dial-in pattern and is surfaced as a plain
- * label without a clickable URL. Pure and dependency-free.
+ * label without a clickable URL. Pure (the dial-in label is read from the
+ * i18n catalog at call time).
  */
+
+import { i18next } from "@/i18n"
 
 /** A found join affordance. `url` is null for dial-in-only matches. */
 export interface JoinLink {
   url: string | null
-  /** Human label — the provider name ("Zoom") or "Dial-in". */
+  /** Human label — the provider name ("Zoom") or the localized "Dial-in". */
   label: string
 }
 
@@ -35,7 +38,8 @@ const VIDEO_HOSTS: { suffix: string; label: string }[] = [
 ]
 
 /** Dial-in affordances without a URL: tel: links and the "Dial-in"/"One-tap" wording organizers embed. */
-const DIAL_IN_PATTERN = /\btel:[+\d][^\s,;)]*|(?:^|\n)\s*(?:dial[- ]?in|one[- ]tap|call[- ]in)\b/i
+const DIAL_IN_PATTERN =
+  /\btel:[+\d][^\s,;)]*|(?:^|\n)\s*(?:dial[- ]?in|one[- ]tap|call[- ]in)\b/i
 
 /** Every http(s) URL in the text, in order (trailing punctuation stripped — sentences end with periods). */
 function extractUrls(text: string): string[] {
@@ -64,7 +68,9 @@ function hostMatchesSuffix(host: string, suffix: string): boolean {
  * patterns are matched only when no video URL was found. Null when the
  * text carries neither.
  */
-export function extractJoinLink(...surfaces: (string | null | undefined)[]): JoinLink | null {
+export function extractJoinLink(
+  ...surfaces: (string | null | undefined)[]
+): JoinLink | null {
   for (const surface of surfaces) {
     if (!surface) continue
     for (const url of extractUrls(surface)) {
@@ -84,7 +90,7 @@ export function extractJoinLink(...surfaces: (string | null | undefined)[]): Joi
       const tel = match[0]
       return {
         url: tel.startsWith("tel:") ? tel : null,
-        label: "Dial-in",
+        label: i18next.t("calendar.joinLinks.dialIn"),
       }
     }
   }

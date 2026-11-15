@@ -1,6 +1,7 @@
 import {
-  HELP_CARDS,
   HELP_CATEGORIES,
+  getHelpCards,
+  helpCategoryLabel,
   type HelpCard,
   type HelpCategory,
 } from "./content"
@@ -16,7 +17,10 @@ import {
  *   keyword exact > keyword prefix > keyword substring
  *     > title substring > category substring > body substring
  *
- * All comparisons are case-insensitive. An empty (or whitespace-only)
+ * All comparisons are case- and accent-insensitive, and run over the
+ * catalog in the active interface language (getHelpCards), whose
+ * keywords also carry the English ones — so "posponer" and "snooze" both
+ * find the snooze card in Spanish. An empty (or whitespace-only)
  * query matches everything, returning the full catalog in its bundled
  * order — which is already grouped by category — so the component can
  * treat "browse" as the degenerate case of "search".
@@ -36,9 +40,18 @@ const TITLE_SCORE = 30
 const CATEGORY_SCORE = 15
 const BODY_SCORE = 10
 
-/** Pre-lowercased search text for one card (computed once per call). */
+/** Lowercase and strip diacritics ("Búsqueda" → "busqueda"). */
+function fold(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
+}
+
+/** Pre-folded search text for one card (computed once per call). */
 interface IndexedCard {
   card: HelpCard
+  keywords: string[]
   title: string
   category: string
   body: string
@@ -47,17 +60,17 @@ interface IndexedCard {
 function indexCard(card: HelpCard): IndexedCard {
   return {
     card,
-    title: card.title.toLowerCase(),
-    category: card.category.toLowerCase(),
-    body: card.body.join(" ").toLowerCase(),
+    keywords: card.keywords.map(fold),
+    title: fold(card.title),
+    category: fold(helpCategoryLabel(card.category)),
+    body: fold(card.body.join(" ")),
   }
 }
 
 /** Best score one query term earns on one card, or 0 when it misses. */
 function termScore(term: string, indexed: IndexedCard): number {
   let best = 0
-  for (const keyword of indexed.card.keywords) {
-    const kw = keyword.toLowerCase()
+  for (const kw of indexed.keywords) {
     if (kw === term) best = Math.max(best, KEYWORD_EXACT_SCORE)
     else if (kw.startsWith(term)) best = Math.max(best, KEYWORD_PREFIX_SCORE)
     else if (kw.includes(term)) best = Math.max(best, KEYWORD_SUBSTRING_SCORE)
@@ -76,23 +89,23 @@ function termScore(term: string, indexed: IndexedCard): number {
 
 /** The query's terms, lowercased; empty for an empty/whitespace query. */
 function queryTerms(query: string): string[] {
-  return query
-    .trim()
-    .toLowerCase()
+  return fold(query.trim())
     .split(/\s+/)
     .filter((term) => term.length > 0)
 }
 
 /**
- * Search the catalog. Ranked matches for a non-empty query (every term
+ * Search the catalog (in `language`, default: the active interface
+ * language). Ranked matches for a non-empty query (every term
  * must hit; ties keep the catalog order); the whole catalog, in its
  * bundled category-grouped order, for an empty query.
  */
-export function searchHelpCards(query: string): HelpCard[] {
+export function searchHelpCards(query: string, language?: string): HelpCard[] {
   const terms = queryTerms(query)
-  if (terms.length === 0) return [...HELP_CARDS]
+  const cards = getHelpCards(language)
+  if (terms.length === 0) return [...cards]
 
-  const indexed = HELP_CARDS.map(indexCard)
+  const indexed = cards.map(indexCard)
   const scored: { card: HelpCard; index: number; score: number }[] = []
   indexed.forEach((entry, index) => {
     let total = 0
@@ -114,7 +127,9 @@ export function searchHelpCards(query: string): HelpCard[] {
  * the order they arrive in within their group; categories with no cards
  * are omitted.
  */
-export function groupHelpCards(cards: ReadonlyArray<HelpCard>): HelpCardGroup[] {
+export function groupHelpCards(
+  cards: ReadonlyArray<HelpCard>
+): HelpCardGroup[] {
   const byCategory = new Map<HelpCategory, HelpCard[]>()
   for (const card of cards) {
     const list = byCategory.get(card.category)
@@ -137,6 +152,9 @@ export function groupHelpCards(cards: ReadonlyArray<HelpCard>): HelpCardGroup[] 
  * point. Empty query → every card, grouped by category; a query → the
  * ranked matches, grouped the same way.
  */
-export function searchHelpGrouped(query: string): HelpCardGroup[] {
-  return groupHelpCards(searchHelpCards(query))
+export function searchHelpGrouped(
+  query: string,
+  language?: string
+): HelpCardGroup[] {
+  return groupHelpCards(searchHelpCards(query, language))
 }

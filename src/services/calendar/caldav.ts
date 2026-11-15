@@ -1,3 +1,4 @@
+import { i18next } from "@/i18n"
 import { invoke } from "@tauri-apps/api/core"
 
 import { decryptCredentials, encryptCredentials } from "../crypto/credentials"
@@ -570,10 +571,12 @@ async function pruneStaleEvents(
   let removed = 0
   for (const row of existing) {
     if (keep.has(row.uid)) continue
-    removed += await executor.execute(
-      "DELETE FROM calendar_events WHERE source_id = $1 AND calendar_id = $2 AND uid = $3",
-      [sourceId, calendarId, row.uid]
-    ).then((result) => result.rowsAffected)
+    removed += await executor
+      .execute(
+        "DELETE FROM calendar_events WHERE source_id = $1 AND calendar_id = $2 AND uid = $3",
+        [sourceId, calendarId, row.uid]
+      )
+      .then((result) => result.rowsAffected)
   }
   return removed
 }
@@ -624,9 +627,7 @@ export async function syncCaldavSource(
     !envelope.appPassword ||
     !Array.isArray(envelope.calendarPaths)
   ) {
-    throw new Error(
-      "No stored CalDAV connection details for this source; re-connect it"
-    )
+    throw new Error(i18next.t("calendar.errors.caldavNoConfig"))
   }
   const credentials: CaldavCallCredentials = {
     serverUrl: envelope.serverUrl,
@@ -684,10 +685,12 @@ export async function syncCaldavSource(
         // uid candidate (module comment on the approximation).
         for (const href of page.removed) {
           const uid = removedHrefToUid(href)
-          base.removed += await executor.execute(
-            "DELETE FROM calendar_events WHERE source_id = $1 AND calendar_id = $2 AND uid = $3",
-            [source.id, calendarPath, uid]
-          ).then((result) => result.rowsAffected)
+          base.removed += await executor
+            .execute(
+              "DELETE FROM calendar_events WHERE source_id = $1 AND calendar_id = $2 AND uid = $3",
+              [source.id, calendarPath, uid]
+            )
+            .then((result) => result.rowsAffected)
         }
       }
 
@@ -698,8 +701,7 @@ export async function syncCaldavSource(
     } catch (error) {
       // The per-source error surface: record the specific failure on the
       // calendar's sync state and keep syncing the other calendars.
-      base.error =
-        error instanceof Error ? error.message : String(error)
+      base.error = error instanceof Error ? error.message : String(error)
       await updateStoredSyncToken(executor, source.id, calendarPath, {
         lastError: base.error,
       })
@@ -716,9 +718,8 @@ async function getStoredSyncToken(
   sourceId: string,
   calendarPath: string
 ): Promise<string | undefined> {
-  const token = (await getCalendarSyncState(executor, sourceId))[
-    calendarPath
-  ]?.nextSyncToken
+  const token = (await getCalendarSyncState(executor, sourceId))[calendarPath]
+    ?.nextSyncToken
   return token && token.length > 0 ? token : undefined
 }
 

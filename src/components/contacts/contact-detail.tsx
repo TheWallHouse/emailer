@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Check, Pencil, SquarePen, Trash2, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { AccountBadge } from "@/components/email/account-badge"
 import { formatFullTimestamp } from "@/components/email/message-utils"
@@ -48,6 +49,7 @@ export function ContactDetail({
   account,
   onDeleted,
 }: ContactDetailProps) {
+  const { t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
   const threads = useContactThreads(contact)
   const displayName = contactDisplayName(contact)
@@ -69,8 +71,10 @@ export function ContactDetail({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Compose to ${displayName}`}
-                    title={`Compose to ${displayName}`}
+                    aria-label={t("contacts.detail.compose", {
+                      name: displayName,
+                    })}
+                    title={t("contacts.detail.compose", { name: displayName })}
                     onClick={() => composeToContact(contact)}
                   >
                     <SquarePen />
@@ -78,8 +82,10 @@ export function ContactDetail({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Delete contact ${displayName}`}
-                    title={`Delete contact ${displayName}`}
+                    aria-label={t("contacts.detail.delete", {
+                      name: displayName,
+                    })}
+                    title={t("contacts.detail.delete", { name: displayName })}
                     onClick={() => setDeleting(true)}
                   >
                     <Trash2 />
@@ -92,7 +98,7 @@ export function ContactDetail({
               {account && (
                 <p
                   className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                  title={`Known to ${account.email}`}
+                  title={t("contacts.detail.knownTo", { email: account.email })}
                 >
                   <AccountBadge account={account} />
                   <span className="truncate">{account.email}</span>
@@ -141,6 +147,7 @@ function AvatarBlock({ contact }: { contact: ContactRow }) {
  * correspondence (the stored name only changes on an explicit edit).
  */
 function NameEditor({ contact }: { contact: ContactRow }) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(contact.name ?? "")
   const [saving, setSaving] = useState(false)
@@ -168,7 +175,7 @@ function NameEditor({ contact }: { contact: ContactRow }) {
     return (
       <span className="flex min-w-0 flex-1 items-center gap-1">
         <Input
-          aria-label="Display name"
+          aria-label={t("contacts.detail.displayName")}
           value={draft}
           autoFocus
           onChange={(event) => setDraft(event.target.value)}
@@ -187,7 +194,7 @@ function NameEditor({ contact }: { contact: ContactRow }) {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Save name"
+          aria-label={t("contacts.detail.saveName")}
           disabled={saving || draft.trim() === (contact.name ?? "")}
           onClick={() => {
             void save()
@@ -198,7 +205,7 @@ function NameEditor({ contact }: { contact: ContactRow }) {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Cancel name edit"
+          aria-label={t("contacts.detail.cancelNameEdit")}
           onClick={cancel}
         >
           <X />
@@ -215,8 +222,10 @@ function NameEditor({ contact }: { contact: ContactRow }) {
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`Rename ${contactDisplayName(contact)}`}
-        title="Rename"
+        aria-label={t("contacts.detail.renameLabel", {
+          name: contactDisplayName(contact),
+        })}
+        title={t("contacts.detail.rename")}
         onClick={start}
       >
         <Pencil />
@@ -226,25 +235,30 @@ function NameEditor({ contact }: { contact: ContactRow }) {
 }
 
 function CorrespondenceStats({ contact }: { contact: ContactRow }) {
+  const { t } = useTranslation()
   return (
-    <dl className="flex items-start gap-6 text-sm" aria-label="Correspondence">
+    <dl
+      className="flex items-start gap-6 text-sm"
+      aria-label={t("contacts.detail.correspondence")}
+    >
       <div className="grid gap-0.5">
         <dt className="text-xs tracking-wide text-muted-foreground uppercase">
-          Correspondence
+          {t("contacts.detail.correspondence")}
         </dt>
         <dd className="font-medium text-foreground tabular-nums">
-          {contact.interaction_count}{" "}
-          {contact.interaction_count === 1 ? "message" : "messages"}
+          {t("contacts.detail.messageCount", {
+            count: contact.interaction_count,
+          })}
         </dd>
       </div>
       <div className="grid gap-0.5">
         <dt className="text-xs tracking-wide text-muted-foreground uppercase">
-          Last contacted
+          {t("contacts.detail.lastContacted")}
         </dt>
         <dd className="font-medium text-foreground">
           {contact.last_interaction_at !== null
             ? formatFullTimestamp(contact.last_interaction_at)
-            : "Never"}
+            : t("contacts.detail.never")}
         </dd>
       </div>
     </dl>
@@ -257,6 +271,7 @@ function CorrespondenceStats({ contact }: { contact: ContactRow }) {
  * the stored notes (back to NULL).
  */
 function NotesEditor({ contact }: { contact: ContactRow }) {
+  const { t } = useTranslation()
   // Draft state seeds from the stored notes; the browser keys this
   // component by contact id, so switching contacts remounts with fresh
   // state and a successful save's notify reload arrives with the exact
@@ -276,14 +291,14 @@ function NotesEditor({ contact }: { contact: ContactRow }) {
   }
 
   return (
-    <section className="grid gap-2" aria-label="Notes">
+    <section className="grid gap-2" aria-label={t("contacts.detail.notes")}>
       <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        Notes
+        {t("contacts.detail.notes")}
       </p>
       <Textarea
-        aria-label="Contact notes"
+        aria-label={t("contacts.detail.contactNotes")}
         value={draft}
-        placeholder="Add a private note about this contact…"
+        placeholder={t("contacts.detail.notesPlaceholder")}
         rows={4}
         onChange={(event) => setDraft(event.target.value)}
       />
@@ -296,7 +311,7 @@ function NotesEditor({ contact }: { contact: ContactRow }) {
             void save()
           }}
         >
-          Save notes
+          {t("contacts.detail.saveNotes")}
         </Button>
       </div>
     </section>
@@ -313,14 +328,18 @@ function RelatedThreads({
 }: {
   threads: ReturnType<typeof useContactThreads>
 }) {
+  const { t } = useTranslation()
   return (
-    <section className="grid gap-2" aria-label="Recent threads">
+    <section
+      className="grid gap-2"
+      aria-label={t("contacts.detail.recentThreads")}
+    >
       <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        Recent threads
+        {t("contacts.detail.recentThreads")}
       </p>
       {threads.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No recent threads with this contact.
+          {t("contacts.detail.noRecentThreads")}
         </p>
       ) : (
         <ul className="grid gap-0.5">
@@ -334,7 +353,7 @@ function RelatedThreads({
                 onClick={() => openRelatedThread(thread.id)}
               >
                 <span className="min-w-0 flex-1 truncate">
-                  {thread.subject || "(no subject)"}
+                  {thread.subject || t("threadList.noSubject")}
                 </span>
                 <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                   {formatRowTimestamp(thread.last_message_at)}

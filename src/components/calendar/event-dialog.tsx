@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { format } from "date-fns"
 import { CalendarPlus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
@@ -24,7 +25,10 @@ import {
   listWritableEventCalendars,
   updateEvent,
 } from "@/services/calendar/event-writes"
-import type { EventWritePatch, WritableCalendar } from "@/services/calendar/event-writes"
+import type {
+  EventWritePatch,
+  WritableCalendar,
+} from "@/services/calendar/event-writes"
 import { getCalendarViewExecutor } from "./use-calendar-view"
 
 /**
@@ -111,7 +115,9 @@ function localSeconds(date: string, time: string): number | null {
   if (!year || !month || !day || Number.isNaN(hour) || Number.isNaN(minute)) {
     return null
   }
-  return Math.floor(new Date(year, month - 1, day, hour, minute).getTime() / 1000)
+  return Math.floor(
+    new Date(year, month - 1, day, hour, minute).getTime() / 1000
+  )
 }
 
 /** "yyyy-MM-dd" → epoch seconds at UTC midnight (all-day events). */
@@ -155,14 +161,20 @@ function stateForRequest(request: EventDialogRequest): FormState {
   // All-day ends are EXCLUSIVE in the cache — show the last covered day.
   const end = event.allDay
     ? utcDateString(Math.max(event.endAt - 86_400, event.startAt))
-    : format(new Date(Math.max(event.endAt, event.startAt + 60) * 1000), "yyyy-MM-dd")
+    : format(
+        new Date(Math.max(event.endAt, event.startAt + 60) * 1000),
+        "yyyy-MM-dd"
+      )
   return {
     title: event.summary ?? "",
     allDay: event.allDay,
     startDate: start,
     endDate: end,
     startTime: format(new Date(event.startAt * 1000), "HH:mm"),
-    endTime: format(new Date(Math.max(event.endAt, event.startAt + 60) * 1000), "HH:mm"),
+    endTime: format(
+      new Date(Math.max(event.endAt, event.startAt + 60) * 1000),
+      "HH:mm"
+    ),
     location: event.location ?? "",
     description: event.description ?? "",
     guests: "",
@@ -176,6 +188,7 @@ export function EventDialog({
   request,
   onSaved,
 }: EventDialogProps) {
+  const { t } = useTranslation()
   const [form, setForm] = useState<FormState | null>(null)
   const [destinations, setDestinations] = useState<WritableCalendar[] | null>(
     null
@@ -238,8 +251,7 @@ export function EventDialog({
             destinationKey ===
             `${destination.sourceId}::${destination.calendarId}`
         )?.provider ?? null)
-  const supportsReminder =
-    provider === "google" || provider === "microsoft"
+  const supportsReminder = provider === "google" || provider === "microsoft"
 
   if (!request || !form) {
     return (
@@ -263,19 +275,27 @@ export function EventDialog({
     error: string | null
   } {
     if (!state.startDate) {
-      return { startAt: 0, endAt: 0, error: "Pick a date for the event." }
+      return {
+        startAt: 0,
+        endAt: 0,
+        error: t("calendar.dialog.errors.pickDate"),
+      }
     }
     if (state.allDay) {
       const startAt = utcSeconds(state.startDate)
       const endAt = utcSeconds(state.endDate || state.startDate)
       if (startAt === null || endAt === null) {
-        return { startAt: 0, endAt: 0, error: "The dates are not valid." }
+        return {
+          startAt: 0,
+          endAt: 0,
+          error: t("calendar.dialog.errors.invalidDates"),
+        }
       }
       if (endAt < startAt) {
         return {
           startAt: 0,
           endAt: 0,
-          error: "The end date must be on or after the start date.",
+          error: t("calendar.dialog.errors.endDateBeforeStart"),
         }
       }
       return { startAt, endAt: endAt + 86_400, error: null }
@@ -283,13 +303,17 @@ export function EventDialog({
     const startAt = localSeconds(state.startDate, state.startTime)
     const endAt = localSeconds(state.startDate, state.endTime)
     if (startAt === null || endAt === null) {
-      return { startAt: 0, endAt: 0, error: "The times are not valid." }
+      return {
+        startAt: 0,
+        endAt: 0,
+        error: t("calendar.dialog.errors.invalidTimes"),
+      }
     }
     if (endAt <= startAt) {
       return {
         startAt: 0,
         endAt: 0,
-        error: "The end time must be after the start time.",
+        error: t("calendar.dialog.errors.endTimeBeforeStart"),
       }
     }
     return { startAt, endAt, error: null }
@@ -344,8 +368,8 @@ export function EventDialog({
       if (result.ok) {
         toast.success(
           activeRequest.mode === "create"
-            ? "Event saved to the calendar"
-            : "Event updated"
+            ? t("calendar.dialog.saved")
+            : t("calendar.dialog.updated")
         )
         onOpenChange(false)
         onSaved?.()
@@ -353,13 +377,13 @@ export function EventDialog({
       }
       // Nothing was persisted — keep the form exactly as the user left it
       // and say so (spec: does not silently keep an unsaved edit).
-      setError(result.message ?? "The event could not be saved.")
+      setError(result.message ?? t("calendar.dialog.errors.saveFailed"))
     } catch (writeError) {
       console.warn("[event-dialog] save failed", writeError)
       setError(
         writeError instanceof Error
           ? writeError.message
-          : "The event could not be saved."
+          : t("calendar.dialog.errors.saveFailed")
       )
     } finally {
       setBusy(null)
@@ -374,18 +398,18 @@ export function EventDialog({
     try {
       const result = await deleteEvent(executor, activeRequest.event)
       if (result.ok) {
-        toast.success("Event deleted")
+        toast.success(t("calendar.dialog.deleted"))
         onOpenChange(false)
         onSaved?.()
         return
       }
-      setError(result.message ?? "The event could not be deleted.")
+      setError(result.message ?? t("calendar.dialog.errors.deleteFailed"))
     } catch (deleteError) {
       console.warn("[event-dialog] delete failed", deleteError)
       setError(
         deleteError instanceof Error
           ? deleteError.message
-          : "The event could not be deleted."
+          : t("calendar.dialog.errors.deleteFailed")
       )
     } finally {
       setBusy(null)
@@ -397,12 +421,14 @@ export function EventDialog({
       <DialogContent data-testid="event-dialog" className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {request.mode === "create" ? "New event" : "Edit event"}
+            {request.mode === "create"
+              ? t("calendar.dialog.newTitle")
+              : t("calendar.dialog.editTitle")}
           </DialogTitle>
           <DialogDescription>
             {request.mode === "create"
-              ? "The event is saved to the connected calendar."
-              : "Changes are written back to the calendar."}
+              ? t("calendar.dialog.newDescription")
+              : t("calendar.dialog.editDescription")}
           </DialogDescription>
         </DialogHeader>
         {error !== null && (
@@ -416,11 +442,11 @@ export function EventDialog({
         )}
         <div className="grid gap-3">
           <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-            Title
+            {t("calendar.dialog.title")}
             <Input
               data-testid="event-dialog-title"
               value={form.title}
-              placeholder="Event title"
+              placeholder={t("calendar.dialog.titlePlaceholder")}
               onChange={(change) => set({ title: change.target.value })}
             />
           </Label>
@@ -430,11 +456,11 @@ export function EventDialog({
               checked={form.allDay}
               onCheckedChange={(checked) => set({ allDay: checked === true })}
             />
-            All day
+            {t("calendar.dialog.allDay")}
           </label>
           <div className="grid grid-cols-2 gap-2">
             <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-              Date
+              {t("calendar.dialog.date")}
               <Input
                 type="date"
                 data-testid="event-dialog-date"
@@ -444,7 +470,7 @@ export function EventDialog({
             </Label>
             {form.allDay ? (
               <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-                Last day
+                {t("calendar.dialog.lastDay")}
                 <Input
                   type="date"
                   data-testid="event-dialog-end-date"
@@ -459,7 +485,7 @@ export function EventDialog({
           {!form.allDay && (
             <div className="grid grid-cols-2 gap-2">
               <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-                Starts
+                {t("calendar.dialog.starts")}
                 <Input
                   type="time"
                   data-testid="event-dialog-start-time"
@@ -468,7 +494,7 @@ export function EventDialog({
                 />
               </Label>
               <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-                Ends
+                {t("calendar.dialog.ends")}
                 <Input
                   type="time"
                   data-testid="event-dialog-end-time"
@@ -486,29 +512,29 @@ export function EventDialog({
             />
           )}
           <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-            Location
+            {t("calendar.dialog.location")}
             <Input
               data-testid="event-dialog-location"
               value={form.location}
-              placeholder="Optional"
+              placeholder={t("calendar.dialog.optional")}
               onChange={(change) => set({ location: change.target.value })}
             />
           </Label>
           <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-            Notes
+            {t("calendar.dialog.notes")}
             <Textarea
               data-testid="event-dialog-description"
               value={form.description}
-              placeholder="Optional"
+              placeholder={t("calendar.dialog.optional")}
               onChange={(change) => set({ description: change.target.value })}
             />
           </Label>
           <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-            Guests
+            {t("calendar.dialog.guests")}
             <Input
               data-testid="event-dialog-guests"
               value={form.guests}
-              placeholder="comma@separated,emails@example.com"
+              placeholder={t("calendar.dialog.guestsPlaceholder")}
               onChange={(change) => set({ guests: change.target.value })}
             />
           </Label>
@@ -517,18 +543,18 @@ export function EventDialog({
               data-testid="event-dialog-reminder-note"
               className="text-xs text-muted-foreground"
             >
-              Reminders are available for Google and Outlook calendars.
+              {t("calendar.dialog.reminderNote")}
             </p>
           ) : (
             supportsReminder && (
               <Label className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-                Reminder (minutes before)
+                {t("calendar.dialog.reminder")}
                 <Input
                   type="number"
                   min={0}
                   data-testid="event-dialog-reminder"
                   value={form.reminder}
-                  placeholder="Default"
+                  placeholder={t("calendar.dialog.reminderPlaceholder")}
                   onChange={(change) => set({ reminder: change.target.value })}
                 />
               </Label>
@@ -545,11 +571,13 @@ export function EventDialog({
               onClick={() => void handleDelete()}
             >
               <Trash2 className="size-3.5" />
-              {busy === "delete" ? "Deleting…" : "Delete"}
+              {busy === "delete"
+                ? t("calendar.dialog.deleting")
+                : t("calendar.dialog.delete")}
             </Button>
           )}
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("calendar.dialog.cancel")}
           </Button>
           <Button
             data-testid="event-dialog-save"
@@ -564,7 +592,9 @@ export function EventDialog({
             onClick={() => void handleSave()}
           >
             <CalendarPlus className="size-3.5" />
-            {busy === "save" ? "Saving…" : "Save"}
+            {busy === "save"
+              ? t("calendar.dialog.saving")
+              : t("calendar.dialog.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -588,13 +618,14 @@ function DestinationPicker({
   value: string | null
   onSelect: (key: string) => void
 }) {
+  const { t } = useTranslation()
   if (destinations === null) {
     return (
       <p
         data-testid="event-dialog-destinations-loading"
         className="text-xs text-muted-foreground"
       >
-        Looking for your calendars…
+        {t("calendar.dialog.lookingForCalendars")}
       </p>
     )
   }
@@ -607,13 +638,13 @@ function DestinationPicker({
           "text-muted-foreground"
         )}
       >
-        Connect a calendar in Settings to save events.
+        {t("calendar.dialog.noCalendars")}
       </p>
     )
   }
   return (
     <Label className="flex items-center gap-2 text-xs text-muted-foreground">
-      Calendar
+      {t("calendar.dialog.calendar")}
       <select
         data-testid="event-dialog-destination"
         className="h-8 w-full flex-1 rounded-lg border border-input bg-transparent px-2 text-sm"

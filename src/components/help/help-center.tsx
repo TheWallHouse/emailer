@@ -1,15 +1,11 @@
 import { useMemo, useState } from "react"
 
 import { BookOpen, ChevronDown, Search, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -19,14 +15,12 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  SHORTCUT_GROUPS,
-  type ShortcutBinding,
-} from "@/constants/shortcuts"
+import { SHORTCUT_GROUPS, type ShortcutBinding } from "@/constants/shortcuts"
 import { useEffectiveShortcuts } from "@/hooks/shortcut-bindings"
 import {
-  HELP_CARDS,
   SHORTCUTS_CARD_ID,
+  getHelpCards,
+  helpCategoryLabel,
   type HelpCard,
 } from "@/services/help/content"
 import { searchHelpGrouped } from "@/services/help/search"
@@ -139,7 +133,7 @@ function HelpCardView({
       {expanded && (
         <CardContent
           data-testid={`help-card-body-${card.id}`}
-          className="flex flex-col gap-2 border-t px-3 pb-3 pt-3"
+          className="flex flex-col gap-2 border-t px-3 pt-3 pb-3"
         >
           {card.body.map((paragraph, index) => (
             <p key={index} className="text-sm text-muted-foreground">
@@ -159,9 +153,16 @@ function HelpCardView({
  * shows the ranked matches (kept expanded) under their categories.
  */
 export function HelpCenter({ className }: { className?: string }) {
+  const { t, i18n } = useTranslation()
   const [query, setQuery] = useState("")
   const searching = query.trim().length > 0
-  const groups = useMemo(() => searchHelpGrouped(query), [query])
+  // The catalog follows the interface language: re-search on a switch.
+  const language = i18n.language
+  const groups = useMemo(
+    () => searchHelpGrouped(query, language),
+    [query, language]
+  )
+  const total = getHelpCards(language).length
   const matchCount = groups.reduce((sum, group) => sum + group.cards.length, 0)
 
   return (
@@ -173,8 +174,8 @@ export function HelpCenter({ className }: { className?: string }) {
         <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
-          aria-label="Search help"
-          placeholder="Search help — try “snooze”…"
+          aria-label={t("help.search.label")}
+          placeholder={t("help.search.placeholder")}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           className="pl-8"
@@ -186,30 +187,36 @@ export function HelpCenter({ className }: { className?: string }) {
         aria-live="polite"
       >
         {searching
-          ? `${matchCount} of ${HELP_CARDS.length} articles match “${query.trim()}”`
-          : `${HELP_CARDS.length} articles — everything is stored in the app, no network needed`}
+          ? t("help.count.matching", {
+              matches: matchCount,
+              total,
+              query: query.trim(),
+            })
+          : t("help.count.browsing", { total })}
       </p>
       {matchCount === 0 ? (
         <div className="flex flex-col items-center gap-2 py-10 text-center">
           <BookOpen className="size-6 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">
-            No matching help articles
+            {t("help.empty.title")}
           </p>
           <p className="max-w-xs text-sm text-muted-foreground">
-            Try a shorter keyword, or clear the search to browse every
-            article by category.
+            {t("help.empty.hint")}
           </p>
           <Button variant="outline" size="sm" onClick={() => setQuery("")}>
             <X />
-            Clear search
+            {t("help.empty.clear")}
           </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-6">
           {groups.map((group) => (
-            <section key={group.category} aria-label={group.category}>
+            <section
+              key={group.category}
+              aria-label={helpCategoryLabel(group.category)}
+            >
               <h3 className="mb-2 text-xs font-semibold tracking-wide text-foreground uppercase">
-                {group.category}
+                {helpCategoryLabel(group.category)}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 {group.cards.map((card) => (
@@ -233,13 +240,18 @@ export function HelpCenter({ className }: { className?: string }) {
  * (heading + description, task 11.1 pattern) around the shared center.
  */
 export function HelpSection() {
+  const { t } = useTranslation()
   return (
-    <section aria-label="Help" className="flex flex-col gap-4">
+    <section
+      aria-label={t("help.section.aria")}
+      className="flex flex-col gap-4"
+    >
       <div>
-        <h2 className="text-base font-semibold text-foreground">Help</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          {t("help.section.title")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Search the built-in help center — bundled with the app, so it
-          works offline.
+          {t("help.section.description")}
         </p>
       </div>
       <HelpCenter />
@@ -253,20 +265,15 @@ export function HelpSection() {
  * see the module docstring). Scrolled so long categories fit the window.
  */
 export function HelpCenterDialog() {
+  const { t } = useTranslation()
   const open = useUiStore((state) => state.helpCenterOpen)
   const setHelpCenterOpen = useUiStore((state) => state.setHelpCenterOpen)
   return (
     <Dialog open={open} onOpenChange={setHelpCenterOpen}>
-      <DialogContent
-        data-testid="help-center-dialog"
-        className="sm:max-w-2xl"
-      >
+      <DialogContent data-testid="help-center-dialog" className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Help center</DialogTitle>
-          <DialogDescription>
-            Everything Emailer can do, answered locally — nothing here
-            needs the network.
-          </DialogDescription>
+          <DialogTitle>{t("help.dialog.title")}</DialogTitle>
+          <DialogDescription>{t("help.dialog.description")}</DialogDescription>
         </DialogHeader>
         <ScrollArea className="-mx-1 max-h-[60vh] px-1">
           <HelpCenter />

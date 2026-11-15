@@ -1,0 +1,26 @@
+{
+  "panel": {
+    "title": "AI assistant",
+    "consent": "Answers are generated from your mailbox with read-only lookups. Nothing is changed.",
+    "newConversation": "New conversation",
+    "close": "Close assistant",
+    "emptyHint": "Ask about your mailbox — e.g. \"find all my flight confirmations\".",
+    "toolActivity_one": "Searched the mailbox ({{count}} lookup)",
+    "toolActivity_other": "Searched the mailbox ({{count}} lookups)",
+    "regenerate": "Regenerate",
+    "busy": "Looking in your mailbox…",
+    "retry": "Retry",
+    "sources": "Sources",
+    "inputLabel": "Message the assistant",
+    "inputPlaceholder": "Ask about your mailbox…",
+    "tokens_one": "≈ {{count}} token",
+    "tokens_other": "≈ {{count}} tokens",
+    "send": "Send",
+    "sending": "Sending…"
+  },
+  "prompts": {
+    "flights": "Find my flight confirmations",
+    "promises": "What did I promise in the last week?",
+    "newsletters": "Summarize unread newsletters"
+  }
+}

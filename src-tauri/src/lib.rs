@@ -192,6 +192,7 @@ pub fn run() {
             updates::download_and_install_update,
             badge::set_unread_badge,
             desktop::set_close_action,
+            desktop::set_tray_labels,
             desktop::get_close_action,
             desktop::tray_available,
             desktop::mailto_default_state,

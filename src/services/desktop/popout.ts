@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core"
 import { emit, listen } from "@tauri-apps/api/event"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 
+import { i18next } from "@/i18n"
 import type { ThreadListChangeEvent } from "@/services/email-actions/thread-actions"
 
 /**
@@ -72,9 +73,7 @@ export function popoutThreadId(): string | null {
 export function sanitizeLabelPart(part: string): string {
   return part
     .split("")
-    .map((char) =>
-      /[A-Za-z0-9\-_. ]/.test(char) ? char : "_"
-    )
+    .map((char) => (/[A-Za-z0-9\-_. ]/.test(char) ? char : "_"))
     .join("")
 }
 
@@ -83,9 +82,7 @@ export function sanitizeLabelPart(part: string): string {
  * prefixes). */
 export function isComposerPopoutWindow(): boolean {
   const label = currentWindowLabel()
-  return (
-    label !== null && label.startsWith(COMPOSER_POPOUT_LABEL_PREFIX)
-  )
+  return label !== null && label.startsWith(COMPOSER_POPOUT_LABEL_PREFIX)
 }
 
 /** The draftKey this composer pop-out resumed, or null in any other
@@ -114,8 +111,7 @@ export function composerPopoutDraftKey(): string | null {
 export async function openComposerPopout(draftKey: string): Promise<void> {
   if (!isTauriRuntime()) return
   const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow")
-  const label =
-    COMPOSER_POPOUT_LABEL_PREFIX + sanitizeLabelPart(draftKey)
+  const label = COMPOSER_POPOUT_LABEL_PREFIX + sanitizeLabelPart(draftKey)
   try {
     const existing = await WebviewWindow.getByLabel(label)
     if (existing) {
@@ -126,7 +122,7 @@ export async function openComposerPopout(draftKey: string): Promise<void> {
     }
     const window = new WebviewWindow(label, {
       url: "index.html",
-      title: "Composer",
+      title: i18next.t("system.windows.composer"),
       width: 700,
       height: 650,
       minWidth: 480,
