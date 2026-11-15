@@ -103,7 +103,11 @@ candle-core = { version = "0.9", optional = true }
 # already pulls the same 0.9 version into the tree.
 candle-nn = { version = "0.9", optional = true }
 candle-transformers = { version = "0.9", optional = true }
-tokenizers = { version = "0.21", optional = true }
+# default-features off drops `esaxx_fast`: esaxx-rs compiles its C++ with
+# the static CRT (/MT), which collides with whisper.cpp's dynamic CRT (/MD)
+# at link time on Windows (LNK2038/LNK1319). It only speeds up Unigram
+# *training*, which the app never does; `onig` stays for pre-tokenizers.
+tokenizers = { version = "0.21", optional = true, default-features = false, features = ["onig"] }
 hf-hub = { version = "0.4", optional = true, features = ["tokio"] }
 # whisper.cpp bindings for local dictation (design D3); builds whisper.cpp
 # from source via the cc/cmake toolchain.
