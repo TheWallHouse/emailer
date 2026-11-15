@@ -94,8 +94,11 @@ describe("compose request subscription", () => {
   })
 
   it("delivers desktop compose requests to the handler and unsubscribes", async () => {
-    let captured: EventCallback<unknown> | null = null
-    let unlisten: UnlistenFn | null = null
+    // Assigned inside the mocked listen() callback, which TS's control-flow
+    // analysis cannot see — the cast keeps the declared union instead of
+    // narrowing to null (which made `captured?.(…)` type as never).
+    let captured = null as EventCallback<unknown> | null
+    let unlisten = null as UnlistenFn | null
     listenMock.mockImplementationOnce(
       async (_event: string, handler: EventCallback<unknown>) => {
         captured = handler
